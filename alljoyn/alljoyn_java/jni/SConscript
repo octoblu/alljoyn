@@ -1,0 +1,42 @@
+# Copyright (c) 2010 - 2014, AllSeen Alliance. All rights reserved.
+#
+#    Permission to use, copy, modify, and/or distribute this software for any
+#    purpose with or without fee is hereby granted, provided that the above
+#    copyright notice and this permission notice appear in all copies.
+#
+#    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+#    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+#    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+#    ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+#    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+#    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+#    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+# 
+
+Import('env')
+
+# JNI library sources
+srcs = ['alljoyn_java.cc']
+
+#if env['OS'] == 'android':
+#    srcs += ['P2pHelperService.cc']
+
+objs = env.SharedObject(srcs)
+
+# JNI library
+bdenv = env.Clone()
+
+if bdenv['LIBTYPE'] == 'both':
+    # Need to replace the shared alljoyn library with the static one for linking the plugin.
+    libs = bdenv['LIBS']
+    libs[libs.index('alljoyn')] = bdenv.File('$DISTDIR/cpp/lib/${LIBPREFIX}alljoyn${LIBSUFFIX}')
+    bdenv.Replace(LIBS = libs)
+
+
+# The JNI code must link in the bundled daemon even if BR is set to 'off'
+bdenv.Prepend(LIBS = [env['brobj'], env['ajrlib']])
+
+
+liballjoyn_java = bdenv.SharedLibrary('alljoyn_java', objs)
+
+Return('liballjoyn_java')

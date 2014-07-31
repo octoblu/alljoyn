@@ -1,0 +1,130 @@
+AllJoyn Version 14.06 Beta Release Notes
+========================================
+
+Platform Support
+----------------
+ 1) Linux Ubuntu 12.04 LTS (32 and 64 bit)
+ 2) Android Gingerbread 2.3.4 (ARM7)
+ 3) Android Ice Cream Sandwich 4.0 (ARM7)
+ 4) Android JellyBean 4.1 (ARM7)
+ 5) Windows 7 (32 and 64 bit)
+ 6) Windows 8 (32 and 64 bit)
+ 7) iOS 7.1 (32-bit)
+ 8) OSX 10.9 Lion
+ 9) OpenWRT (trunk)
+
+
+Features added in Version 14.06 Beta
+------------------------------------
+* Next Generation Name Service (NGNS): New version of the Name Service
+  protocol that is more efficient and reliable.
+* Security Enhancements: support for ECC based authentication
+* Policy DB: rules to manage the flow of messages through the router to
+  and from applications.
+* Sessionless Signal (SLS) Improvements: Allow apps to specify and fetch
+  SLS only when there is a signal they are interested in.
+* Events and Actions: Ability to annotate signals and methods with human
+  readable descriptions. Descriptions are introspectable, and describe
+  semantics of signal or method call
+* UDP Transport (experimental): router to router transport using
+  reliability protocol on top of UDP.  Provide more control over the data
+  flow, and reduction of resources.
+
+
+Issues Addressed in Version 14.06 Beta
+--------------------------------------
+ASACORE-35   delay in update of interfaces causes missed announcement in
+             onboarding
+ASACORE-136  A space in the path of a project prevents Java compilation on linux
+ASACORE-139  ICE client login service app should be removed from SDK for Android
+ASACORE-140  SCons should install library files with the "alljoyn_android" apps
+             (Android SDK)
+ASACORE-138  About API docs are integrated with core docs
+ASACORE-145  liballjoyn_about.a binary compatibility for objective C
+ASACORE-147  With Visual Studio 11 Express installed, cannot build
+ASACORE-153  Match multicast packets to the network interface on which they are
+             received.
+ASACORE-169  Socket connect() can block for a long time on darwin
+ASACORE-206  Complete AboutClientSample java code
+ASACORE-213  About iOS SDK: missing API ('SetDeviceName' with language)
+ASACORE-215  JoinSession API hangs instead of returning
+             ER_BUS_BLOCKING_CALL_NOT_ALLOWED, when EnableConcurrentCallbacks()
+             is not used
+ASACORE-220  AllJoynStd.h not automatically included in release mode.
+ASACORE-259  AboutIconClient::GetContent returns garbage
+ASACORE-264  AllJoynFramework_iOS: add missing files to project
+ASACORE-284  Argument of type array of Boolean fails with Android.
+ASACORE-293  AboutService sometimes crashes when responding to
+             GetObjectDescription
+ASACORE-352  Change bus config for bundled router to allow untrusted leaf nodes
+             using AJ thin library
+ASACORE-422  Add object based security APIs to Objective C bindings
+ASACORE-502  Race condition when joining threads can lead to crash
+ASACORE-512  Google Tests cannot compile with VC11
+ASACORE-548  Restrict untrusted Thin Clients in standalone daemon only for
+             Android
+ASACORE-634  Remove or update AllJoyn_API_Changes_cpp and _java files for rel
+             14.06.
+
+
+Known Issues in Version 14.06 Beta
+----------------------------------
+Stability in complex environments, under load and longevity needs to be
+improved.
+
+ASACORE-49   Multipoint session lost on joiner side and not binder side
+             prevents joiner from rejoining.
+ASACORE-51   Implicit PropertiesChanged emit only works for multi-point sessions
+ASACORE-177  policydb: receive_type error rule with other receive attributes is
+             not working
+ASACORE-181  Memory leak on repeated registration/unregistration of the same
+             BusObject: note this is an unusual use case
+ASACORE-189  BusObject::Unregistered callback is not called for busobjects
+             after the BusAttachment is disconnected and stopped from the bus.
+ASACORE-192  Overlapping ADDMATCH rules should not fetch previously received
+             Sessionless signals again.
+ASACORE-276  If a transport is disabled in the routing node and if user tries
+             to use the exact transport for discovery, it should return
+             suitable error.
+ASACORE-341  Incorrect replyCode from AllJoynObj::AdvertiseName: it should
+             return ALLJOYN_ADVERTISENAME_REPLY_FAILED
+ASACORE-363  NameService discovery does not work over IPv6 when name service
+             IPv4 property is set to false in config file: IPv6 only discovery
+             doesn't work.
+ASACORE-366  alljoyn-daemon crashes when it loads an improper external
+             configuration file
+ASACORE-367  Router AJ objects that don't call BusController::ObjectRegister()
+             due to a failure will cause the program to lockup in a fast
+             spinning while/sleep loop
+ASACORE-370  AllJoyn does not build with Android 4.4 (KitKat) sources
+ASACORE-381  Unable to join session with another RN whose ip address has
+             changed: if an app has a cached IP address for a routing Node, and
+             that routing node's IP address changes, it will not be able to
+             connect as the cache entry is invalid
+ASACORE-401  Error advertising quietly over IPv6 multicast on iOS/OS X
+ASACORE-605  Truncation in posix version of GetTimestamp64() on 32-bit
+             platforms
+ASACORE-621  Objective-C binding needs PingAsync
+ASACORE-636  Unrelated interface down/up causes problems with Ping.
+
+
+Compatibility
+-------------
+Version 14.06 Beta changed the format of the router configuration file to enable
+support for Policy DB.
+
+Version 14.02 renamed libajdaemon.a and BundledDaemon.o to libajrouter.a
+and BundledRouter.o to match the AllJoyn terminology of leaf and router
+nodes. 
+
+Change history
+--------------
+14.06 Beta - Bug fixes. Removed support for ICE. Added a number of features:
+ * Next Generation Name Service (NGNS)
+ * Security Enhancements
+ * Policy DB
+ * Sessionless Signal (SLS) Improvements
+ * Events and Actions
+ * UDP Transport (experimental)
+14.02 - Bug fixes. Removed support for Windows RT.
+3.4.6 - Bug fixes. Improve CPU and memory usage when using sessionless signals.

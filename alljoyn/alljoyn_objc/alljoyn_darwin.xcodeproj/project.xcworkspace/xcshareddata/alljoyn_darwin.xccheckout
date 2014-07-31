@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>8982C98C-5C90-4D54-A428-F8FD8A8819F6</string>
+	<key>IDESourceControlProjectName</key>
+	<string>alljoyn_darwin</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>E5B3CA11-B648-480E-B347-5F8137AF7A5B</key>
+		<string>https://git.allseenalliance.org/gerrit/core/alljoyn.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>alljoyn_objc/alljoyn_darwin.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>E5B3CA11-B648-480E-B347-5F8137AF7A5B</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://git.allseenalliance.org/gerrit/core/alljoyn.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>E5B3CA11-B648-480E-B347-5F8137AF7A5B</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>E5B3CA11-B648-480E-B347-5F8137AF7A5B</string>
+			<key>IDESourceControlWCCName</key>
+			<string>alljoyn</string>
+		</dict>
+	</array>
+</dict>
+</plist>

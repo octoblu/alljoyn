@@ -1,0 +1,686 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7D3DCAE8192BFBAC0015A009 /* liballjoyn_about_objc.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AA935E91854BC2B00378361 /* liballjoyn_about_objc.a */; };
+		7D43EA6C192C30E6001C75BB /* AJNAnnounceHandlerAdapter.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9ADE4C2818A776C900742C05 /* AJNAnnounceHandlerAdapter.h */; };
+		7D43EA6D192C30E6001C75BB /* AJNAboutClient.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004318A38FB70007C679 /* AJNAboutClient.h */; };
+		7D43EA6E192C30E6001C75BB /* AJNAboutDataConverter.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004418A38FB70007C679 /* AJNAboutDataConverter.h */; };
+		7D43EA6F192C30E6001C75BB /* AJNAboutIconClient.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004518A38FB70007C679 /* AJNAboutIconClient.h */; };
+		7D43EA70192C30E6001C75BB /* AJNAboutIconService.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004618A38FB70007C679 /* AJNAboutIconService.h */; };
+		7D43EA71192C30E6001C75BB /* AJNAboutPropertyStoreImpl.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004718A38FB70007C679 /* AJNAboutPropertyStoreImpl.h */; };
+		7D43EA72192C30E6001C75BB /* AJNAboutService.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004818A38FB70007C679 /* AJNAboutService.h */; };
+		7D43EA73192C30E6001C75BB /* AJNAboutServiceApi.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004918A38FB70007C679 /* AJNAboutServiceApi.h */; };
+		7D43EA74192C30E6001C75BB /* AJNAnnouncement.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004A18A38FB70007C679 /* AJNAnnouncement.h */; };
+		7D43EA75192C30E6001C75BB /* AJNAnnouncementListener.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004B18A38FB70007C679 /* AJNAnnouncementListener.h */; };
+		7D43EA76192C30E6001C75BB /* AJNAnnouncementReceiver.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004C18A38FB70007C679 /* AJNAnnouncementReceiver.h */; };
+		7D43EA77192C30E6001C75BB /* AJNConvertUtil.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004D18A38FB70007C679 /* AJNConvertUtil.h */; };
+		7D43EA78192C30E6001C75BB /* AJNPropertyStore.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004F18A38FB70007C679 /* AJNPropertyStore.h */; };
+		7D43EA79192C30E6001C75BB /* AJNPropertyStoreProperty.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3005018A38FB70007C679 /* AJNPropertyStoreProperty.h */; };
+		9AA935ED1854BC2B00378361 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AA935EC1854BC2B00378361 /* Foundation.framework */; };
+		9AA935FB1854BC2B00378361 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AA935FA1854BC2B00378361 /* XCTest.framework */; };
+		9AA935FC1854BC2B00378361 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AA935EC1854BC2B00378361 /* Foundation.framework */; };
+		9AA935FE1854BC2B00378361 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AA935FD1854BC2B00378361 /* UIKit.framework */; };
+		9AA936011854BC2B00378361 /* liballjoyn_about_objc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AA935E91854BC2B00378361 /* liballjoyn_about_objc.a */; };
+		9AA936071854BC2B00378361 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9AA936051854BC2B00378361 /* InfoPlist.strings */; };
+		9AA936091854BC2B00378361 /* alljoyn_services_objcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AA936081854BC2B00378361 /* alljoyn_services_objcTests.m */; };
+		9AC3005218A38FC50007C679 /* AJNAboutClient.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004318A38FB70007C679 /* AJNAboutClient.h */; };
+		9AC3005318A38FC50007C679 /* AJNAboutDataConverter.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004418A38FB70007C679 /* AJNAboutDataConverter.h */; };
+		9AC3005418A38FC50007C679 /* AJNAboutIconClient.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004518A38FB70007C679 /* AJNAboutIconClient.h */; };
+		9AC3005518A38FC50007C679 /* AJNAboutIconService.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004618A38FB70007C679 /* AJNAboutIconService.h */; };
+		9AC3005618A38FC50007C679 /* AJNAboutPropertyStoreImpl.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004718A38FB70007C679 /* AJNAboutPropertyStoreImpl.h */; };
+		9AC3005718A38FC60007C679 /* AJNAboutService.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004818A38FB70007C679 /* AJNAboutService.h */; };
+		9AC3005818A38FC60007C679 /* AJNAboutServiceApi.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004918A38FB70007C679 /* AJNAboutServiceApi.h */; };
+		9AC3005918A38FC60007C679 /* AJNAnnouncement.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004A18A38FB70007C679 /* AJNAnnouncement.h */; };
+		9AC3005A18A38FC60007C679 /* AJNAnnouncementListener.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004B18A38FB70007C679 /* AJNAnnouncementListener.h */; };
+		9AC3005B18A38FC60007C679 /* AJNAnnouncementReceiver.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004C18A38FB70007C679 /* AJNAnnouncementReceiver.h */; };
+		9AC3005C18A38FC60007C679 /* AJNConvertUtil.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004D18A38FB70007C679 /* AJNConvertUtil.h */; };
+		9AC3005E18A38FC60007C679 /* AJNPropertyStore.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3004F18A38FB70007C679 /* AJNPropertyStore.h */; };
+		9AC3005F18A38FC60007C679 /* AJNPropertyStoreProperty.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9AC3005018A38FB70007C679 /* AJNPropertyStoreProperty.h */; };
+		9ADE4C2A18A7770900742C05 /* AJNAnnounceHandlerAdapter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9ADE4C2918A7770900742C05 /* AJNAnnounceHandlerAdapter.mm */; };
+		9AEB17FF18A3DA8B00A4F130 /* AJNAboutClient.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17F318A3DA8B00A4F130 /* AJNAboutClient.mm */; };
+		9AEB180018A3DA8B00A4F130 /* AJNAboutDataConverter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17F418A3DA8B00A4F130 /* AJNAboutDataConverter.mm */; };
+		9AEB180118A3DA8B00A4F130 /* AJNAboutIconClient.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17F518A3DA8B00A4F130 /* AJNAboutIconClient.mm */; };
+		9AEB180218A3DA8B00A4F130 /* AJNAboutIconService.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17F618A3DA8B00A4F130 /* AJNAboutIconService.mm */; };
+		9AEB180318A3DA8B00A4F130 /* AJNAboutPropertyStoreImpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17F718A3DA8B00A4F130 /* AJNAboutPropertyStoreImpl.mm */; };
+		9AEB180418A3DA8B00A4F130 /* AJNAboutService.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17F818A3DA8B00A4F130 /* AJNAboutService.mm */; };
+		9AEB180518A3DA8B00A4F130 /* AJNAboutServiceApi.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17F918A3DA8B00A4F130 /* AJNAboutServiceApi.mm */; };
+		9AEB180618A3DA8B00A4F130 /* AJNAnnouncement.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17FA18A3DA8B00A4F130 /* AJNAnnouncement.mm */; };
+		9AEB180718A3DA8B00A4F130 /* AJNAnnouncementReceiver.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17FB18A3DA8B00A4F130 /* AJNAnnouncementReceiver.mm */; };
+		9AEB180818A3DA8B00A4F130 /* AJNConvertUtil.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17FC18A3DA8B00A4F130 /* AJNConvertUtil.mm */; };
+		9AEB180918A3DA8B00A4F130 /* AJNPropertyStoreProperty.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9AEB17FD18A3DA8B00A4F130 /* AJNPropertyStoreProperty.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9AA935FF1854BC2B00378361 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9AA935E11854BC2B00378361 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9AA935E81854BC2B00378361;
+			remoteInfo = alljoyn_services_objc;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7D3DCAE7192BFB9A0015A009 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/about/lib";
+			dstSubfolderSpec = 0;
+			files = (
+				7D3DCAE8192BFBAC0015A009 /* liballjoyn_about_objc.a in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D43EA6B192C2DC7001C75BB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/about/inc/alljoyn/about";
+			dstSubfolderSpec = 0;
+			files = (
+				7D43EA6C192C30E6001C75BB /* AJNAnnounceHandlerAdapter.h in CopyFiles */,
+				7D43EA6D192C30E6001C75BB /* AJNAboutClient.h in CopyFiles */,
+				7D43EA6E192C30E6001C75BB /* AJNAboutDataConverter.h in CopyFiles */,
+				7D43EA6F192C30E6001C75BB /* AJNAboutIconClient.h in CopyFiles */,
+				7D43EA70192C30E6001C75BB /* AJNAboutIconService.h in CopyFiles */,
+				7D43EA71192C30E6001C75BB /* AJNAboutPropertyStoreImpl.h in CopyFiles */,
+				7D43EA72192C30E6001C75BB /* AJNAboutService.h in CopyFiles */,
+				7D43EA73192C30E6001C75BB /* AJNAboutServiceApi.h in CopyFiles */,
+				7D43EA74192C30E6001C75BB /* AJNAnnouncement.h in CopyFiles */,
+				7D43EA75192C30E6001C75BB /* AJNAnnouncementListener.h in CopyFiles */,
+				7D43EA76192C30E6001C75BB /* AJNAnnouncementReceiver.h in CopyFiles */,
+				7D43EA77192C30E6001C75BB /* AJNConvertUtil.h in CopyFiles */,
+				7D43EA78192C30E6001C75BB /* AJNPropertyStore.h in CopyFiles */,
+				7D43EA79192C30E6001C75BB /* AJNPropertyStoreProperty.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AA935E71854BC2B00378361 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = inc/alljoyn/about;
+			dstSubfolderSpec = 16;
+			files = (
+				9AC3005218A38FC50007C679 /* AJNAboutClient.h in CopyFiles */,
+				9AC3005318A38FC50007C679 /* AJNAboutDataConverter.h in CopyFiles */,
+				9AC3005418A38FC50007C679 /* AJNAboutIconClient.h in CopyFiles */,
+				9AC3005518A38FC50007C679 /* AJNAboutIconService.h in CopyFiles */,
+				9AC3005618A38FC50007C679 /* AJNAboutPropertyStoreImpl.h in CopyFiles */,
+				9AC3005718A38FC60007C679 /* AJNAboutService.h in CopyFiles */,
+				9AC3005818A38FC60007C679 /* AJNAboutServiceApi.h in CopyFiles */,
+				9AC3005918A38FC60007C679 /* AJNAnnouncement.h in CopyFiles */,
+				9AC3005A18A38FC60007C679 /* AJNAnnouncementListener.h in CopyFiles */,
+				9AC3005B18A38FC60007C679 /* AJNAnnouncementReceiver.h in CopyFiles */,
+				9AC3005C18A38FC60007C679 /* AJNConvertUtil.h in CopyFiles */,
+				9AC3005E18A38FC60007C679 /* AJNPropertyStore.h in CopyFiles */,
+				9AC3005F18A38FC60007C679 /* AJNPropertyStoreProperty.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		9AA935E91854BC2B00378361 /* liballjoyn_about_objc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liballjoyn_about_objc.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AA935EC1854BC2B00378361 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		9AA935F01854BC2B00378361 /* alljoyn_about_objc-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "alljoyn_about_objc-Prefix.pch"; sourceTree = "<group>"; };
+		9AA935F91854BC2B00378361 /* alljoyn_about_objcTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = alljoyn_about_objcTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AA935FA1854BC2B00378361 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		9AA935FD1854BC2B00378361 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		9AA936041854BC2B00378361 /* alljoyn_about_objcTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "alljoyn_about_objcTests-Info.plist"; sourceTree = "<group>"; };
+		9AA936061854BC2B00378361 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		9AA936081854BC2B00378361 /* alljoyn_services_objcTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = alljoyn_services_objcTests.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		9AC3004318A38FB70007C679 /* AJNAboutClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAboutClient.h; sourceTree = "<group>"; };
+		9AC3004418A38FB70007C679 /* AJNAboutDataConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAboutDataConverter.h; sourceTree = "<group>"; };
+		9AC3004518A38FB70007C679 /* AJNAboutIconClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAboutIconClient.h; sourceTree = "<group>"; };
+		9AC3004618A38FB70007C679 /* AJNAboutIconService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAboutIconService.h; sourceTree = "<group>"; };
+		9AC3004718A38FB70007C679 /* AJNAboutPropertyStoreImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAboutPropertyStoreImpl.h; sourceTree = "<group>"; };
+		9AC3004818A38FB70007C679 /* AJNAboutService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAboutService.h; sourceTree = "<group>"; };
+		9AC3004918A38FB70007C679 /* AJNAboutServiceApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAboutServiceApi.h; sourceTree = "<group>"; };
+		9AC3004A18A38FB70007C679 /* AJNAnnouncement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAnnouncement.h; sourceTree = "<group>"; };
+		9AC3004B18A38FB70007C679 /* AJNAnnouncementListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAnnouncementListener.h; sourceTree = "<group>"; };
+		9AC3004C18A38FB70007C679 /* AJNAnnouncementReceiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAnnouncementReceiver.h; sourceTree = "<group>"; };
+		9AC3004D18A38FB70007C679 /* AJNConvertUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNConvertUtil.h; sourceTree = "<group>"; };
+		9AC3004F18A38FB70007C679 /* AJNPropertyStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNPropertyStore.h; sourceTree = "<group>"; };
+		9AC3005018A38FB70007C679 /* AJNPropertyStoreProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNPropertyStoreProperty.h; sourceTree = "<group>"; };
+		9ADE4C2818A776C900742C05 /* AJNAnnounceHandlerAdapter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJNAnnounceHandlerAdapter.h; sourceTree = "<group>"; };
+		9ADE4C2918A7770900742C05 /* AJNAnnounceHandlerAdapter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAnnounceHandlerAdapter.mm; sourceTree = "<group>"; };
+		9AEB17F318A3DA8B00A4F130 /* AJNAboutClient.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAboutClient.mm; sourceTree = "<group>"; };
+		9AEB17F418A3DA8B00A4F130 /* AJNAboutDataConverter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAboutDataConverter.mm; sourceTree = "<group>"; };
+		9AEB17F518A3DA8B00A4F130 /* AJNAboutIconClient.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAboutIconClient.mm; sourceTree = "<group>"; };
+		9AEB17F618A3DA8B00A4F130 /* AJNAboutIconService.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAboutIconService.mm; sourceTree = "<group>"; };
+		9AEB17F718A3DA8B00A4F130 /* AJNAboutPropertyStoreImpl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAboutPropertyStoreImpl.mm; sourceTree = "<group>"; };
+		9AEB17F818A3DA8B00A4F130 /* AJNAboutService.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAboutService.mm; sourceTree = "<group>"; };
+		9AEB17F918A3DA8B00A4F130 /* AJNAboutServiceApi.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAboutServiceApi.mm; sourceTree = "<group>"; };
+		9AEB17FA18A3DA8B00A4F130 /* AJNAnnouncement.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAnnouncement.mm; sourceTree = "<group>"; };
+		9AEB17FB18A3DA8B00A4F130 /* AJNAnnouncementReceiver.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNAnnouncementReceiver.mm; sourceTree = "<group>"; };
+		9AEB17FC18A3DA8B00A4F130 /* AJNConvertUtil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNConvertUtil.mm; sourceTree = "<group>"; };
+		9AEB17FD18A3DA8B00A4F130 /* AJNPropertyStoreProperty.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AJNPropertyStoreProperty.mm; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9AA935E61854BC2B00378361 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9AA935ED1854BC2B00378361 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AA935F61854BC2B00378361 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9AA935FB1854BC2B00378361 /* XCTest.framework in Frameworks */,
+				9AA936011854BC2B00378361 /* liballjoyn_about_objc.a in Frameworks */,
+				9AA935FE1854BC2B00378361 /* UIKit.framework in Frameworks */,
+				9AA935FC1854BC2B00378361 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9AA935E01854BC2B00378361 = {
+			isa = PBXGroup;
+			children = (
+				9AA936781854BD1600378361 /* about */,
+				9AA935EE1854BC2B00378361 /* alljoyn_services_objc */,
+				9AA936021854BC2B00378361 /* alljoyn_services_objcTests */,
+				9AA935EB1854BC2B00378361 /* Frameworks */,
+				9AA935EA1854BC2B00378361 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9AA935EA1854BC2B00378361 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9AA935E91854BC2B00378361 /* liballjoyn_about_objc.a */,
+				9AA935F91854BC2B00378361 /* alljoyn_about_objcTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9AA935EB1854BC2B00378361 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9AA935EC1854BC2B00378361 /* Foundation.framework */,
+				9AA935FA1854BC2B00378361 /* XCTest.framework */,
+				9AA935FD1854BC2B00378361 /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9AA935EE1854BC2B00378361 /* alljoyn_services_objc */ = {
+			isa = PBXGroup;
+			children = (
+				9AA935EF1854BC2B00378361 /* Supporting Files */,
+			);
+			path = alljoyn_services_objc;
+			sourceTree = "<group>";
+		};
+		9AA935EF1854BC2B00378361 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				9AA935F01854BC2B00378361 /* alljoyn_about_objc-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		9AA936021854BC2B00378361 /* alljoyn_services_objcTests */ = {
+			isa = PBXGroup;
+			children = (
+				9AA936081854BC2B00378361 /* alljoyn_services_objcTests.m */,
+				9AA936031854BC2B00378361 /* Supporting Files */,
+			);
+			path = alljoyn_services_objcTests;
+			sourceTree = "<group>";
+		};
+		9AA936031854BC2B00378361 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				9AA936041854BC2B00378361 /* alljoyn_about_objcTests-Info.plist */,
+				9AA936051854BC2B00378361 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		9AA936781854BD1600378361 /* about */ = {
+			isa = PBXGroup;
+			children = (
+				9AA936AB1854BD1600378361 /* ios */,
+			);
+			name = about;
+			path = ../../../../about;
+			sourceTree = "<group>";
+		};
+		9AA936AB1854BD1600378361 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				9AA936AD1854BD1600378361 /* inc */,
+				9AA936DD1854BD1700378361 /* src */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
+		9AA936AD1854BD1600378361 /* inc */ = {
+			isa = PBXGroup;
+			children = (
+				9AA936AE1854BD1600378361 /* alljoyn */,
+			);
+			path = inc;
+			sourceTree = "<group>";
+		};
+		9AA936AE1854BD1600378361 /* alljoyn */ = {
+			isa = PBXGroup;
+			children = (
+				9AA936AF1854BD1600378361 /* about */,
+			);
+			path = alljoyn;
+			sourceTree = "<group>";
+		};
+		9AA936AF1854BD1600378361 /* about */ = {
+			isa = PBXGroup;
+			children = (
+				9ADE4C2818A776C900742C05 /* AJNAnnounceHandlerAdapter.h */,
+				9AC3004318A38FB70007C679 /* AJNAboutClient.h */,
+				9AC3004418A38FB70007C679 /* AJNAboutDataConverter.h */,
+				9AC3004518A38FB70007C679 /* AJNAboutIconClient.h */,
+				9AC3004618A38FB70007C679 /* AJNAboutIconService.h */,
+				9AC3004718A38FB70007C679 /* AJNAboutPropertyStoreImpl.h */,
+				9AC3004818A38FB70007C679 /* AJNAboutService.h */,
+				9AC3004918A38FB70007C679 /* AJNAboutServiceApi.h */,
+				9AC3004A18A38FB70007C679 /* AJNAnnouncement.h */,
+				9AC3004B18A38FB70007C679 /* AJNAnnouncementListener.h */,
+				9AC3004C18A38FB70007C679 /* AJNAnnouncementReceiver.h */,
+				9AC3004D18A38FB70007C679 /* AJNConvertUtil.h */,
+				9AC3004F18A38FB70007C679 /* AJNPropertyStore.h */,
+				9AC3005018A38FB70007C679 /* AJNPropertyStoreProperty.h */,
+			);
+			path = about;
+			sourceTree = "<group>";
+		};
+		9AA936DD1854BD1700378361 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				9ADE4C2918A7770900742C05 /* AJNAnnounceHandlerAdapter.mm */,
+				9AEB17F318A3DA8B00A4F130 /* AJNAboutClient.mm */,
+				9AEB17F418A3DA8B00A4F130 /* AJNAboutDataConverter.mm */,
+				9AEB17F518A3DA8B00A4F130 /* AJNAboutIconClient.mm */,
+				9AEB17F618A3DA8B00A4F130 /* AJNAboutIconService.mm */,
+				9AEB17F718A3DA8B00A4F130 /* AJNAboutPropertyStoreImpl.mm */,
+				9AEB17F818A3DA8B00A4F130 /* AJNAboutService.mm */,
+				9AEB17F918A3DA8B00A4F130 /* AJNAboutServiceApi.mm */,
+				9AEB17FA18A3DA8B00A4F130 /* AJNAnnouncement.mm */,
+				9AEB17FB18A3DA8B00A4F130 /* AJNAnnouncementReceiver.mm */,
+				9AEB17FC18A3DA8B00A4F130 /* AJNConvertUtil.mm */,
+				9AEB17FD18A3DA8B00A4F130 /* AJNPropertyStoreProperty.mm */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9AA935E81854BC2B00378361 /* alljoyn_about_objc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9AA9360C1854BC2B00378361 /* Build configuration list for PBXNativeTarget "alljoyn_about_objc" */;
+			buildPhases = (
+				9AA935E51854BC2B00378361 /* Sources */,
+				9AA935E61854BC2B00378361 /* Frameworks */,
+				9AA935E71854BC2B00378361 /* CopyFiles */,
+				7D3DCAE7192BFB9A0015A009 /* CopyFiles */,
+				7D43EA6B192C2DC7001C75BB /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = alljoyn_about_objc;
+			productName = alljoyn_services_objc;
+			productReference = 9AA935E91854BC2B00378361 /* liballjoyn_about_objc.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		9AA935F81854BC2B00378361 /* alljoyn_about_objcTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9AA9360F1854BC2B00378361 /* Build configuration list for PBXNativeTarget "alljoyn_about_objcTests" */;
+			buildPhases = (
+				9AA935F51854BC2B00378361 /* Sources */,
+				9AA935F61854BC2B00378361 /* Frameworks */,
+				9AA935F71854BC2B00378361 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9AA936001854BC2B00378361 /* PBXTargetDependency */,
+			);
+			name = alljoyn_about_objcTests;
+			productName = alljoyn_services_objcTests;
+			productReference = 9AA935F91854BC2B00378361 /* alljoyn_about_objcTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9AA935E11854BC2B00378361 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = AllJoyn;
+			};
+			buildConfigurationList = 9AA935E41854BC2B00378361 /* Build configuration list for PBXProject "alljoyn_about_objc" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 9AA935E01854BC2B00378361;
+			productRefGroup = 9AA935EA1854BC2B00378361 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9AA935E81854BC2B00378361 /* alljoyn_about_objc */,
+				9AA935F81854BC2B00378361 /* alljoyn_about_objcTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9AA935F71854BC2B00378361 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9AA936071854BC2B00378361 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9AA935E51854BC2B00378361 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9AEB180318A3DA8B00A4F130 /* AJNAboutPropertyStoreImpl.mm in Sources */,
+				9AEB180218A3DA8B00A4F130 /* AJNAboutIconService.mm in Sources */,
+				9AEB17FF18A3DA8B00A4F130 /* AJNAboutClient.mm in Sources */,
+				9AEB180418A3DA8B00A4F130 /* AJNAboutService.mm in Sources */,
+				9AEB180518A3DA8B00A4F130 /* AJNAboutServiceApi.mm in Sources */,
+				9AEB180718A3DA8B00A4F130 /* AJNAnnouncementReceiver.mm in Sources */,
+				9AEB180118A3DA8B00A4F130 /* AJNAboutIconClient.mm in Sources */,
+				9ADE4C2A18A7770900742C05 /* AJNAnnounceHandlerAdapter.mm in Sources */,
+				9AEB180618A3DA8B00A4F130 /* AJNAnnouncement.mm in Sources */,
+				9AEB180818A3DA8B00A4F130 /* AJNConvertUtil.mm in Sources */,
+				9AEB180018A3DA8B00A4F130 /* AJNAboutDataConverter.mm in Sources */,
+				9AEB180918A3DA8B00A4F130 /* AJNPropertyStoreProperty.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AA935F51854BC2B00378361 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9AA936091854BC2B00378361 /* alljoyn_services_objcTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9AA936001854BC2B00378361 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9AA935E81854BC2B00378361 /* alljoyn_about_objc */;
+			targetProxy = 9AA935FF1854BC2B00378361 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		9AA936051854BC2B00378361 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9AA936061854BC2B00378361 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		9AA9360A1854BC2B00378361 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		9AA9360B1854BC2B00378361 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9AA9360D1854BC2B00378361 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				DSTROOT = /tmp/alljoyn_services_objc.dst;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_services_objc/alljoyn_about_objc-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc/alljoyn\"",
+					"\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc\"",
+					"\"$(SRCROOT)/../../../../../common/inc\"",
+					"\"$(SRCROOT)/../../../../../alljoyn_objc/AllJoynFramework/AllJoynFramework\"",
+					"\"$(SRCROOT)/../../../../../applications\"/**",
+					"\"$(SRCROOT)/../../../../../services/about/cpp/inc/alljoyn/about \"$(SRCROOT)/../../../../../services/services_common/cpp/inc/alljoyn/services_common",
+					"\"$(SRCROOT)/../../../../../services/about/cpp/inc/alljoyn/about/\"",
+					"\"$(SRCROOT)/../../../../../services/services_common/cpp/inc/alljoyn/services_common/\"",
+					"\"$(SRCROOT)/../../../../../services/about/cpp/inc/\"",
+					"\"$(SRCROOT)/../../../../../services/about/ios/inc/\"",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(USER_LIBRARY_DIR)/Developer/Xcode/DerivedData/AboutServiceWorkspace-diiswixxecsgjablfhnnpcwwvocf/Build/Products/Debug-iphoneos",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-DQCC_OS_GROUP_POSIX",
+					"-DQCC_OS_DARWIN",
+					"-DUSE_SAMPLE_LOGGER",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = alljoyn_about_objc;
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s";
+			};
+			name = Debug;
+		};
+		9AA9360E1854BC2B00378361 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				DSTROOT = /tmp/alljoyn_services_objc.dst;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_services_objc/alljoyn_about_objc-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc/alljoyn\"",
+					"\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc\"",
+					"\"$(SRCROOT)/../../../../../common/inc\"",
+					"\"$(SRCROOT)/../../../../../alljoyn_objc/AllJoynFramework/AllJoynFramework\"",
+					"\"$(SRCROOT)/../../../../../applications\"/**",
+					"\"$(SRCROOT)/../../../../../services/about/cpp/inc/alljoyn/about \"$(SRCROOT)/../../../../../services/services_common/cpp/inc/alljoyn/services_common",
+					"\"$(SRCROOT)/../../../../../services/about/cpp/inc/alljoyn/about/\"",
+					"\"$(SRCROOT)/../../../../../services/services_common/cpp/inc/alljoyn/services_common/\"",
+					"\"$(SRCROOT)/../../../../../services/about/cpp/inc/\"",
+					"\"$(SRCROOT)/../../../../../services/about/ios/inc/\"",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(USER_LIBRARY_DIR)/Developer/Xcode/DerivedData/AboutServiceWorkspace-diiswixxecsgjablfhnnpcwwvocf/Build/Products/Debug-iphoneos",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-DQCC_OS_GROUP_POSIX",
+					"-DQCC_OS_DARWIN",
+					"-DUSE_SAMPLE_LOGGER",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = alljoyn_about_objc;
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s";
+			};
+			name = Release;
+		};
+		9AA936101854BC2B00378361 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_services_objc/alljoyn_services_objc-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc\"",
+					"\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc/alljoyn\"/**",
+					"\"$(SRCROOT)/../../../../../services\"/**",
+					"\"$(SRCROOT)/../../../../../common/inc\"",
+					"\"$(SRCROOT)/../../../../../alljoyn_objc/AllJoynFramework/AllJoynFramework\"",
+					"\"$(SRCROOT)/../../../../../applications\"/**",
+					"\"$(SRCROOT)/../../../../../services/notification/cpp/inc/alljoyn/notification/",
+				);
+				INFOPLIST_FILE = "alljoyn_services_objcTests/alljoyn_about_objcTests-Info.plist";
+				PRODUCT_NAME = alljoyn_about_objcTests;
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		9AA936111854BC2B00378361 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_services_objc/alljoyn_services_objc-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc\"",
+					"\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc/alljoyn\"/**",
+					"\"$(SRCROOT)/../../../../../services\"/**",
+					"\"$(SRCROOT)/../../../../../common/inc\"",
+					"\"$(SRCROOT)/../../../../../alljoyn_objc/AllJoynFramework/AllJoynFramework\"",
+					"\"$(SRCROOT)/../../../../../applications\"/**",
+				);
+				INFOPLIST_FILE = "alljoyn_services_objcTests/alljoyn_about_objcTests-Info.plist";
+				PRODUCT_NAME = alljoyn_about_objcTests;
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9AA935E41854BC2B00378361 /* Build configuration list for PBXProject "alljoyn_about_objc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AA9360A1854BC2B00378361 /* Debug */,
+				9AA9360B1854BC2B00378361 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9AA9360C1854BC2B00378361 /* Build configuration list for PBXNativeTarget "alljoyn_about_objc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AA9360D1854BC2B00378361 /* Debug */,
+				9AA9360E1854BC2B00378361 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9AA9360F1854BC2B00378361 /* Build configuration list for PBXNativeTarget "alljoyn_about_objcTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AA936101854BC2B00378361 /* Debug */,
+				9AA936111854BC2B00378361 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9AA935E11854BC2B00378361 /* Project object */;
+}
