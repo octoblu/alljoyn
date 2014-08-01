@@ -6,13 +6,28 @@
 #include <alljoyn/DBusStd.h>
 #include <alljoyn/AllJoynStd.h>
 
-BusAttachment::BusAttachment(std::string shortName, std::string interfaceName){
+BusAttachment::BusAttachment(const char* shortName):connected(0){
+    status = ER_OK;
     bus = new BusAttachment(shortName, true);
-    interface = NULL;
-    status = s_bus->CreateInterface(interfaceName, chatIntf);
+    if (!s_bus) {
+        status = ER_OUT_OF_MEMORY;
+    }
+}
+
+void BusAttachment::createInterface(const char* interfaceName, const char* signalName, const char* signalParams, const char* signalArgs)){
+	InterfaceDescription* interface = NULL;
+    status = s_bus->CreateInterface(interfaceName, interface);
+
     if (ER_OK == status) {
+        interface->AddSignal(signalName, signalParams,  signalArgs, 0);
         interface->Activate();
     } else {
         printf("Failed to create interface \"%s\" (%s)\n", interfaceName, QCC_StatusText(status));
     }
+
+    return status;
+}
+
+void BusAttachment::connectInterface(){
+	s_bus->RegisterBusListener(s_busListener);
 }

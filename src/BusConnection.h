@@ -6,7 +6,12 @@ class BusConnection {
 	ajn::BusAttachment* bus;
 	InterfaceDescription* interface;
 	QStatus status;
+	int connected;
   public:
+  	BusAttachment(const char* shortName);
+  	void createInterface(const char* interfaceName, const char* signalName, const char* signalParams, const char* signalArgs));
+	void connectInterface();
     void disconnect();
+    int connected(){ return connected};
     QStatus getStatus(){return status};
 };

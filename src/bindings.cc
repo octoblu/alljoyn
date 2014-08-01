@@ -16,10 +16,19 @@
 
 std::vector<BusConnection*> connectionList;
 
+// Interface args:
+// { 	interfaceName, 
+//		signalName, 
+//		signalParams, 
+//		signalArgs }
+
 void createConnection(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = Isolate::GetCurrent();
   HandleScope scope(isolate);
-
+  BusConnection* conn = new BusConnection();
+  connectionList.push(conn);
+  conn->createInterface(args);
+  conn->connectInterface();
 }
 
 static void exitCleanup(void* arg) {
@@ -31,8 +40,10 @@ static void exitCleanup(void* arg) {
 	}
 }
 
+
 void init(Handle<Object> target) {
-  NODE_SET_METHOD(target, "openConnection", createConnection);
+  NODE_SET_METHOD(target, "createConnection", createConnection);
+  NODE_SET_METHOD(target, "connectBus", createConnection);
   AtExit(exitCleanup);
 }
 
