@@ -4,6 +4,7 @@
 
 class BusConnection {
 	ajn::BusAttachment* bus;
+  BusBinding binding;
 	InterfaceDescription* interface;
 	QStatus status;
 	int connected;

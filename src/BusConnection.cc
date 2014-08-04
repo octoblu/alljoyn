@@ -16,7 +16,7 @@ BusAttachment::BusAttachment(const char* shortName):connected(0){
 
 void BusAttachment::createInterface(const char* interfaceName, const char* signalName, const char* signalParams, const char* signalArgs)){
 	InterfaceDescription* interface = NULL;
-    status = s_bus->CreateInterface(interfaceName, interface);
+    status = bus->CreateInterface(interfaceName, interface);
 
     if (ER_OK == status) {
         interface->AddSignal(signalName, signalParams,  signalArgs, 0);
@@ -29,5 +29,5 @@ void BusAttachment::createInterface(const char* interfaceName, const char* signa
 }
 
 void BusAttachment::connectInterface(){
-	s_bus->RegisterBusListener(s_busListener);
+	bus->RegisterBusListener(binding);
 }
