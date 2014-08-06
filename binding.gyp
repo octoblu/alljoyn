@@ -14,7 +14,8 @@
         'gen/alljoyn',
         'alljoyn/alljoyn_core/inc',
         'alljoyn/alljoyn_core/inc/alljoyn',
-        'alljoyn/common/inc'
+        'alljoyn/common/inc',
+        "<!(node -e \"require('nan')\")"
       ],
       'sources': [
         'src/bindings.cc'
