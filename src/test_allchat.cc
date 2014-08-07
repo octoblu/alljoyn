@@ -69,9 +69,9 @@ class ChatObject : public BusObject {
 
         /* Register signal handler */
         status =  bus.RegisterSignalHandler(this,
-                                            static_cast<MessageReceiver::SignalHandler>(&ChatObject::ChatSignalHandler),
-                                            chatSignalMember,
-                                            NULL);
+            static_cast<MessageReceiver::SignalHandler>(&ChatObject::ChatSignalHandler),
+            chatSignalMember,
+            NULL);
 
         if (ER_OK != status) {
             printf("Failed to register signal handler for ChatObject::Chat (%s)\n", QCC_StatusText(status));

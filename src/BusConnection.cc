@@ -10,7 +10,7 @@
 
 static v8::Persistent<v8::FunctionTemplate> bus_constructor;
 
-v8::Handle<v8::Value> BusConnection::NewInstance (v8::Local<v8::String> &appName) {
+v8::Handle<v8::Value> BusConnection::NewInstance(v8::Local<v8::String> &appName) {
     NanScope();
 
     v8::Local<v8::Object> obj;
@@ -26,7 +26,7 @@ NAN_METHOD(AlljoynBus) {
     NanReturnValue(BusConnection::NewInstance(appName));
 }
 
-BusConnection::BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent):connected(0){
+BusConnection::BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent){
     status = ER_OK;
     bus = new BusAttachment(shortName, allowRemoteMessages, maxConcurrent);
     if (!s_bus) {
@@ -37,7 +37,7 @@ BusConnection::BusConnection(const char* shortName, bool allowRemoteMessages, in
 void BusConnection::Init () {
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(BusConnection::New);
   NanAssignPersistent(v8::FunctionTemplate, bus_constructor, tpl);
-  tpl->SetClassName(NanSymbol("BusConnection"));
+  tpl->SetClassName(NanSymbol("BusAttachment"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   NODE_SET_PROTOTYPE_METHOD(tpl, "start", BusConnection::Start);
   NODE_SET_PROTOTYPE_METHOD(tpl, "stop", BusConnection::Stop);
@@ -61,26 +61,48 @@ NAN_METHOD(BusConnection::New) {
 
 NAN_METHOD(BusConnection::Start) {
   NanScope();
-  int statusCode = ER_OK;
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
-  statusCode = connection->bus->Start();
-  NanReturnValue(NanNew<Integer>(statusCode));
+  status = connection->bus->Start();
+  NanReturnValue(NanNew<Integer>(static_cast<int>(status)));
 }
 
 NAN_METHOD(BusConnection::Stop) {
   NanScope();
-  int statusCode = ER_OK;
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
-  statusCode = connection->bus->Stop();
-  NanReturnValue(NanNew<Integer>(statusCode));
+  status = connection->bus->Stop();
+  NanReturnValue(NanNew<Integer>(static_cast<int>(status)));
 }
 
 NAN_METHOD(BusConnection::Join) {
   NanScope();
-  int statusCode = ER_OK;
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
-  statusCode = connection->bus->Join();
-  NanReturnValue(NanNew<Integer>(statusCode));
+  status = connection->bus->Join();
+  NanReturnValue(NanNew<Integer>(static_cast<int>(status)));
+}
+
+NAN_METHOD(BusConnection::CreateInterface) {
+  NanScope();
+  if (args.Length() == 0 || !args[0]->IsString())
+    return NanThrowError("CreateInterface requires a name string argument");
+  if (args.Length() == 1)
+    return NanThrowError("CreateInterface requires a new InterfaceDescription argument");
+
+  char* name = NanFromV8String(args[0].As<v8::Object>(), Nan::UTF8, NULL, NULL, 0, v8::String::NO_OPTIONS);
+  
+
+  InterfaceDescription* interface = NULL;
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  status = connection->bus->CreateInterface(name, interface);
+  InterfaceWrapper* wrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(args[1].As<v8::Object>());
+  wrapper->interface = interface;
+  if (ER_OK == status) {
+    //callback
+  } else {
+      printf("Failed to create interface \"%s\" (%s)\n", name, QCC_StatusText(status));
+  }
+
+  NanReturnValue(NanNew<Integer>(static_cast<int>(status)));
 }
 
 

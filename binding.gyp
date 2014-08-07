@@ -18,7 +18,9 @@
         "<!(node -e \"require('nan')\")"
       ],
       'sources': [
-        'src/bindings.cc'
+        'src/bindings.cc',
+        'src/InterfaceWrapper.cc',
+        'src/BusConnection.cc'
       ]
     }
   ]
