@@ -6,15 +6,17 @@
 #include <alljoyn/BusObject.h>
 #include <alljoyn/AllJoynStd.h>
 
+NAN_METHOD(InterfaceDescriptionWrapper);
+
 class InterfaceWrapper : public node::ObjectWrap {
   private:
-  	ajn::InterfaceDescription* interface;
 
     static NAN_METHOD(New);
     static NAN_METHOD(AddSignal);
     static NAN_METHOD(Activate);
   public:
   	InterfaceWrapper();
+    ajn::InterfaceDescription* interface;
     static void Init ();
     static v8::Handle<v8::Value> NewInstance();
 };

@@ -6,17 +6,17 @@
 #include <alljoyn/BusObject.h>
 #include <alljoyn/AllJoynStd.h>
 
-NAN_METHOD(AlljoynBus);
+NAN_METHOD(BusAttachmentWrapper);
 
 class BusConnection : public node::ObjectWrap {
   private:
   	ajn::BusAttachment* bus;
-  	QStatus status;
 
     static NAN_METHOD(New);
     static NAN_METHOD(Start);
     static NAN_METHOD(Stop);
     static NAN_METHOD(Join);
+    static NAN_METHOD(CreateInterface);
   public:
   	BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent);
     static void Init ();
