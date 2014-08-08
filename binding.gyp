@@ -20,7 +20,8 @@
       'sources': [
         'src/bindings.cc',
         'src/InterfaceWrapper.cc',
-        'src/BusConnection.cc'
+        'src/BusConnection.cc',
+        'src/BusListenerWrapper.cc'
       ]
     }
   ]

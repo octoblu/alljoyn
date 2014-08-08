@@ -2,6 +2,7 @@
 
 #include "BusConnection.h"
 #include "InterfaceWrapper.h"
+#include "BusListenerWrapper.h"
 #include <alljoyn/BusAttachment.h>
 #include <alljoyn/ProxyBusObject.h>
 #include <alljoyn/BusObject.h>
@@ -40,6 +41,7 @@ void BusConnection::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "stop", BusConnection::Stop);
   NODE_SET_PROTOTYPE_METHOD(tpl, "join", BusConnection::Join);
   NODE_SET_PROTOTYPE_METHOD(tpl, "createInterface", BusConnection::CreateInterface);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusListener", BusConnection::RegisterBusListener);
 }
 
 NAN_METHOD(BusConnection::New) {
@@ -99,4 +101,16 @@ NAN_METHOD(BusConnection::CreateInterface) {
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 
+NAN_METHOD(BusConnection::RegisterBusListener) {
+  NanScope();
+  printf("RegisterBusListener\n");
+  if (args.Length() == 0)
+    return NanThrowError("RegisterBusListener requires a BusListener argument");
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  BusListenerWrapper* wrapper = node::ObjectWrap::Unwrap<BusListenerWrapper>(args[0].As<v8::Object>());
+  connection->bus->RegisterBusListener(*wrapper);
+
+  NanReturnUndefined();
+}
 
