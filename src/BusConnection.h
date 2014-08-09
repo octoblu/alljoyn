@@ -18,6 +18,7 @@ class BusConnection : public node::ObjectWrap {
     static NAN_METHOD(Join);
     static NAN_METHOD(CreateInterface);
     static NAN_METHOD(RegisterBusListener);
+    static NAN_METHOD(RegisterBusObject);
   public:
   	BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent);
     static void Init ();

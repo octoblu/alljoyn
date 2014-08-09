@@ -72,7 +72,7 @@ NAN_METHOD(BusListenerWrapper::New) {
   v8::Local<v8::Function> changeName = args[2].As<v8::Function>();
   NanCallback *nameChangeCall = new NanCallback(changeName);
 
-  BusListenerWrapper* obj = new BusListenerWrapper(NULL, NULL, NULL);//foundNameCall, lostNameCall, nameChangeCall);
+  BusListenerWrapper* obj = new BusListenerWrapper(foundNameCall, lostNameCall, nameChangeCall);
   obj->Wrap(args.This());
 
   NanReturnValue(args.This());
