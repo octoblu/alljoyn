@@ -41,7 +41,9 @@ void BusConnection::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "start", BusConnection::Start);
   NODE_SET_PROTOTYPE_METHOD(tpl, "stop", BusConnection::Stop);
   NODE_SET_PROTOTYPE_METHOD(tpl, "join", BusConnection::Join);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "connect", BusConnection::Connect);
   NODE_SET_PROTOTYPE_METHOD(tpl, "createInterface", BusConnection::CreateInterface);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getInterface", BusConnection::GetInterface);
   NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusListener", BusConnection::RegisterBusListener);
   NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusObject", BusConnection::RegisterBusObject);
 }
@@ -79,6 +81,13 @@ NAN_METHOD(BusConnection::Join) {
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 
+NAN_METHOD(BusConnection::Connect) {
+  NanScope();
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  QStatus status = connection->bus->Connect();
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+}
+
 NAN_METHOD(BusConnection::CreateInterface) {
   NanScope();
   if (args.Length() == 0 || !args[0]->IsString())
@@ -103,6 +112,24 @@ NAN_METHOD(BusConnection::CreateInterface) {
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 
+NAN_METHOD(BusConnection::GetInterface) {
+  NanScope();
+  if (args.Length() == 0 || !args[0]->IsString())
+    return NanThrowError("CreateInterface requires a name string argument");
+  if (args.Length() == 1)
+    return NanThrowError("CreateInterface requires a new InterfaceDescription argument");
+  
+  char* name = *NanUtf8String(args[0]);
+  ajn::InterfaceDescription* interface = NULL;
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  interface = const_cast<ajn::InterfaceDescription*>(connection->bus->GetInterface(name));
+  InterfaceWrapper* wrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(args[1].As<v8::Object>());
+  wrapper->interface = interface;
+
+  NanReturnUndefined();
+}
+
 NAN_METHOD(BusConnection::RegisterBusListener) {
   NanScope();
   printf("RegisterBusListener\n");
@@ -124,8 +151,9 @@ NAN_METHOD(BusConnection::RegisterBusObject) {
 
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
   BusObjectWrapper* wrapper = node::ObjectWrap::Unwrap<BusObjectWrapper>(args[0].As<v8::Object>());
-  connection->bus->RegisterBusObject(*wrapper);
 
-  NanReturnUndefined();
+  QStatus status = connection->bus->RegisterBusObject(*(wrapper->object));
+
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 

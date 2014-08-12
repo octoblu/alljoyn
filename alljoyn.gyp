@@ -15,6 +15,7 @@
       'gen/alljoyn',
       'alljoyn/alljoyn_core/inc',
       'alljoyn/alljoyn_core/inc/alljoyn',
+      'alljoyn/alljoyn_core/router',
       'alljoyn/alljoyn_core/src',
       'alljoyn/common/inc'
     ],
@@ -25,9 +26,6 @@
         'defines': [
           'QCC_OS_GROUP_POSIX',
           'QCC_OS_DARWIN'
-        ],
-        'include_dirs': [
-          ''
         ]
       }]
     ]
@@ -144,26 +142,30 @@
       ],
     },
     {
+      'target_name': 'ajrouter',
+      'product_prefix': 'lib',
+      'type': 'static_library',
+      'sources': [
+        'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
+      ],
+    },
+    {
       'target_name': 'allchat',
       'type': 'executable',
       'dependencies': [
-        'alljoyn.gyp:alljoyn'
+        'alljoyn.gyp:alljoyn',
+        'alljoyn.gyp:ajrouter'
       ],
-    'include_dirs': [
-      'alljoyn/alljoyn_core/router'
-    ],
       'link_settings': {
         'libraries': [
         '-lstdc++',
         '-lcrypto',
         '-lpthread',
-        '-L/Users/matthewshepard/Projects/node-alljoyn/lib',
         '-lajrouter'
         ]
       },
       'sources': [
-        'src/test_allchat.cc',
-        'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
+        'src/test_allchat.cc'
       ],
     },
   ]

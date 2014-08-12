@@ -3,7 +3,8 @@
     {
       'target_name': 'node-alljoyn',
       'dependencies': [
-        'alljoyn.gyp:alljoyn'
+        'alljoyn.gyp:alljoyn',
+        'alljoyn.gyp:ajrouter'
       ],
       'defines': [
         'QCC_OS_GROUP_POSIX',
@@ -14,6 +15,7 @@
         'gen/alljoyn',
         'alljoyn/alljoyn_core/inc',
         'alljoyn/alljoyn_core/inc/alljoyn',
+        'alljoyn/alljoyn_core/router',
         'alljoyn/common/inc',
         "<!(node -e \"require('nan')\")"
       ],
