@@ -351,7 +351,7 @@ typedef enum {
     ER_UDP_EARLY_EXIT = 0x9111 /**< UDP Transport connection aborted during setup */,
     ER_UDP_LOCAL_DISCONNECT_FAIL = 0x9112 /**< UDP Transport local connection disconnect failure */,
     ER_ARDP_DISCONNECTING = 0x9113 /**< ARDP connection is being shut down */,
-    ER_ALLJOYN_PING_REPLY_UNIMPLEMENTED = 0x9114 /**< Remote routing node does not implement Ping */,
+    ER_ALLJOYN_PING_REPLY_INCOMPATIBLE_REMOTE_ROUTING_NODE = 0x9114 /**< Remote routing node does not implement Ping */,
     ER_ALLJOYN_PING_REPLY_TIMEOUT = 0x9115 /**< Ping call timeout */,
     ER_ALLJOYN_PING_REPLY_UNKNOWN_NAME = 0x9116 /**< Name not found currently or part of any known session */,
     ER_ALLJOYN_PING_REPLY_FAILED = 0x9117 /**< Generic Ping call error */,

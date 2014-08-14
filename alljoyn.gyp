@@ -16,11 +16,18 @@
       'alljoyn/alljoyn_core/inc',
       'alljoyn/alljoyn_core/inc/alljoyn',
       'alljoyn/alljoyn_core/router',
+      'alljoyn/alljoyn_core/router/posix',
       'alljoyn/alljoyn_core/src',
       'alljoyn/common/inc'
     ],
     'defines': [
     ],
+    'cflags':[
+      '-Wno-error=non-pod-varargs'
+    ],
+    'xcode_settings': {
+        'OTHER_CFLAGS': [ '-Wno-error=non-pod-varargs' ]
+    },
     'conditions': [
       ['OS=="mac"', {
         'defines': [
@@ -104,7 +111,6 @@
         'alljoyn/common/os/posix/Mutex.cc',
         'alljoyn/common/os/posix/RWLock.cc',
         'alljoyn/common/os/posix/SslSocket.cc',
-        'alljoyn/common/os/posix/Timer.cc',
         'alljoyn/common/os/posix/UARTStreamLinux.cc',
         'alljoyn/common/os/posix/time.cc',
         'alljoyn/common/src/ASN1.cc',
@@ -133,6 +139,7 @@
         'alljoyn/common/src/SLAPStream.cc',
         'alljoyn/common/src/Stream.cc',
         'alljoyn/common/src/StringSource.cc',
+        'alljoyn/common/src/Timer.cc',
         'alljoyn/common/src/Util.cc',
         'alljoyn/common/crypto/openssl/CryptoAES.cc',
         'alljoyn/common/crypto/openssl/CryptoHash.cc',
@@ -145,14 +152,50 @@
       'target_name': 'ajrouter',
       'product_prefix': 'lib',
       'type': 'static_library',
+      'dependencies': [
+        'alljoyn.gyp:alljoynstatus',
+        'alljoyn.gyp:alljoyn'
+      ],
+      'cflags_cc':[
+        '-Wno-error=non-pod-varargs'
+      ],
       'sources': [
-        'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
+        'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc',
+        'alljoyn/alljoyn_core/router/AllJoynDebugObj.cc',
+        'alljoyn/alljoyn_core/router/Bus.cc',
+        'alljoyn/alljoyn_core/router/ConvertUTF.cc',
+        'alljoyn/alljoyn_core/router/DaemonSLAPTransport.cc',
+        'alljoyn/alljoyn_core/router/TCPTransport.cc',
+        'alljoyn/alljoyn_core/router/UDPTransport.cc',
+        'alljoyn/alljoyn_core/router/AllJoynObj.cc',
+        'alljoyn/alljoyn_core/router/BusController.cc',
+        'alljoyn/alljoyn_core/router/DBusObj.cc',
+        'alljoyn/alljoyn_core/router/RuleTable.cc',
+        'alljoyn/alljoyn_core/router/ArdpProtocol.cc',
+        'alljoyn/alljoyn_core/router/ConfigDB.cc',
+        'alljoyn/alljoyn_core/router/DaemonRouter.cc',
+        'alljoyn/alljoyn_core/router/NameTable.cc',
+        'alljoyn/alljoyn_core/router/SessionlessObj.cc',
+        'alljoyn/alljoyn_core/router/VirtualEndpoint.cc',
+        'alljoyn/alljoyn_core/router/PermissionMgr.cc',
+        'alljoyn/alljoyn_core/router/darwin/DaemonTransport.cc',
+        'alljoyn/alljoyn_core/router/posix/PermissionMgr2.cc',
+        'alljoyn/alljoyn_core/router/posix/Socket.cc',
+        'alljoyn/alljoyn_core/router/ns/IpNameService.cc',
+        'alljoyn/alljoyn_core/router/ns/IpNameServiceImpl.cc',
+        'alljoyn/alljoyn_core/router/ns/IpNsProtocol.cc',
+        'alljoyn/alljoyn_core/router/policydb/PolicyDB.cc',
+        'alljoyn/alljoyn_core/router/packetengine/Packet.cc',
+        'alljoyn/alljoyn_core/router/packetengine/PacketEngine.cc',
+        'alljoyn/alljoyn_core/router/packetengine/PacketEngineStream.cc',
+        'alljoyn/alljoyn_core/router/packetengine/PacketPool.cc'
       ],
     },
     {
       'target_name': 'allchat',
       'type': 'executable',
       'dependencies': [
+        'alljoyn.gyp:alljoynstatus',
         'alljoyn.gyp:alljoyn',
         'alljoyn.gyp:ajrouter'
       ],
@@ -160,12 +203,12 @@
         'libraries': [
         '-lstdc++',
         '-lcrypto',
-        '-lpthread',
-        '-lajrouter'
+        '-lpthread'
         ]
       },
       'sources': [
-        'src/test_allchat.cc'
+        'src/test_allchat.cc',
+        'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
       ],
     },
   ]

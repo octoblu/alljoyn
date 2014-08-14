@@ -954,6 +954,21 @@ QStatus SetBlocking(SocketFd sockfd, bool blocking)
     return status;
 }
 
+QStatus SetLinger(SocketFd sockfd, bool onoff, uint32_t linger)
+{
+    QStatus status = ER_OK;
+    struct linger l;
+    l.l_onoff = onoff;
+    l.l_linger = linger;
+
+    int r = setsockopt(sockfd, SOL_SOCKET, SO_LINGER, (char*)&l, sizeof(l));
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Setting SO_LINGER failed: (%d) %s", errno, strerror(errno)));
+    }
+    return status;
+}
+
 QStatus SetNagle(SocketFd sockfd, bool useNagle)
 {
     QStatus status = ER_OK;
@@ -1011,7 +1026,7 @@ QStatus MulticastGroupOpInternal(SocketFd sockFd, AddressFamily family, String m
      * We assume that No external API will be trying to call here and so asserts
      * are appropriate when checking for completely bogus parameters.
      */
-    assert(sockFd);
+    assert(sockFd != INVALID_SOCKET);
     assert(family == AF_INET || family == AF_INET6);
     assert(multicastGroup.size());
     assert(iface.size());
@@ -1123,7 +1138,7 @@ QStatus SetMulticastInterface(SocketFd sockFd, AddressFamily family, qcc::String
      * We assume that No external API will be trying to call here and so asserts
      * are appropriate when checking for completely bogus parameters.
      */
-    assert(sockFd);
+    assert(sockFd != INVALID_SOCKET);
     assert(family == AF_INET || family == AF_INET6);
     assert(iface.size());
 
@@ -1210,7 +1225,7 @@ QStatus SetMulticastHops(SocketFd sockFd, AddressFamily family, uint32_t hops)
      * We assume that No external API will be trying to call here and so asserts
      * are appropriate when checking for completely bogus parameters.
      */
-    assert(sockFd);
+    assert(sockFd != INVALID_SOCKET);
     assert(family == AF_INET || family == AF_INET6);
 
     /*
@@ -1250,7 +1265,7 @@ QStatus SetRecvPktAncillaryData(SocketFd sockfd, AddressFamily addrFamily, bool 
      * We assume that No external API will be trying to call here and so asserts
      * are appropriate when checking for completely bogus parameters.
      */
-    assert(sockfd);
+    assert(sockfd != INVALID_SOCKET);
     assert(addrFamily == AF_INET || addrFamily == AF_INET6);
 
     QStatus status = ER_OK;

@@ -95,9 +95,6 @@ static map<SessionId, SessionInfo> s_sessionMap;
 static Mutex s_lock;
 static bool s_chatEcho = true;
 
-static String s_name;
-static bool s_found = false;
-
 /*
  * get a line of input from the the file pointer (most likely stdin).
  * This will capture the the num-1 characters or till a newline character is
@@ -200,10 +197,6 @@ class MyBusListener : public BusListener, public SessionPortListener, public Ses
         s_lock.Lock(MUTEX_CONTEXT);
         s_discoverSet.insert(DiscoverInfo(name, transport));
         s_lock.Unlock(MUTEX_CONTEXT);
-
-        if (strcmp(name, s_name.c_str()) == 0) {
-            s_found = true;
-        }
     }
 
     void NameOwnerChanged(const char* busName, const char* previousOwner, const char* newOwner)
@@ -327,7 +320,7 @@ class AutoChatThread : public Thread, public ThreadListener {
 
 static void usage()
 {
-    printf("Usage: sessions [command-file]\n");
+    printf("Usage: sessions [-h]\n");
     exit(1);
 }
 
@@ -459,19 +452,8 @@ static void DoCancelAdvertise(String name, TransportMask transports)
     }
 }
 
-static void DoWait(String name)
-{
-    while (s_found == false) {
-        qcc::Sleep(250);
-        printf(".");
-    }
-    printf("\n");
-}
-
 static void DoFind(String name)
 {
-    s_name = name;
-    s_found = false;
     QStatus status = s_bus->FindAdvertisedName(name.c_str());
     if (status != ER_OK) {
         printf("BusAttachment::FindAdvertisedName(%s) failed with %s\n", name.c_str(), QCC_StatusText(status));
@@ -684,13 +666,42 @@ static void DoSetLinkTimeoutAsync(SessionId id, uint32_t timeout)
 
 }
 
-static void DoPing(String name)
+static void DoPing(String name, uint32_t timeout)
 {
-    QStatus status = s_bus->Ping(name.c_str(), 30000);
+    QStatus status = s_bus->Ping(name.c_str(), timeout);
     if (status != ER_OK) {
         printf("DoPing(%s) failed with %s (%u)\n", name.c_str(), QCC_StatusText(status), status);
     } else {
         printf("Ping(%s) OK\n", name.c_str());
+    }
+}
+
+struct AsyncPingHandler : public BusAttachment::PingAsyncCB {
+
+    const String name;
+
+    AsyncPingHandler(String& name) : name(name)
+    {   }
+
+    void PingCB(QStatus status, void* context)
+    {
+        if (status != ER_OK) {
+            printf("PingAsync(%s) failed with %s (%u)\n", name.c_str(), QCC_StatusText(status), status);
+        } else {
+            printf("PingAsync(%s) OK\n", name.c_str());
+        }
+
+        delete this;
+    }
+};
+
+static void DoPingAsync(String name, uint32_t timeout)
+{
+    QStatus status = s_bus->PingAsync(name.c_str(), timeout, new AsyncPingHandler(name), NULL);
+    if (status != ER_OK) {
+        printf("DoPingAsync(%s) failed with %s (%u)\n", name.c_str(), QCC_StatusText(status), status);
+    } else {
+        printf("PingAsync(%s) OK\n", name.c_str());
     }
 }
 
@@ -699,8 +710,13 @@ int main(int argc, char** argv)
     QStatus status = ER_OK;
 
     /* Parse command line args */
-    if (argc > 2) {
-        usage();
+    for (int i = 1; i < argc; ++i) {
+        if (0 == ::strcmp("-h", argv[i])) {
+            usage();
+        } else {
+            printf("Unknown argument \"%s\"\n", argv[i]);
+            usage();
+        }
     }
 
     /* Create message bus */
@@ -750,40 +766,11 @@ int main(int argc, char** argv)
         }
     }
 
-    /*
-     * If argc is two, argv[1] is a file name from which we will interpret setup
-     * commands until EOF.  If no file, or when the file is parsed, start
-     * reading and parsing commands from stdin.
-     */
+    /* Parse commands from stdin */
+    printf("ready\n");
     const int bufSize = 1024;
     char buf[bufSize];
-
-    FILE* fp;
-
-    if (argc == 2) {
-        fp = fopen(argv[1], "r");
-        if (fp == NULL) {
-            printf("unable to open \"%s\"\n", argv[1]);
-            fp = stdin;
-        } else {
-            printf("reading commands from \"%s\"\n", argv[1]);
-        }
-    } else {
-        fp = stdin;
-    }
-
-    while (ER_OK == status) {
-        if (get_line(buf, bufSize, fp) == NULL) {
-            if (fp == stdin) {
-                break;
-            } else {
-                fclose(fp);
-                fp = stdin;
-                printf("ready\n");
-                continue;
-            }
-        }
-
+    while ((ER_OK == status) && (get_line(buf, bufSize, stdin))) {
         String line(buf);
         String cmd = NextTok(line);
         if (cmd == "debug") {
@@ -1071,10 +1058,12 @@ int main(int argc, char** argv)
             sessionTestObj.SetTtl(ttl);
         } else if (cmd == "ping") {
             String name = NextTok(line);
-            DoPing(name);
-        } else if (cmd == "wait") {
+            uint32_t timeout = StringToU32(NextTok(line), 0, 30000);
+            DoPing(name, timeout);
+        } else if (cmd == "asyncping") {
             String name = NextTok(line);
-            DoWait(name);
+            uint32_t timeout = StringToU32(NextTok(line), 0, 30000);
+            DoPingAsync(name, timeout);
         } else if (cmd == "exit") {
             break;
         } else if (cmd == "help" || cmd == "?") {
@@ -1103,8 +1092,8 @@ int main(int argc, char** argv)
             printf("addmatch <rule>                                               - Add a DBUS rule\n");
             printf("removematch <rule>                                            - Remove a DBUS rule\n");
             printf("sendttl <ttl>                                                 - Set ttl (in ms) for all chat messages (0 = infinite)\n");
-            printf("ping <name>                                                   - Ping a name\n");
-            printf("wait <name>                                                   - Wait until <name> is found\n");
+            printf("ping <name> [timeout]                                         - Ping a name\n");
+            printf("asyncping <name> [timeout]                                    - Ping a name asynchronously\n");
             printf("exit                                                          - Exit this program\n");
             printf("\n");
             printf("SessionIds can be specified by value or by #<idx> where <idx> is the session index printed with \"list\" command\n");

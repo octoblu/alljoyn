@@ -2972,26 +2972,6 @@ void MDNSSenderRData::SetIPV4ResponseAddr(qcc::String ipv4Addr)
     MDNSTextRData::SetValue("ipv4", ipv4Addr);
 }
 
-uint16_t MDNSSenderRData::GetIPV6ResponsePort()
-{
-    return MDNSTextRData::GetU16Value("upcv6");
-}
-
-void MDNSSenderRData::SetIPV6ResponsePort(uint16_t ipv6Port)
-{
-    MDNSTextRData::SetValue("upcv6", ipv6Port);
-}
-
-qcc::String MDNSSenderRData::GetIPV6ResponseAddr()
-{
-    return MDNSTextRData::GetValue("ipv6");
-}
-
-void MDNSSenderRData::SetIPV6ResponseAddr(qcc::String ipv6Addr)
-{
-    MDNSTextRData::SetValue("ipv6", ipv6Addr);
-}
-
 //MDNSHeader
 MDNSHeader::MDNSHeader() :
     m_queryId(0),
@@ -3381,6 +3361,51 @@ bool _MDNSPacket::GetAdditionalRecord(qcc::String str, MDNSResourceRecord::RRTyp
             (static_cast<MDNSTextRData*>((*it1).GetRData())->GetU16Value("txtvers") == version)) {
             *additional = &(*it1);
             return true;
+        }
+        it1++;
+    }
+    return false;
+}
+
+uint32_t _MDNSPacket::GetNumMatches(qcc::String str, MDNSResourceRecord::RRType type, uint16_t version)
+{
+    if (type != MDNSResourceRecord::TXT) {
+        return false;
+    }
+    uint32_t numMatches =  0;
+    size_t starPos = str.find_last_of('*');
+    String name = str.substr(0, starPos);
+    std::vector<MDNSResourceRecord>::iterator it1 = m_additional.begin();
+    while (it1 != m_additional.end()) {
+        String dname = (*it1).GetDomainName();
+        bool nameMatches = (starPos == String::npos) ? (dname == name) : (dname.find(name) == 0);
+        if (nameMatches && ((*it1).GetRRType() == type) &&
+            (static_cast<MDNSTextRData*>((*it1).GetRData())->GetU16Value("txtvers") == version)) {
+            numMatches++;
+        }
+        it1++;
+    }
+    return numMatches;
+}
+
+bool _MDNSPacket::GetAdditionalRecordAt(qcc::String str, MDNSResourceRecord::RRType type, uint16_t version, uint32_t index, MDNSResourceRecord** additional)
+{
+    if (type != MDNSResourceRecord::TXT) {
+        return false;
+    }
+    size_t starPos = str.find_last_of('*');
+    String name = str.substr(0, starPos);
+    uint32_t i = 0;
+    std::vector<MDNSResourceRecord>::iterator it1 = m_additional.begin();
+    while (it1 != m_additional.end()) {
+        String dname = (*it1).GetDomainName();
+        bool nameMatches = (starPos == String::npos) ? (dname == name) : (dname.find(name) == 0);
+        if (nameMatches && ((*it1).GetRRType() == type) &&
+            (static_cast<MDNSTextRData*>((*it1).GetRData())->GetU16Value("txtvers") == version)) {
+            if (i++ == index) {
+                *additional = &(*it1);
+                return true;
+            }
         }
         it1++;
     }

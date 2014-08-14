@@ -1,7 +1,0 @@
-.sconsign.dblite
-build
-*~
-*.o
-whitespace.db
-.cproject
-.project

@@ -3199,7 +3199,7 @@ class MDNSSenderRData : public MDNSTextRData {
     /**
      * @internal
      * @brief Construct an in-memory object representation of an on-the-wire
-     * MDNS Reference RData.
+     * MDNS Sender RData.
      */
     MDNSSenderRData(uint16_t version = MDNSTextRData::TXTVERS);
 
@@ -3257,34 +3257,6 @@ class MDNSSenderRData : public MDNSTextRData {
      * @return The ipv4Addr contained in this Sender RData.
      */
     qcc::String GetIPV4ResponseAddr();
-
-    /**
-     * @internal
-     * @brief Set the ipv6Port for this Sender RData.
-     * @param ipv6Port The ipv6Port to set.
-     */
-    void SetIPV6ResponsePort(uint16_t ipv6Port);
-
-    /**
-     * @internal
-     * @brief Get the ipv6Port for this Sender RData.
-     * @return The ipv6Port contained in this Sender RData.
-     */
-    uint16_t GetIPV6ResponsePort();
-
-    /**
-     * @internal
-     * @brief Set the ipv6Addr for this Sender RData.
-     * @param ipv6Addr The ipv6Addr to set.
-     */
-    void SetIPV6ResponseAddr(qcc::String ipv6Addr);
-
-    /**
-     * @internal
-     * @brief Get the ipv6Addr for this Sender RData.
-     * @return The ipv6Addr contained in this Sender RData.
-     */
-    qcc::String GetIPV6ResponseAddr();
 
 };
 
@@ -3965,6 +3937,32 @@ class _MDNSPacket : public _Packet {
      * @return true if the name and type were found, false otherwise.
      */
     bool GetAdditionalRecord(qcc::String str, MDNSResourceRecord::RRType type, uint16_t version, MDNSResourceRecord** additional);
+
+    /**
+     * @internal
+     * @brief Get the additional record with a particular name, type, rdata version and particular index.
+     *
+     * @param str The desired name.
+     * @param type The desired RRtype.
+     * @param version The desired version
+     * @param index The index to obtain in case of multiple matches
+     * @param additional[out] The MDNSResourceRecord into which the additional record will be filled.
+     *
+     * @return true if the name and type were found, false otherwise.
+     */
+    bool GetAdditionalRecordAt(qcc::String str, MDNSResourceRecord::RRType type, uint16_t version, uint32_t index, MDNSResourceRecord** additional);
+
+    /**
+     * @internal
+     * @brief Get number additional records matching a particular name, type, and rdata version.
+     *
+     * @param str The desired name.
+     * @param type The desired RRtype.
+     * @param version The desired version
+     *
+     * @return number of matches.
+     */
+    uint32_t GetNumMatches(qcc::String str, MDNSResourceRecord::RRType type, uint16_t version);
 
     TransportMask GetTransportMask();
     /**

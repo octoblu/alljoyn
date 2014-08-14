@@ -16,6 +16,8 @@
         'alljoyn/alljoyn_core/inc',
         'alljoyn/alljoyn_core/inc/alljoyn',
         'alljoyn/alljoyn_core/router',
+        'alljoyn/alljoyn_core/router/posix',
+        'alljoyn/alljoyn_core/src',
         'alljoyn/common/inc',
         "<!(node -e \"require('nan')\")"
       ],
@@ -24,7 +26,9 @@
         'src/InterfaceWrapper.cc',
         'src/BusConnection.cc',
         'src/BusListenerWrapper.cc',
-        'src/BusObjectWrapper.cc'
+        'src/BusListenerImpl.cc',
+        'src/BusObjectWrapper.cc',
+        'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
       ]
     }
   ]

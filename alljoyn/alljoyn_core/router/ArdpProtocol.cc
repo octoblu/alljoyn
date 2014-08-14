@@ -110,6 +110,7 @@ typedef struct ARDP_SEND_BUF {
     uint32_t tStart;
     ARDP_SEND_BUF* next;
     ArdpTimer timer;
+    bool onTheWire;
     bool inUse;
     uint16_t hdrlen;
     uint16_t fastRT;
@@ -144,8 +145,7 @@ typedef struct {
     ArdpRcvBuf* rcv;    /* Array holding received buffers not consumed by the app */
     uint32_t last;      /* Sequence number of the last pending segment */
     uint16_t window;    /* Receive Window */
-    uint16_t ackPending; /* Number of segments pending acknowledgement */
-    uint32_t acknxt;    /* Sequence number the sender wants us to acknowledge, everything before the number has expired */
+    uint16_t ackPending;    /* Receive Window */
 } ArdpRbuf;
 
 /**
@@ -726,31 +726,6 @@ static void AckTimerHandler(ArdpHandle* handle, ArdpConnRecord* conn, void* cont
     }
 }
 
-static void ExpireMessageSnd(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSndBuf* snd, uint32_t msElapsed)
-{
-    ArdpHeader* h = (ArdpHeader*) snd->hdr;;
-    uint32_t som = ntohl(h->som);
-    uint16_t fcnt = ntohs(h->fcnt);
-    ArdpSndBuf* start = &conn->SBUF.snd[som % conn->SND.MAX];
-
-    /* Start fragment of the expired message */
-    snd = start;
-
-    QCC_DbgPrintf(("ExpireMessageSnd message with SOM %u and fcnt %d expired", som, fcnt));
-    if (SEQ32_LT(conn->SND.UNA, (som + fcnt))) {
-        conn->SND.UNA = som + fcnt;
-    }
-
-    do {
-        h = (ArdpHeader*) snd->hdr;
-        snd->timer.retry = 0;
-        snd = snd->next;
-        snd->ttl = ARDP_TTL_EXPIRED;
-        fcnt--;
-    } while (fcnt > 0);
-
-}
-
 static QStatus SendMsgHeader(ArdpHandle* handle, ArdpConnRecord* conn, ArdpHeader* h)
 {
     qcc::ScatterGatherList msgSG;
@@ -775,8 +750,8 @@ static QStatus SendMsgData(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSndBuf*
     size_t sent;
     QStatus status;
 
-    QCC_DbgTrace(("SendMsgData(): handle=%p, conn=%p, hdr=%p, hdrlen=%d, data=%p, datalen=%d, ttl=%u, tStart=%u",
-                  handle, conn, sndBuf->hdr, sndBuf->hdrlen, sndBuf->data, sndBuf->datalen, sndBuf->ttl, sndBuf->tStart));
+    QCC_DbgTrace(("SendMsgData(): handle=0x%p, conn=0x%p, hdr=0x%p, hdrlen=%d., data=0x%p, datalen=%d., ttl=%u., tStart=%u., onTheWire=%d.",
+                  handle, conn, sndBuf->hdr, sndBuf->hdrlen, sndBuf->data, sndBuf->datalen, sndBuf->ttl, sndBuf->tStart, sndBuf->onTheWire));
 
     msgSG.AddBuffer(sndBuf->hdr, ARDP_FIXED_HEADER_LEN);
     msgSG.AddBuffer(conn->rcvMsk.htnMask, conn->rcvMsk.fixedSz * sizeof(uint32_t));
@@ -811,6 +786,18 @@ static QStatus SendMsgData(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSndBuf*
      * Transit.  In-transit means while ARDP is moving it from one endpoint in
      * one Routing Node to another endpoint in another Routing Node.
      *
+     * One tricky bit here is that once a segment goes out on the wire, it
+     * occupies a sequence number.  We can't just silently drop a segment after
+     * it has been sent because if it is dropped in transmission, the other side
+     * will still expect it to be valid and will ask for retransmission.
+     *
+     * In future, We have a mechanism available to send ACKNXT sequence numbers (like
+     * EACKs but the in the other direction) in order to tell the other side to
+     * forget about particular segments that expire during a retransmission
+     * interval; but it is not implemented yet.  Temporarily, we continue to
+     * reliably transmit messages that happen to expire during a retransmit
+     * interval, but mark their ttl as expired; and they are dropped first
+     * thing on the other side.
      */
     if (sndBuf->ttl != ARDP_TTL_INFINITE) {
         /*
@@ -824,7 +811,7 @@ static QStatus SendMsgData(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSndBuf*
         /*
          * If the message has never been on the wire, it is trivial to drop.
          */
-        if (sndBuf->inUse == false) {
+        if (sndBuf->onTheWire == false) {
 
             /*
              * This is a brand new segment, we are seeing it for the first time.
@@ -849,8 +836,14 @@ static QStatus SendMsgData(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSndBuf*
              * The implication is that the retransmit timer handler fired.
              */
             if (msElapsed >= sndBuf->ttl) {
-                ExpireMessageSnd(handle, conn, sndBuf, msElapsed);
-                return ER_OK;
+                /*
+                 * Set ttl to a magic constant indicating that the message has
+                 * actually expired.
+                 *
+                 * In future, don't send expired messages even if they have been on
+                 * the wire.
+                 */
+                h->ttl = htonl(ARDP_TTL_EXPIRED);
             } else {
                 /*
                  * Set ttl to the number of milliseconds remaining at the "instant"
@@ -864,6 +857,8 @@ static QStatus SendMsgData(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSndBuf*
     status = qcc::SendToSG(conn->sock, conn->ipAddr, conn->ipPort, msgSG, sent);
 
     if (status == ER_OK) {
+        sndBuf->onTheWire = true;
+
         if (conn->ackTimer.retry != 0) {
             UpdateTimer(handle, conn, &conn->ackTimer, ARDP_ACK_TIMEOUT, 1);
         }
@@ -1034,9 +1029,9 @@ static void ProbeTimerHandler(ArdpHandle* handle, ArdpConnRecord* conn, void* co
     ArdpTimer* timer = &conn->probeTimer;
     uint32_t now = TimeNow(handle->tbase);
     uint32_t elapsed = now - conn->lastSeen;
-    uint32_t delta = MAX(GetRTO(handle, conn), handle->config.probeTimeout);
+    uint32_t RTO = GetRTO(handle, conn);
     /* Connection timeout */
-    uint32_t linkTimeout = delta * handle->config.probeRetries;
+    uint32_t linkTimeout = MAX(RTO, handle->config.probeTimeout) * handle->config.probeRetries;
 
     /*
      * Relevant only if there are no pending retransmissions.
@@ -1051,7 +1046,7 @@ static void ProbeTimerHandler(ArdpHandle* handle, ArdpConnRecord* conn, void* co
         } else if (elapsed >= handle->config.probeTimeout) {
             QCC_DbgPrintf(("ProbeTimerHandler: send ping (NUL packet)"));
             Send(handle, conn, ARDP_FLAG_ACK | ARDP_FLAG_VER | ARDP_FLAG_NUL, conn->SND.NXT, conn->RCV.CUR, conn->RCV.LCS);
-            timer->delta = delta;
+            timer->delta = RTO;
         }
     }
 }
@@ -1232,7 +1227,7 @@ static void InitSnd(ArdpConnRecord* conn)
     conn->SND.ISS = qcc::Rand32();        /* Initial sequence number used for sending data over this connection */
     conn->SND.NXT = conn->SND.ISS + 1;    /* The sequence number of the next segment to be sent over this connection */
     conn->SND.UNA = conn->SND.ISS;        /* The oldest unacknowledged segment is the ISS */
-    conn->SND.LCS = conn->SND.ISS;        /* The most recently consumed segment (we keep this in sync with the other side) */
+    conn->SND.LCS = conn->SND.ISS;        /* The most recently consumed segment (we keep this in sync with the other sidee) */
     conn->SND.MAX = 0;                    /* The maximum number of unacknowledged segments we can send (other side will tell us this */
 }
 
@@ -1698,8 +1693,20 @@ static QStatus UpdateRcvBuffers(ArdpHandle* handle, ArdpConnRecord* conn, ArdpRc
     ArdpRcvBuf* rcv = conn->RBUF.rcv;
     uint16_t index;
     uint32_t count = consumed->fcnt;
+    uint32_t first = conn->RCV.LCS + 1;
 
     QCC_DbgTrace(("UpdateRcvBuffers(handle=%p, conn=%p, consumed=%p)", handle, conn, consumed));
+
+    /*
+     * Important! The contract with the upper layer is that the buffers are ALWAYS released in the same order
+     * they have been delivered.
+     */
+
+    if (first != consumed->seq) {
+        QCC_DbgHLPrintf(("UpdateRcvBuffers: released buffer %p (seq=%u) is not first in line to be released: rcv %p (seq %u)",
+                         consumed, consumed->seq, conn->RBUF.rcv[first % conn->RCV.MAX], first));
+    }
+    assert(first == consumed->seq);
 
     index = consumed->seq % conn->RCV.MAX;
     if (&rcv[index] != consumed) {
@@ -1714,31 +1721,37 @@ static QStatus UpdateRcvBuffers(ArdpHandle* handle, ArdpConnRecord* conn, ArdpRc
         return ER_FAIL;
     }
 
-    /* Release the current buffers associated with the consumed message. */
-    QCC_DbgPrintf(("UpdateRcvBuffers: conn->RCV.LCS=%u should be less than seq=%u", conn->RCV.LCS, consumed->seq));
-    assert(SEQ32_LT(conn->RCV.LCS, consumed->seq));
-    conn->RCV.LCS = consumed->seq + (count - 1);
-    QCC_DbgPrintf(("UpdateRcvBuffers: conn->RCV.LCS=%u", conn->RCV.LCS));
+    /*
+     * Release the current buffers associated with the consumed message.
+     * At the same time check whether the next in queue message expired,
+     * and if so, release the corresponding buffers as well.
+     */
+    do {
+        for (uint32_t i = 0; i < count; i++) {
+            assert((consumed->inUse) && "UpdateRcvBuffers: Attempt to release a buffer that is not in use");
+            assert((consumed->isDelivered) && "UpdateRcvBuffers: Attempt to release a buffer that has not been delivered");
 
-    for (uint32_t i = 0; i < count; i++) {
-        consumed->isDelivered = false;
-        consumed->inUse = false;
-        QCC_DbgPrintf(("UpdateRcvBuffers: released buffer %p (seq=%u)", consumed, consumed->seq));
+            consumed->inUse = false;
+            consumed->isDelivered = false;
+            QCC_DbgPrintf(("UpdateRcvBuffers: released buffer %p (seq=%u)", consumed, consumed->seq));
 
-        if (consumed->data != NULL) {
-            free(consumed->data);
-            consumed->data = NULL;
+            assert(consumed->data != NULL);
+            if (consumed->data != NULL) {
+                free(consumed->data);
+                consumed->data = NULL;
+            }
+            conn->RCV.LCS++;
+            consumed = consumed->next;
         }
-        consumed = consumed->next;
-    }
+        count = consumed->fcnt;
+    } while ((consumed->isDelivered) && (consumed->ttl == ARDP_TTL_EXPIRED));
 
-    /* Advance LCS till next valid segment */
-    while (consumed->ttl == ARDP_TTL_EXPIRED && !consumed->isDelivered && SEQ32_LT(conn->RCV.LCS, conn->RCV.CUR)) {
-        conn->RCV.LCS++;
-        consumed = consumed->next;
-        QCC_DbgPrintf(("UpdateRcvBuffers: advanced conn->RCV.LCS=%u", conn->RCV.LCS));
-    }
-    ;
+    /*
+     * Update receive window size and sequence number of last consumed segment
+     * which will be communicated to the remote side.
+     */
+    conn->RBUF.window = conn->RCV.MAX - (conn->RBUF.last - conn->RCV.LCS);
+    QCC_DbgPrintf(("UpdateRcvBuffers: window %d last %u lsc %u", conn->RBUF.window, conn->RBUF.last, conn->RCV.LCS));
 
     /* Send "unsolicited" ACK if the ACK timer is not running */
     if (conn->ackTimer.retry == 0) {
@@ -1746,130 +1759,6 @@ static QStatus UpdateRcvBuffers(ArdpHandle* handle, ArdpConnRecord* conn, ArdpRc
     }
 
     return ER_OK;
-}
-
-static uint32_t AdvanceRcvQueue(ArdpHandle* handle, ArdpConnRecord* conn, ArdpRcvBuf* current)
-{
-    uint32_t delta = 0;
-    uint32_t first = current->seq;
-
-    do {
-        conn->RCV.CUR = current->seq;
-
-        /*
-         * Check if last fragment. If this is the case, re-assemble the message:
-         * - Find the rcv, corresponding to SOM
-         * - Make sure there are no gaps (shouldn't be the case we are in "ordered delivery" case here,
-         *   assert on that), remove for release.
-         * - RecvCb(SOM's rcvBuf, fcnt)
-         */
-        if (current->seq == current->som + (current->fcnt - 1)) {
-            uint32_t tNow = TimeNow(handle->tbase);
-            bool expired = false;
-            ArdpRcvBuf* startFrag = &conn->RBUF.rcv[current->som % conn->RCV.MAX];
-            ArdpRcvBuf* fragment = startFrag;
-
-            /* Remove this check before release */
-            for (uint32_t i = 0; i < current->fcnt; i++) {
-                if (!fragment->inUse || fragment->isDelivered || fragment->som != startFrag->som || fragment->fcnt != startFrag->fcnt) {
-                    QCC_LogError(ER_FAIL, ("Gap in fragmented (%d) message: start %u, this(%i): seq=%u inUse=%s, delivered = %s, som=%u, fcnt=%u",
-                                           startFrag->fcnt, startFrag->som, i, fragment->seq, fragment->inUse ? "true" : "false",
-                                           fragment->isDelivered ? "true" : "false", fragment->som, fragment->fcnt));
-                }
-                assert(fragment->inUse && "Gap in fragmented message");
-                assert((fragment->som == startFrag->som && fragment->fcnt == startFrag->fcnt) && "Lost track of received fragment");
-                fragment = fragment->next;
-            }
-
-            /*
-             * Mark all the fragments as delivered, and while we're at it note
-             * whether or not the message has expired.
-             */
-            fragment = startFrag;
-            if ((fragment->ttl == ARDP_TTL_EXPIRED)  || (fragment->ttl != ARDP_TTL_INFINITE && (tNow - fragment->tRecv >= fragment->ttl))) {
-                QCC_DbgPrintf(("ArdpRcvBuffer(): Detected expired message (conn=0x%p, seq=%u)", conn, fragment->seq));
-                expired = true;
-            }
-
-            /*
-             * If the message has expired, don't send it up to the upper layer,
-             * just recycle it, otherwise pass it off to the transport.
-             */
-            if (expired) {
-                startFrag->ttl = ARDP_TTL_EXPIRED;
-
-                /* If this message is first in line to be released, flush it*/
-                if ((conn->RCV.LCS + 1) == startFrag->seq) {
-                    UpdateRcvBuffers(handle, conn, startFrag);
-                }
-            } else {
-                QCC_DbgPrintf(("ArdpRcvBuffer(): RecvCb(conn=0x%p, buf=%p, seq=%u, fcnt (@ %p)=%d)", conn, startFrag, startFrag->seq, &(startFrag->fcnt), startFrag->fcnt));
-                handle->cb.RecvCb(handle, conn, startFrag, ER_OK);
-            }
-        }
-
-        current = current->next;
-        /* Remove this check before release. Detect where the message starts */
-        if (current->seq == current->som) {
-            QCC_DbgPrintf(("ArdpRcvBuffer(): next message starts @ %u", current->som));
-        }
-
-        delta++;
-
-    } while (current->seq == (first + delta));
-
-    return delta;
-
-}
-
-static void FlushExpiredRcvMessages(ArdpHandle* handle, ArdpConnRecord* conn, uint32_t acknxt)
-{
-    QCC_DbgTrace(("FlushExpiredRcvMessages(handle=%p, conn=%p, acknxt=%u", handle, conn, acknxt));
-    uint16_t index = (conn->RCV.CUR + 1) % conn->RCV.MAX;
-    ArdpRcvBuf* current = &conn->RBUF.rcv[index];
-    uint32_t delta = 0;
-
-    /* Move to the start of the message */
-    ArdpRcvBuf* start = &conn->RBUF.rcv[current->som % conn->RCV.MAX];
-    uint32_t fcnt = start->fcnt;
-    current = start;
-    index = current->seq;
-    do {
-        if (!current->isDelivered) {
-            if (current->data != NULL) {
-                free(current->data);
-                current->data = NULL;
-            }
-            current->inUse = false;
-        }
-        current->ttl = ARDP_TTL_EXPIRED;
-        current = current->next;
-        delta++;
-        index++;
-    } while (SEQ32_LT(index, acknxt));
-
-    /* in case the sender expired the entire window, nothing to do, just zero out EACK bitmask*/
-    if ((acknxt - conn->RCV.CUR) >= conn->RCV.MAX) {
-        memset(conn->rcvMsk.mask, 0, conn->rcvMsk.sz * sizeof(uint32_t));
-        memset(conn->rcvMsk.htnMask, 0, conn->rcvMsk.sz * sizeof(uint32_t));
-    } else {
-        /* Update EACK bitmask */
-        UpdateRcvMsk(conn, delta);
-
-        /* If there are pending complete messages, deliver them to upper layer */
-        if (current->inUse) {
-            AdvanceRcvQueue(handle, conn, current);
-        }
-    }
-
-    /* If nothing is pending "consumed" confirmation from upper layer, advance left edge */
-    if (conn->RCV.LCS == conn->RCV.CUR) {
-        conn->RCV.CUR = acknxt - 1;
-    }
-
-    /* Next segment to expect will be ACKNXT */
-    conn->RCV.CUR = acknxt - 1;
-
 }
 
 static QStatus AddRcvBuffer(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSeg* seg, uint8_t* buf, uint16_t len, bool ordered)
@@ -1936,7 +1825,71 @@ static QStatus AddRcvBuffer(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSeg* s
 
     /* Deliver this segment (and following out-of-order segments) to the upper layer. */
     if (ordered) {
-        uint32_t delta = AdvanceRcvQueue(handle, conn, current);
+        uint32_t delta = 0;
+
+        /* Same execution flow for both fragmented and non-fagmented messages */
+        do {
+
+            conn->RCV.CUR = current->seq;
+
+            /*
+             * Check if last fragment. If this is the case, re-assemble the message:
+             * - Find the rcv, corresponding to SOM
+             * - RecvCb(SOM's rcvBuf, fcnt)
+             */
+            if (current->seq == current->som + (current->fcnt - 1)) {
+                uint32_t tNow = TimeNow(handle->tbase);
+                bool expired = false;
+                ArdpRcvBuf* startFrag = &conn->RBUF.rcv[current->som % conn->RCV.MAX];
+                ArdpRcvBuf* fragment = startFrag;
+
+                /*
+                 * Mark all the fragments as delivered, and while we're at it note
+                 * whether or not the message has expired.
+                 */
+                for (uint32_t i = 0; i < current->fcnt; i++) {
+                    /*
+                     * If any one of the fragments is marked as expired, the entire message has expired.
+                     */
+                    if ((fragment->ttl == ARDP_TTL_EXPIRED)  || (fragment->ttl != ARDP_TTL_INFINITE && (tNow - fragment->tRecv >= fragment->ttl))) {
+                        QCC_DbgPrintf(("ArdpRcvBuffer(): Detected expired message (conn=0x%p, seq=%u)", conn, fragment->seq));
+                        expired = true;
+                    }
+
+
+                    fragment->isDelivered = true;
+                    fragment = fragment->next;
+                }
+
+                /*
+                 * If the message has expired, don't send it up to the upper layer,
+                 * just recycle it, otherwise pass it off to the transport.
+                 */
+                if (expired) {
+                    QCC_DbgPrintf(("ArdpRcvBuffer(): Ignoring expired message (conn=0x%p, start seq =%u)", conn, startFrag->seq));
+                    startFrag->ttl = ARDP_TTL_EXPIRED;
+
+                    /* If this message is first in line to be released, flush it*/
+                    if ((conn->RCV.LCS + 1) == startFrag->seq) {
+                        UpdateRcvBuffers(handle, conn, startFrag);
+                    }
+                } else {
+                    QCC_DbgPrintf(("ArdpRcvBuffer(): RecvCb(conn=0x%p, buf=%p, seq=%u, fcnt (@ %p)=%d)", conn, startFrag, startFrag->seq, &(startFrag->fcnt), startFrag->fcnt));
+                    handle->cb.RecvCb(handle, conn, startFrag, ER_OK);
+                }
+            }
+
+            current = current->next;
+
+            if (current->seq == current->som) {
+                QCC_DbgPrintf(("ArdpRcvBuffer(): next message starts @ %u", current->som));
+            }
+
+            delta++;
+            QCC_DbgPrintf(("ArdpRcvBuffer(): current->seq = %u, (seg->SEQ + delta) = %u", current->seq, (seg->SEQ + delta)));
+
+        } while (current->seq == (seg->SEQ + delta));
+
         UpdateRcvMsk(conn, delta);
 
     } else {
@@ -2278,12 +2231,6 @@ static void ArdpMachine(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSeg* seg, 
                 break;
             }
 
-            if (SEQ32_LT(conn->RCV.CUR + 1, seg->ACKNXT)) {
-                QCC_DbgPrintf(("ArdpMachine(): OPEN: FlushExpiredRcvMessages: expected %u got %u",
-                               conn->RCV.CUR + 1, seg->ACKNXT));
-                FlushExpiredRcvMessages(handle, conn, seg->ACKNXT);
-            }
-
             /* If we got NUL segment, send ACK without delay */
             if (seg->FLG & ARDP_FLAG_NUL) {
                 QCC_DbgPrintf(("ArdpMachine(): OPEN: got NUL, send LCS %u", conn->RCV.LCS));
@@ -2321,7 +2268,6 @@ static void ArdpMachine(ArdpHandle* handle, ArdpConnRecord* conn, ArdpSeg* seg, 
                  * Update RCV buffers if the segment is not a duplicate (accounting for a case when
                  * receiving a retransmit of a segment with sequence number between LCS and CUR).
                  */
-
                 if (SEQ32_LT(conn->RCV.CUR, seg->SEQ)) {
                     status = AddRcvBuffer(handle, conn, seg, buf, len, seg->SEQ == (conn->RCV.CUR + 1));
                     conn->RBUF.ackPending++;

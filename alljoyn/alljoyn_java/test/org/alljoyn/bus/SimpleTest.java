@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2009-2011, 2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -38,7 +38,7 @@ public class SimpleTest extends TestCase {
 
     public class Service implements SimpleInterface, BusObject  {
 
-        public String ping(String inStr) {
+        public String Ping(String inStr) {
             return inStr;
         }
     }
@@ -76,6 +76,6 @@ public class SimpleTest extends TestCase {
         SimpleInterface proxy = remoteObj.getInterface(SimpleInterface.class);
 
         /* Call the ping method on the remote object */
-        assertEquals("Hello World", proxy.ping("Hello World"));
+        assertEquals("Hello World", proxy.Ping("Hello World"));
     }
 }

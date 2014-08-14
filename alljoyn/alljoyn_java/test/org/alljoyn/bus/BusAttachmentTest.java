@@ -36,8 +36,8 @@ public class BusAttachmentTest extends TestCase {
             emitter = new SignalEmitter(this);
             emitter.setTimeToLive(1000);
         }
-        public void emit(String string) throws BusException {
-            emitter.getInterface(EmitterInterface.class).emit(string);
+        public void Emit(String string) throws BusException {
+            emitter.getInterface(EmitterInterface.class).Emit(string);
         }
     }
 
@@ -45,7 +45,7 @@ public class BusAttachmentTest extends TestCase {
     }
 
     public class SimpleService implements SimpleInterface, BusObject {
-        public String ping(String str) {
+        public String Ping(String str) {
             MessageContext ctx = bus.getMessageContext();
             assertEquals(false, ctx.isUnreliable);
             assertEquals("/simple", ctx.objectPath);
@@ -58,12 +58,12 @@ public class BusAttachmentTest extends TestCase {
     }
 
     public class SecureService implements SecureInterface, BusObject {
-        public String ping(String str) { return str; }
+        public String Ping(String str) { return str; }
     }
 
     public class ExceptionService implements SimpleInterface, BusObject {
         private int i;
-        public String ping(String str) throws BusException {
+        public String Ping(String str) throws BusException {
             switch (i++) {
             case 0:
                 throw new ErrorReplyBusException(Status.OS_ERROR);
@@ -80,10 +80,10 @@ public class BusAttachmentTest extends TestCase {
 
     public class AnnotationService implements AnnotationInterface,
     BusObject {
-        public String deprecatedMethod(String str) throws BusException { return str; }
-        public void noReplyMethod(String str) throws BusException {}
-        public void deprecatedNoReplyMethod(String str) throws BusException {}
-        public void deprecatedSignal(String str) throws BusException {}
+        public String DeprecatedMethod(String str) throws BusException { return str; }
+        public void NoReplyMethod(String str) throws BusException {}
+        public void DeprecatedNoReplyMethod(String str) throws BusException {}
+        public void DeprecatedSignal(String str) throws BusException {}
     }
 
     private BusAttachment bus;
@@ -158,7 +158,7 @@ public class BusAttachmentTest extends TestCase {
         boolean thrown = false;
         try {
             Emitter emitter = new Emitter();
-            emitter.emit("emit1");
+            emitter.Emit("emit1");
             emitter = null;
         } catch (BusException ex) {
             thrown = true;
@@ -199,7 +199,7 @@ public class BusAttachmentTest extends TestCase {
         // Emit a signal and make sure that both of the handlers we registered
         // receive that signal.
         //
-        emitter.emit("emit1");
+        emitter.Emit("emit1");
 
         //
         // It's hard to say what the minimum time to wait is, but we have to
@@ -229,7 +229,7 @@ public class BusAttachmentTest extends TestCase {
         // to get the signal.
         //
         bus.unregisterSignalHandler(this, getClass().getMethod("signalHandler1", String.class));
-        emitter.emit("emit2");
+        emitter.Emit("emit2");
 
         //
         // We want to wait go make sure that we *don't* see a signal, so we
@@ -302,7 +302,7 @@ public class BusAttachmentTest extends TestCase {
         assertEquals(Status.OK, status);
 
         handledSignals1 = 0;
-        emitter.emit("emit1");
+        emitter.Emit("emit1");
         this.wait(500);
         assertEquals(1, handledSignals1);
         emitter = null;
@@ -326,7 +326,7 @@ public class BusAttachmentTest extends TestCase {
         status = bus.addMatch("type='signal',interface='org.alljoyn.bus.EmitterInterface',member='Emit'");
         assertEquals(Status.OK, status);
         handledSignals1 = 0;
-        emitter.emit("emit1");
+        emitter.Emit("emit1");
         this.wait(500);
         assertEquals(1, handledSignals1);
 
@@ -336,7 +336,7 @@ public class BusAttachmentTest extends TestCase {
                 "/doesntexist");
         assertEquals(Status.OK, status);
         handledSignals1 = 0;
-        emitter.emit("emit1");
+        emitter.Emit("emit1");
         this.wait(500);
         assertEquals(0, handledSignals1);
         emitter = null;
@@ -423,7 +423,7 @@ public class BusAttachmentTest extends TestCase {
         status = bus.addMatch("type='signal',interface='org.alljoyn.bus.EmitterInterface',member='Emit'");
         assertEquals(Status.OK, status);
 
-        emitter.emit("emit4");
+        emitter.Emit("emit4");
         this.wait(500);
         assertEquals(1, handledSignals4);
         emitter = null;
@@ -446,7 +446,7 @@ public class BusAttachmentTest extends TestCase {
                 BusAttachment.SESSION_ID_ANY,
                 new Class<?>[] { SimpleInterface.class });
         SimpleInterface proxy = proxyObj.getInterface(SimpleInterface.class);
-        proxy.ping("hello");
+        proxy.Ping("hello");
     }
 
     /* ALLJOYN-26 */
@@ -510,7 +510,7 @@ public class BusAttachmentTest extends TestCase {
                 new Class<?>[] { SecureInterface.class });
         SecureInterface proxy = proxyObj.getInterface(SecureInterface.class);
         pinRequested = false;
-        proxy.ping("hello");
+        proxy.Ping("hello");
         assertEquals(true, pinRequested);
 
         otherBus.disconnect();
@@ -602,7 +602,7 @@ public class BusAttachmentTest extends TestCase {
                 BusAttachment.SESSION_ID_ANY,
                 new Class<?>[] { AnnotationInterface.class });
         AnnotationInterface proxy = proxyObj.getInterface(AnnotationInterface.class);
-        proxy.noReplyMethod("noreply");
+        proxy.NoReplyMethod("noreply");
         /* No assert here, the test is to make sure the above call doesn't throw an exception. */
     }
 
@@ -624,7 +624,7 @@ public class BusAttachmentTest extends TestCase {
 
         boolean thrown = false;
         try {
-            proxy.ping("hello");
+            proxy.Ping("hello");
         } catch (ErrorReplyBusException ex) {
             thrown = true;
             assertEquals(Status.BUS_REPLY_IS_ERROR_MESSAGE, ex.getErrorStatus());
@@ -639,7 +639,7 @@ public class BusAttachmentTest extends TestCase {
 
         thrown = false;
         try {
-            proxy.ping("hello");
+            proxy.Ping("hello");
         } catch (ErrorReplyBusException ex) {
             thrown = true;
             assertEquals(Status.BUS_REPLY_IS_ERROR_MESSAGE, ex.getErrorStatus());
@@ -650,7 +650,7 @@ public class BusAttachmentTest extends TestCase {
 
         thrown = false;
         try {
-            proxy.ping("hello");
+            proxy.Ping("hello");
         } catch (ErrorReplyBusException ex) {
             thrown = true;
             assertEquals(Status.BUS_REPLY_IS_ERROR_MESSAGE, ex.getErrorStatus());
@@ -661,7 +661,7 @@ public class BusAttachmentTest extends TestCase {
 
         thrown = false;
         try {
-            proxy.ping("hello");
+            proxy.Ping("hello");
         } catch (BusException ex) {
             thrown = true;
             assertEquals("org.alljoyn.Bus.ErStatus", ex.getMessage());
@@ -1592,16 +1592,13 @@ public class BusAttachmentTest extends TestCase {
         assertEquals(Status.OK, bus.ping(bus.getUniqueName(), 1000, new OnPingListener() {
             @Override
             public void onPing(Status status, Object context) {
-                synchronized(this) {
-                    assertEquals(Status.OK, status);
-                    int i = ((Integer)context).intValue();
-                    assertEquals(0xdeedfeed, i);
-                    onPinged = true;
-                }
+                assertEquals(Status.OK, status);
+                int i = ((Integer)context).intValue();
+                assertEquals(0xdeedfeed, i);
+                onPinged = true;
                 // stopWait seems to block sometimes, so enable concurrency.
                 bus.enableConcurrentCallbacks();
                 stopWait();
-                
             }
         }, context));
         this.wait(5 * 1000);
@@ -1621,12 +1618,10 @@ public class BusAttachmentTest extends TestCase {
         assertEquals(Status.OK, bus.ping(otherBus.getUniqueName(), 1000, new OnPingListener() {
             @Override
             public void onPing(Status status, Object context) {
-                synchronized(this) {
-                    assertEquals(Status.OK, status);
-                    int i = ((Integer)context).intValue();
-                    assertEquals(0xdeedfeed, i);
-                    onPinged = true;
-                }
+                assertEquals(Status.OK, status);
+                int i = ((Integer)context).intValue();
+                assertEquals(0xdeedfeed, i);
+                onPinged = true;
                 // stopWait seems to block sometimes, so enable concurrency.
                 bus.enableConcurrentCallbacks();
                 stopWait();

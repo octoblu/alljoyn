@@ -46,6 +46,7 @@ void BusConnection::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "getInterface", BusConnection::GetInterface);
   NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusListener", BusConnection::RegisterBusListener);
   NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusObject", BusConnection::RegisterBusObject);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "findAdvertisedName", BusConnection::FindAdvertisedName);
 }
 
 NAN_METHOD(BusConnection::New) {
@@ -138,7 +139,7 @@ NAN_METHOD(BusConnection::RegisterBusListener) {
 
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
   BusListenerWrapper* wrapper = node::ObjectWrap::Unwrap<BusListenerWrapper>(args[0].As<v8::Object>());
-  connection->bus->RegisterBusListener(*wrapper);
+  connection->bus->RegisterBusListener(*(wrapper->listener));
 
   NanReturnUndefined();
 }
@@ -157,3 +158,12 @@ NAN_METHOD(BusConnection::RegisterBusObject) {
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 
+NAN_METHOD(BusConnection::FindAdvertisedName) {
+  NanScope();
+  if (args.Length() == 0 || !args[0]->IsString())
+    return NanThrowError("FindAdvertisedName requires a namePrefix string argument");
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  QStatus status = connection->bus->FindAdvertisedName(*NanUtf8String(args[0]));
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+}

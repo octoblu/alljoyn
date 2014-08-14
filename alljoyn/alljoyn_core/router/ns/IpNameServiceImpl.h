@@ -629,7 +629,7 @@ class IpNameServiceImpl : public qcc::Thread {
      * The method signature for the Callback method must be:
      *
      * @code
-     *     void Found(const qcc::String &, const qcc::String &, std::vector<qcc::String> &, uint8_t);
+     *     void Found(const qcc::String &, const qcc::String &, std::vector<qcc::String> &, uint32_t);
      * @endcode
      *
      * The first parameter is the address and port of the found service,
@@ -654,7 +654,7 @@ class IpNameServiceImpl : public qcc::Thread {
      * @code
      *     class MyClass:
      *     public:
-     *         void Found(const qcc::String &s, const qcc::String &g, std::vector<qcc::String>& wkn, uint8_t timer) {}
+     *         void Found(const qcc::String &s, const qcc::String &g, std::vector<qcc::String>& wkn, uint32_t timer) {}
      *     }
      *
      *     ...
@@ -668,7 +668,7 @@ class IpNameServiceImpl : public qcc::Thread {
      *
      * @code
      *    nameService.SetCallback(new CallbackImpl<MyClass, void,
-     *         const qcc::String &, const qcc::String &, std::vector<qcc::string>, uint8_t>(MyClass, myclass));
+     *         const qcc::String &, const qcc::String &, std::vector<qcc::string>, uint32_t>(MyClass, myclass));
      * @endcode
      *
      * From this point forward, all changes to services specified by the
@@ -691,7 +691,7 @@ class IpNameServiceImpl : public qcc::Thread {
      * @return Status of the operation.  Returns ER_OK on success.
      */
     QStatus SetCallback(TransportMask transportMask,
-                        Callback<void, const qcc::String&, const qcc::String&, std::vector<qcc::String>&, uint8_t>* cb);
+                        Callback<void, const qcc::String&, const qcc::String&, std::vector<qcc::String>&, uint32_t>* cb);
 
     /**
      * @brief Clear the callbacks for all transports.
@@ -812,7 +812,7 @@ class IpNameServiceImpl : public qcc::Thread {
      * @brief Update the AddToPeerInfoMap
      *
      */
-    bool AddToPeerInfoMap(const qcc::String& guid, const qcc::IPEndpoint& ipv4, const qcc::IPEndpoint& ipv6, uint32_t ttl);
+    bool AddToPeerInfoMap(const qcc::String& guid, const qcc::IPEndpoint& ipEndpoint);
 
     /**
      * @internal
@@ -1119,7 +1119,7 @@ class IpNameServiceImpl : public qcc::Thread {
     void RewriteVersionSpecific(uint32_t msgVersion, Packet packet,
                                 bool haveIPv4address, qcc::IPAddress ipv4address,
                                 bool haveIPv6Address, qcc::IPAddress ipv6address,
-                                uint16_t unicastIpv4Port = 0, uint16_t unicastIpv6Port = 0);
+                                uint16_t unicastIpv4Port = 0);
 
     /**
      * @internal
@@ -1184,7 +1184,7 @@ class IpNameServiceImpl : public qcc::Thread {
      * One possible callback for each of the corresponding transport masks in a
      * sixteen-bit word.
      */
-    Callback<void, const qcc::String&, const qcc::String&, std::vector<qcc::String>&, uint8_t>* m_callback[N_TRANSPORTS];
+    Callback<void, const qcc::String&, const qcc::String&, std::vector<qcc::String>&, uint32_t>* m_callback[N_TRANSPORTS];
 
     /**
      * @internal @brief A vector of list of all of the names that the various
@@ -1557,28 +1557,33 @@ class IpNameServiceImpl : public qcc::Thread {
      * The timestamp field is used for cache refresh
      */
     struct PeerInfo {
-        qcc::IPEndpoint unicastIPV4Info;
-        qcc::IPEndpoint unicastIPV6Info;
-        qcc::Timespec lastQueryTimeStamp;
+        qcc::IPEndpoint unicastInfo;
+        mutable qcc::Timespec lastQueryTimeStamp;
+        mutable qcc::Timespec lastResponseTimeStamp;
 
-        PeerInfo(const qcc::IPEndpoint& ipv4, const qcc::IPEndpoint& ipv6) :
-            unicastIPV4Info(ipv4),
-            unicastIPV6Info(ipv6)
+        PeerInfo(const qcc::IPEndpoint& ipEndpoint) :
+            unicastInfo(ipEndpoint)
         { }
-        qcc::String ToString(const qcc::String& guid);
+        qcc::String ToString(const qcc::String& guid) const;
+        bool operator<(const PeerInfo& other) const {
+            return unicastInfo.ToString() < other.unicastInfo.ToString();
+        }
+        bool operator==(const PeerInfo& other) const {
+            return unicastInfo.ToString() == other.unicastInfo.ToString();
+        }
     };
 
-    std::unordered_map<qcc::String, std::list<PeerInfo>, Hash, Equal> m_peerInfoMap;
+    std::unordered_map<qcc::String, std::set<PeerInfo>, Hash, Equal> m_peerInfoMap;
     void PrintPeerInfoMap();
 
     class BurstExpiryHandler;
     BurstExpiryHandler* burstExpiryHandler;
 
     bool HandleSearchQuery(TransportMask transport, MDNSPacket mdnsPacket, uint16_t recvPort,
-                           const qcc::String& guid, const qcc::IPEndpoint& ns4, const qcc::IPEndpoint& ns6, const qcc::IPEndpoint& endpoint);
+                           const qcc::String& guid, const qcc::IPEndpoint& ns4);
 
     bool HandleAdvertiseResponse(MDNSPacket mdnsPacket, uint16_t recvPort,
-                                 const qcc::String& guid, const qcc::IPEndpoint& ns4, const qcc::IPEndpoint& ns6,
+                                 const qcc::String& guid, const qcc::IPEndpoint& ns4,
                                  const qcc::IPEndpoint& r4, const qcc::IPEndpoint& r6, const qcc::IPEndpoint& u4, const qcc::IPEndpoint& u6);
     std::set<qcc::String> GetAdvertising(TransportMask transport);
     std::set<qcc::String> GetAdvertisingQuietly(TransportMask transport);

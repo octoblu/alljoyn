@@ -14,7 +14,7 @@ var listener = alljoyn.BusListener(
 		console.log("NameOwnerChanged");
 	}
 );
-console.log("Result: "+bus+" - "+inter+" - "+listener+" - "+chatObject);
+console.log("Result: "+bus+" - "+inter+" - "+listener);
 
 console.log("CreateInterface "+bus.createInterface("org.alljoyn.bus.samples.chat", inter));
 console.log("AddSignal "+inter.addSignal("Chat", "s",  "str"));
@@ -24,3 +24,4 @@ var chatObject = alljoyn.BusObject("/chatService");
 //console.log("chat.AddInterface "+chatObject.addInterface(inter));
 console.log("RegisterBusObject "+bus.registerBusObject(chatObject));
 console.log("Connect"+bus.connect());
+console.log("FindAdvertisedName "+bus.findAdvertisedName("org.alljoyn.bus.samples.chat.matt"));

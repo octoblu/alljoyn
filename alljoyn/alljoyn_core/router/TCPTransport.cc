@@ -961,7 +961,7 @@ QStatus TCPTransport::Start()
      * we hear about a new well-known bus name.
      */
     IpNameService::Instance().SetCallback(TRANSPORT_TCP,
-                                          new CallbackImpl<FoundCallback, void, const qcc::String&, const qcc::String&, std::vector<qcc::String>&, uint8_t>
+                                          new CallbackImpl<FoundCallback, void, const qcc::String&, const qcc::String&, std::vector<qcc::String>&, uint32_t>
                                               (&m_foundCallback, &FoundCallback::Found));
 
     /*
@@ -1712,6 +1712,7 @@ void* TCPTransport::Run(void* arg)
                     m_endpointListLock.Unlock(MUTEX_CONTEXT);
                 } else {
                     m_endpointListLock.Unlock(MUTEX_CONTEXT);
+                    qcc::SetLinger(newSock, true, 0);
                     qcc::Shutdown(newSock);
                     qcc::Close(newSock);
                     status = ER_AUTH_FAIL;
@@ -1756,6 +1757,7 @@ void* TCPTransport::Run(void* arg)
      */
     m_listenFdsLock.Lock(MUTEX_CONTEXT);
     for (list<pair<qcc::String, SocketFd> >::iterator i = m_listenFds.begin(); i != m_listenFds.end(); ++i) {
+        qcc::SetLinger(i->second, true, 0);
         qcc::Shutdown(i->second);
         qcc::Close(i->second);
     }
@@ -2954,6 +2956,7 @@ QStatus TCPTransport::Connect(const char* connectSpec, const SessionOpts& opts, 
          * for the cleanup.
          */
         if (isConnected) {
+            qcc::SetLinger(sockFd, true, 0);
             qcc::Shutdown(sockFd);
         }
         if (sockFd >= 0) {
@@ -3659,7 +3662,7 @@ void TCPTransport::DoStopListen(qcc::String& normSpec)
          * If we took a socketFD off of the list of active FDs, we need to tear it
          * down.
          */
-
+        qcc::SetLinger(stopFd, true, 0);
         qcc::Shutdown(stopFd);
         qcc::Close(stopFd);
     }
@@ -3900,7 +3903,7 @@ void TCPTransport::QueueDisableAdvertisement(const qcc::String& advertiseName, T
 }
 
 void TCPTransport::FoundCallback::Found(const qcc::String& busAddr, const qcc::String& guid,
-                                        std::vector<qcc::String>& nameList, uint8_t timer)
+                                        std::vector<qcc::String>& nameList, uint32_t timer)
 {
     QCC_DbgPrintf(("TCPTransport::FoundCallback::Found(): busAddr = \"%s\"", busAddr.c_str()));
 

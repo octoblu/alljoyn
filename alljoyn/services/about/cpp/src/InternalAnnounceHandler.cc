@@ -28,8 +28,8 @@ using namespace services;
 
 #define QCC_MODULE "ALLJOYN_ABOUT_ANNOUNCE_HANDLER"
 
-InternalAnnounceHandler::InternalAnnounceHandler() :
-    announceSignalMember(NULL) {
+InternalAnnounceHandler::InternalAnnounceHandler(BusAttachment& bus) :
+    bus(bus), announceSignalMember(NULL), emptyMatchRule("type='signal',interface='org.alljoyn.About',member='Announce',sessionless='t'") {
     QCC_DbgTrace(("InternalAnnounceHandler::%s", __FUNCTION__));
 }
 
@@ -73,7 +73,13 @@ QStatus InternalAnnounceHandler::AddHandler(AnnounceHandler& handler, const char
     announceMap.insert(hi_pair);
     announceMapLock.Unlock(MUTEX_CONTEXT);
 
-    return ER_OK;
+    qcc::String matchRule = emptyMatchRule;
+    for (std::set<qcc::String>::iterator it = interfaces.begin(); it != interfaces.end(); ++it) {
+        matchRule += qcc::String(",implements='") + *it + qcc::String("'");
+    }
+
+    QCC_DbgTrace(("Calling AddMatch(\"%s\")", matchRule.c_str()));
+    return bus.AddMatch(matchRule.c_str());
 }
 
 QStatus InternalAnnounceHandler::RemoveHandler(AnnounceHandler& handler, const char** implementsInterfaces, size_t numberInterfaces) {
@@ -82,6 +88,8 @@ QStatus InternalAnnounceHandler::RemoveHandler(AnnounceHandler& handler, const c
     std::pair <AnnounceMap::iterator, AnnounceMap::iterator> handlers;
     announceMapLock.Lock(MUTEX_CONTEXT);
     std::vector<AnnounceMap::iterator> toRemove;
+    std::vector<qcc::String> ruleToRemove;
+
     handlers = announceMap.equal_range(&handler);
     for (AnnounceMap::iterator it = handlers.first; it != handlers.second; ++it) {
         if (implementsInterfaces == NULL) {
@@ -107,8 +115,20 @@ QStatus InternalAnnounceHandler::RemoveHandler(AnnounceHandler& handler, const c
     }
 
     for (std::vector<AnnounceMap::iterator>::iterator trit = toRemove.begin(); trit != toRemove.end(); ++trit) {
+        //call remove match for the interface
+        qcc::String matchRule = emptyMatchRule;
+        for (std::set<qcc::String>::iterator it = (*trit)->second.begin(); it != (*trit)->second.end(); ++it) {
+            matchRule += qcc::String(",implements='") + *it + qcc::String("'");
+        }
+        // The MatchRule can not be removed while the announceMapLock is
+        // held since it could result in a deadlock.  So we build a list
+        // of all the match rules that should be removed and then remove
+        // them after the announceMapLock is released.
+        ruleToRemove.push_back(matchRule);
+
         bool erased = false;
         while (!erased) {
+            //remove the announce handler from the announceMap;
             announceHandlerLock.Lock(MUTEX_CONTEXT);
             if (announceHandlerList.empty()) {
                 announceMap.erase(*trit);
@@ -121,9 +141,36 @@ QStatus InternalAnnounceHandler::RemoveHandler(AnnounceHandler& handler, const c
         }
     }
     announceMapLock.Unlock(MUTEX_CONTEXT);
+
+    for (uint32_t i = 0; i < ruleToRemove.size(); ++i) {
+        QCC_DbgTrace(("Calling RemoveMatch(\"%s\")", ruleToRemove[i].c_str()));
+        status = bus.RemoveMatch(ruleToRemove[i].c_str());
+    }
     return status;
 }
 
+
+QStatus InternalAnnounceHandler::RemoveAllHandlers() {
+    QCC_DbgTrace(("InternalAnnounceHandler::%s", __FUNCTION__));
+    QStatus status = ER_OK;
+    announceMapLock.Lock(MUTEX_CONTEXT);
+    AnnounceMap tmpAnnounceMap = announceMap;
+    announceMap.clear();
+    announceMapLock.Unlock(MUTEX_CONTEXT);
+
+    for (AnnounceMap::iterator amit = tmpAnnounceMap.begin(); amit != tmpAnnounceMap.end(); ++amit) {
+        //call remove match for each interface
+        qcc::String matchRule = emptyMatchRule;
+        for (std::set<qcc::String>::iterator it = amit->second.begin(); it != amit->second.end(); ++it) {
+            matchRule += qcc::String(",implements='") + *it + qcc::String("'");
+        }
+
+        QCC_DbgTrace(("Calling RemoveMatch(\"%s\")", matchRule.c_str()));
+        status = bus.RemoveMatch(matchRule.c_str());
+    }
+    //now that all the match rules are removed clear the announceMap
+    return status;
+}
 
 bool InternalAnnounceHandler::ContainsInterface(const ObjectDescriptions& objectDescriptions, const qcc::String interface) const {
     size_t n = interface.find_first_of('*');

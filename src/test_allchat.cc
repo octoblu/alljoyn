@@ -376,6 +376,7 @@ int main(int argc, char** argv)
 {
     /* Install SIGINT handler. */
     signal(SIGINT, SigIntHandler);
+    //QCC_SetDebugLevel("ALL", 0xFF);
 
     ParseCommandLine(argc, argv);
     ValidateCommandLine();
