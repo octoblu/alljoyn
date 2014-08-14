@@ -4,9 +4,11 @@
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-BusListenerImpl::BusListenerImpl(NanCallback* foundName, NanCallback* lostName, NanCallback* nameChanged)
-  :foundNameCallback(foundName),lostNameCallback(lostName),nameChangedCallback(nameChanged){
+BusListenerImpl::BusListenerImpl(NanCallback* foundNameCallback, NanCallback* lostNameCallback, NanCallback* nameChangedCallback){
   loop = uv_default_loop();
+  foundName.callback = foundNameCallback;
+  lostName.callback = lostNameCallback;
+  nameChanged.callback = nameChangedCallback;
   uv_async_init(loop, &found_async, found_callback);
   uv_async_init(loop, &lost_async, lost_callback);
   uv_async_init(loop, &name_change_async, name_change_callback);
@@ -14,14 +16,14 @@ BusListenerImpl::BusListenerImpl(NanCallback* foundName, NanCallback* lostName, 
 
 BusListenerImpl::~BusListenerImpl(){
   printf("BusListenerImpl-destructor\n");
-  if(foundNameCallback){
-    delete foundNameCallback;
+  if(foundName.callback){
+    delete foundName.callback;
   }
-  if(lostNameCallback){
-    delete lostNameCallback;
+  if(lostName.callback){
+    delete lostName.callback;
   }
-  if(nameChangedCallback){
-    delete nameChangedCallback;
+  if(nameChanged.callback){
+    delete nameChanged.callback;
   }
 }
 
@@ -32,9 +34,13 @@ void BusListenerImpl::found_callback(uv_async_t *handle, int status) {
     //   NanNull(),
     //   NanNew<v8::String>(name)
     // };
-    printf("Calling found callback");
-    NanCallback* callback = (NanCallback*) handle->data;
-    callback->Call(0, NULL);
+    printf("Calling found callback\n");
+    CallbackHolder* holder = (CallbackHolder*) handle->data;
+
+    v8::Handle<v8::Value> argv[] = {
+      NanNew<v8::String>(holder->data)
+    };
+    holder->callback->Call(1, argv);
 }
 
 void BusListenerImpl::lost_callback(uv_async_t *handle, int status) {
@@ -44,9 +50,13 @@ void BusListenerImpl::lost_callback(uv_async_t *handle, int status) {
     //   NanNull(),
     //   NanNew<v8::String>(name)
     // };
-    printf("Calling lost callback");
-    NanCallback* callback = (NanCallback*) handle->data;
-    callback->Call(0, NULL);
+    printf("Calling lost callback\n");
+    CallbackHolder* holder = (CallbackHolder*) handle->data;
+
+    v8::Handle<v8::Value> argv[] = {
+      NanNew<v8::String>(holder->data)
+    };
+    holder->callback->Call(1, argv);
 }
 
 void BusListenerImpl::name_change_callback(uv_async_t *handle, int status) {
@@ -56,27 +66,34 @@ void BusListenerImpl::name_change_callback(uv_async_t *handle, int status) {
     //   NanNull(),
     //   NanNew<v8::String>(name)
     // };
-    printf("Calling name change callback");
-    NanCallback* callback = (NanCallback*) handle->data;
-    callback->Call(0, NULL);
+    printf("Calling name change callback\n");
+    CallbackHolder* holder = (CallbackHolder*) handle->data;
+
+    v8::Handle<v8::Value> argv[] = {
+      NanNew<v8::String>(holder->data)
+    };
+    holder->callback->Call(1, argv);
 }
 
 void BusListenerImpl::FoundAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix){
     printf("Got FoundAdvertisedName for %s from transport 0x%x\n", name, transport);
-    found_async.data = (void*) foundNameCallback;
+    found_async.data = (void*) &foundName;
+    foundName.data = name;
     uv_async_send(&found_async);
 }
 
 void BusListenerImpl::LostAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix){
     printf("Got LostAdvertisedName for %s from transport 0x%x\n", name, transport);
-    lost_async.data = (void*) lostNameCallback;
+    lost_async.data = (void*) &lostName;
+    lostName.data = name;
     uv_async_send(&lost_async);
 }
 
 void BusListenerImpl::NameOwnerChanged(const char* busName, const char* previousOwner, const char* newOwner){
     printf("NameOwnerChanged: name=%s, oldOwner=%s, newOwner=%s\n", busName, previousOwner ? previousOwner : "<none>",
            newOwner ? newOwner : "<none>");
-    name_change_async.data = (void*) nameChangedCallback;
+    name_change_async.data = (void*) &nameChanged;
+    nameChanged.data = busName;
     uv_async_send(&name_change_async);
 }
 

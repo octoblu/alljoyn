@@ -12,9 +12,11 @@ class BusListenerImpl : public ajn::BusListener {
   private:
   	uv_loop_t *loop;
   	uv_async_t found_async, lost_async, name_change_async;
-  	NanCallback *foundNameCallback;
-  	NanCallback *lostNameCallback;
-  	NanCallback *nameChangedCallback;
+
+    struct CallbackHolder{
+      NanCallback* callback;
+      const char* data;
+    } foundName, lostName, nameChanged;
 
   public:
   	BusListenerImpl(NanCallback* foundName, NanCallback* lostName, NanCallback* nameChanged);

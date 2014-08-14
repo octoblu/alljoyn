@@ -4,19 +4,19 @@ console.log("Test loading alljoyn bus...", alljoyn);
 var bus = alljoyn.BusAttachment("test");
 var inter = alljoyn.InterfaceDescription();
 var listener = alljoyn.BusListener(
-	function(){
-		console.log("FoundAdvertisedName");
+	function(name){
+		console.log("FoundAdvertisedName", name);
 	},
-	function(){
-		console.log("LostAdvertisedName");
+	function(name){
+		console.log("LostAdvertisedName", name);
 	},
-	function(){
-		console.log("NameOwnerChanged");
+	function(name){
+		console.log("NameOwnerChanged", name);
 	}
 );
 console.log("Result: "+bus+" - "+inter+" - "+listener);
 
-console.log("CreateInterface "+bus.createInterface("org.alljoyn.bus.samples.chat", inter));
+console.log("CreateInterface "+bus.createInterface("", inter));
 console.log("AddSignal "+inter.addSignal("Chat", "s",  "str"));
 console.log("RegisterBusListener "+bus.registerBusListener(listener));
 console.log("Start "+bus.start());
@@ -24,4 +24,4 @@ var chatObject = alljoyn.BusObject("/chatService");
 //console.log("chat.AddInterface "+chatObject.addInterface(inter));
 console.log("RegisterBusObject "+bus.registerBusObject(chatObject));
 console.log("Connect"+bus.connect());
-console.log("FindAdvertisedName "+bus.findAdvertisedName("org.alljoyn.bus.samples.chat.matt"));
+console.log("FindAdvertisedName "+bus.findAdvertisedName(""));
