@@ -18,6 +18,7 @@ class BusConnection : public node::ObjectWrap {
     static NAN_METHOD(Stop);
     static NAN_METHOD(Join);
     static NAN_METHOD(Connect);
+    static NAN_METHOD(Disconnect);
     static NAN_METHOD(CreateInterface);
     static NAN_METHOD(GetInterface);
     static NAN_METHOD(RegisterBusListener);
@@ -27,6 +28,7 @@ class BusConnection : public node::ObjectWrap {
     static NAN_METHOD(BindSessionPort);
     static NAN_METHOD(RequestName);
     static NAN_METHOD(AdvertiseName);
+
   public:
   	BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent);
     static void Init ();

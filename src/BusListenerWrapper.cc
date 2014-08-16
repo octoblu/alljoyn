@@ -38,7 +38,6 @@ BusListenerWrapper::BusListenerWrapper(NanCallback* foundName, NanCallback* lost
 }
 
 BusListenerWrapper::~BusListenerWrapper(){
-  printf("BusListenerWrapper-destructor\n");
   if(listener){
     delete listener;
   }

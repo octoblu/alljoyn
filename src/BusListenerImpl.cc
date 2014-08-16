@@ -15,7 +15,6 @@ BusListenerImpl::BusListenerImpl(NanCallback* foundNameCallback, NanCallback* lo
 }
 
 BusListenerImpl::~BusListenerImpl(){
-  printf("BusListenerImpl-destructor\n");
   if(foundName.callback){
     delete foundName.callback;
   }
@@ -28,13 +27,6 @@ BusListenerImpl::~BusListenerImpl(){
 }
 
 void BusListenerImpl::found_callback(uv_async_t *handle, int status) {
-    // char* name = (char*) handle->data;
-    // printf("Found-Callback:  %s\n", name);
-    // v8::Handle<v8::Value> argv[] = {
-    //   NanNull(),
-    //   NanNew<v8::String>(name)
-    // };
-    printf("Calling found callback\n");
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
     v8::Handle<v8::Value> argv[] = {
@@ -44,13 +36,6 @@ void BusListenerImpl::found_callback(uv_async_t *handle, int status) {
 }
 
 void BusListenerImpl::lost_callback(uv_async_t *handle, int status) {
-    // char* name = (char*) handle->data;
-    // printf("Found-Callback:  %s\n", name);
-    // v8::Handle<v8::Value> argv[] = {
-    //   NanNull(),
-    //   NanNew<v8::String>(name)
-    // };
-    printf("Calling lost callback\n");
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
     v8::Handle<v8::Value> argv[] = {
@@ -60,13 +45,6 @@ void BusListenerImpl::lost_callback(uv_async_t *handle, int status) {
 }
 
 void BusListenerImpl::name_change_callback(uv_async_t *handle, int status) {
-    // char* name = (char*) handle->data;
-    // printf("NameChange-Callback:  %s\n", name);
-    // v8::Handle<v8::Value> argv[] = {
-    //   NanNull(),
-    //   NanNew<v8::String>(name)
-    // };
-    printf("Calling name change callback\n");
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
     v8::Handle<v8::Value> argv[] = {
@@ -76,14 +54,12 @@ void BusListenerImpl::name_change_callback(uv_async_t *handle, int status) {
 }
 
 void BusListenerImpl::FoundAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix){
-    printf("Got FoundAdvertisedName for %s from transport 0x%x\n", name, transport);
     found_async.data = (void*) &foundName;
     foundName.data = name;
     uv_async_send(&found_async);
 }
 
 void BusListenerImpl::LostAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix){
-    printf("Got LostAdvertisedName for %s from transport 0x%x\n", name, transport);
     lost_async.data = (void*) &lostName;
     lostName.data = name;
     uv_async_send(&lost_async);
