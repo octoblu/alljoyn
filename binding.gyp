@@ -28,6 +28,8 @@
         'src/BusListenerWrapper.cc',
         'src/BusListenerImpl.cc',
         'src/BusObjectWrapper.cc',
+        'src/SessionPortListenerWrapper.cc',
+        'src/SessionPortListenerImpl.cc',
         'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
       ]
     }

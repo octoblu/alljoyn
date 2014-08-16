@@ -3,6 +3,7 @@
 #include "BusConnection.h"
 #include "InterfaceWrapper.h"
 #include "BusListenerWrapper.h"
+#include "SessionPortListenerWrapper.h"
 #include "BusObjectWrapper.h"
 #include <alljoyn/BusAttachment.h>
 #include <alljoyn/ProxyBusObject.h>
@@ -47,6 +48,7 @@ void BusConnection::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusListener", BusConnection::RegisterBusListener);
   NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusObject", BusConnection::RegisterBusObject);
   NODE_SET_PROTOTYPE_METHOD(tpl, "findAdvertisedName", BusConnection::FindAdvertisedName);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "joinSession", BusConnection::JoinSession);
 }
 
 NAN_METHOD(BusConnection::New) {
@@ -165,5 +167,39 @@ NAN_METHOD(BusConnection::FindAdvertisedName) {
 
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
   QStatus status = connection->bus->FindAdvertisedName(*NanUtf8String(args[0]));
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+}
+
+NAN_METHOD(BusConnection::JoinSession) {
+  NanScope();
+  printf("JoinSession\n");
+  if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsNumber())
+    return NanThrowError("JoinSession requires a sessionHost name, sessionPort number, and (optional) SessionListener callback");
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  ajn::SessionId sessionId = static_cast<ajn::SessionPort>(args[1]->Int32Value());
+  ajn::SessionOpts opts(ajn::SessionOpts::TRAFFIC_MESSAGES, true, ajn::SessionOpts::PROXIMITY_ANY, ajn::TRANSPORT_ANY);
+  // if(args.Length() == 3 && args[2]->IsObject() && !args[2]->IsNull()){
+  //   SessionPortListenerWrapper* wrapper = node::ObjectWrap::Unwrap<SessionPortListenerWrapper>(args[2].As<v8::Object>());
+  //   QStatus status = connection->bus->JoinSession(*NanUtf8String(args[0]), args[1]->IntegerValue(), *(wrapper->listener), args[1]->IntegerValue(), opts);
+  // }else{
+    QStatus status = connection->bus->JoinSession(*NanUtf8String(args[0]), static_cast<ajn::SessionPort>(args[1]->Int32Value()), NULL, sessionId, opts);
+  // }
+
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(sessionId)));
+}
+
+NAN_METHOD(BusConnection::BindSessionPort) {
+  NanScope();
+  printf("BindSessionPort\n");
+  if (args.Length() < 2 || !args[0]->IsNumber() || !args[1]->IsObject())
+    return NanThrowError("BindSessionPort requires a sessionPort number and SessionPortListener callback");
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  SessionPortListenerWrapper* wrapper = node::ObjectWrap::Unwrap<SessionPortListenerWrapper>(args[1].As<v8::Object>());
+  ajn::SessionPort port = static_cast<ajn::SessionPort>(args[0]->Int32Value());
+  ajn::SessionOpts opts(ajn::SessionOpts::TRAFFIC_MESSAGES, true, ajn::SessionOpts::PROXIMITY_ANY, ajn::TRANSPORT_ANY);
+  QStatus status = connection->bus->BindSessionPort(port, opts, *(wrapper->listener));
+
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
