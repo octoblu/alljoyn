@@ -49,6 +49,9 @@ void BusConnection::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusObject", BusConnection::RegisterBusObject);
   NODE_SET_PROTOTYPE_METHOD(tpl, "findAdvertisedName", BusConnection::FindAdvertisedName);
   NODE_SET_PROTOTYPE_METHOD(tpl, "joinSession", BusConnection::JoinSession);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "bindSessionPort", BusConnection::BindSessionPort);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "requestName", BusConnection::RequestName);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "advertiseName", BusConnection::AdvertiseName);
 }
 
 NAN_METHOD(BusConnection::New) {
@@ -203,3 +206,24 @@ NAN_METHOD(BusConnection::BindSessionPort) {
 
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
+
+NAN_METHOD(BusConnection::RequestName) {
+  NanScope();
+  if (args.Length() == 0 || !args[0]->IsString())
+    return NanThrowError("RequestName requires a requestedName string argument");
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  QStatus status = connection->bus->RequestName(*NanUtf8String(args[0]), DBUS_NAME_FLAG_DO_NOT_QUEUE);
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+}
+
+NAN_METHOD(BusConnection::AdvertiseName) {
+  NanScope();
+  if (args.Length() == 0 || !args[0]->IsString())
+    return NanThrowError("AdvertiseName requires a name string argument");
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  QStatus status = connection->bus->AdvertiseName(*NanUtf8String(args[0]), ajn::TRANSPORT_ANY);
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+}
+

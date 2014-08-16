@@ -2,6 +2,7 @@ var alljoyn = require('./');
 
 console.log("Test loading alljoyn bus...", alljoyn);
 var sessionId = 0;
+var advertisedName = "org.alljoyn.bus.samples.chat.test";
 var bus = alljoyn.BusAttachment("test");
 var inter = alljoyn.InterfaceDescription();
 var listener = alljoyn.BusListener(
@@ -36,6 +37,8 @@ var chatObject = alljoyn.BusObject("/chatService");
 //console.log("chat.AddInterface "+chatObject.addInterface(inter));
 console.log("RegisterBusObject "+bus.registerBusObject(chatObject));
 console.log("Connect"+bus.connect());
-console.log("FindAdvertisedName "+bus.findAdvertisedName('org.alljoyn'));
+//console.log("FindAdvertisedName "+bus.findAdvertisedName('org.alljoyn'));
 
-//console.log("BindSessionPort "+bus.bindSessionPort(27, portListener));
+console.log("RequestName "+bus.requestName(advertisedName));
+console.log("BindSessionPort "+bus.bindSessionPort(27, portListener));
+console.log("AdvertiseName "+bus.advertiseName(advertisedName));
