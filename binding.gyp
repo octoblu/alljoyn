@@ -66,6 +66,7 @@
         'src/BusObjectWrapper.cc',
         'src/SessionPortListenerWrapper.cc',
         'src/SessionPortListenerImpl.cc',
+        'src/SignalHandlerImpl.cc',
         'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
       ]
     },

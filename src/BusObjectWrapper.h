@@ -7,6 +7,12 @@
 
 NAN_METHOD(BusObjectConstructor);
 
+class BusObjectImpl : public ajn::BusObject{
+	public:
+		BusObjectImpl(const char* path);
+	    QStatus AddInter(ajn::InterfaceDescription* interface);
+};
+
 class BusObjectWrapper : public node::ObjectWrap {
   private:
 
@@ -16,7 +22,8 @@ class BusObjectWrapper : public node::ObjectWrap {
   	BusObjectWrapper(const char* path);
     static void Init ();
     static v8::Handle<v8::Value> NewInstance();
-    ajn::BusObject* object;
+    BusObjectImpl* object;
 };
+
 
 #endif

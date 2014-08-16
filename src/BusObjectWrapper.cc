@@ -32,7 +32,7 @@ NAN_METHOD(BusObjectConstructor) {
   NanReturnValue(obj);
 }
 
-BusObjectWrapper::BusObjectWrapper(const char* path):object(new ajn::BusObject(path)){}
+BusObjectWrapper::BusObjectWrapper(const char* path):object(new BusObjectImpl(path)){}
 
 void BusObjectWrapper::Init () {
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(BusObjectWrapper::New);
@@ -56,14 +56,17 @@ NAN_METHOD(BusObjectWrapper::New) {
 
 NAN_METHOD(BusObjectWrapper::AddInterfaceInternal) {
   NanScope();
-  return NanThrowError("AddInterface NOT IMPLEMENTED YET");
-  // if(args.Length() < 1){
-  //   return NanThrowError("BusObject.AddInterface requires an Interface.");
-  // }
-  // BusObjectWrapper* obj = node::ObjectWrap::Unwrap<BusObjectWrapper>(args.This());
-  // InterfaceWrapper* interWrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(args[0].As<v8::Object>());
-  QStatus status = ER_OK;//obj->object->AddInterface(*(interWrapper->interface));
+  if(args.Length() < 1){
+    return NanThrowError("BusObject.AddInterface requires an Interface.");
+  }
+  BusObjectWrapper* obj = node::ObjectWrap::Unwrap<BusObjectWrapper>(args.This());
+  InterfaceWrapper* interWrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(args[0].As<v8::Object>());
+  QStatus status = obj->object->AddInter(interWrapper->interface);
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 
+BusObjectImpl::BusObjectImpl(const char* path):ajn::BusObject(path){}
+QStatus BusObjectImpl::AddInter(ajn::InterfaceDescription* interface){
+    return AddInterface(*interface);
+}
 

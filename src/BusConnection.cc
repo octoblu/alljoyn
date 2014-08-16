@@ -43,6 +43,7 @@ void BusConnection::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "stop", BusConnection::Stop);
   NODE_SET_PROTOTYPE_METHOD(tpl, "join", BusConnection::Join);
   NODE_SET_PROTOTYPE_METHOD(tpl, "connect", BusConnection::Connect);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "disconnect", BusConnection::Disconnect);
   NODE_SET_PROTOTYPE_METHOD(tpl, "createInterface", BusConnection::CreateInterface);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getInterface", BusConnection::GetInterface);
   NODE_SET_PROTOTYPE_METHOD(tpl, "registerBusListener", BusConnection::RegisterBusListener);
@@ -94,6 +95,13 @@ NAN_METHOD(BusConnection::Connect) {
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 
+NAN_METHOD(BusConnection::Disconnect) {
+  NanScope();
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  QStatus status = connection->bus->Disconnect();
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+}
+
 NAN_METHOD(BusConnection::CreateInterface) {
   NanScope();
   if (args.Length() == 0 || !args[0]->IsString())
@@ -138,7 +146,6 @@ NAN_METHOD(BusConnection::GetInterface) {
 
 NAN_METHOD(BusConnection::RegisterBusListener) {
   NanScope();
-  printf("RegisterBusListener\n");
   if (args.Length() == 0)
     return NanThrowError("RegisterBusListener requires a BusListener argument");
 
@@ -151,7 +158,6 @@ NAN_METHOD(BusConnection::RegisterBusListener) {
 
 NAN_METHOD(BusConnection::RegisterBusObject) {
   NanScope();
-  printf("RegisterBusObject\n");
   if (args.Length() == 0)
     return NanThrowError("RegisterBusObject requires a BusObject argument");
 
@@ -175,7 +181,6 @@ NAN_METHOD(BusConnection::FindAdvertisedName) {
 
 NAN_METHOD(BusConnection::JoinSession) {
   NanScope();
-  printf("JoinSession\n");
   if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsNumber())
     return NanThrowError("JoinSession requires a sessionHost name, sessionPort number, and (optional) SessionListener callback");
 
@@ -194,7 +199,6 @@ NAN_METHOD(BusConnection::JoinSession) {
 
 NAN_METHOD(BusConnection::BindSessionPort) {
   NanScope();
-  printf("BindSessionPort\n");
   if (args.Length() < 2 || !args[0]->IsNumber() || !args[1]->IsObject())
     return NanThrowError("BindSessionPort requires a sessionPort number and SessionPortListener callback");
 
