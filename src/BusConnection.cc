@@ -5,10 +5,12 @@
 #include "BusListenerWrapper.h"
 #include "SessionPortListenerWrapper.h"
 #include "BusObjectWrapper.h"
+#include "SignalHandlerImpl.h"
 #include <alljoyn/BusAttachment.h>
 #include <alljoyn/ProxyBusObject.h>
 #include <alljoyn/BusObject.h>
 #include <alljoyn/InterfaceDescription.h>
+#include <MessageReceiver.h>
 #include <alljoyn/DBusStd.h>
 #include <alljoyn/AllJoynStd.h>
 
@@ -53,6 +55,7 @@ void BusConnection::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "bindSessionPort", BusConnection::BindSessionPort);
   NODE_SET_PROTOTYPE_METHOD(tpl, "requestName", BusConnection::RequestName);
   NODE_SET_PROTOTYPE_METHOD(tpl, "advertiseName", BusConnection::AdvertiseName);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "registerSignalHandler", BusConnection::RegisterSignalHandler);
 }
 
 NAN_METHOD(BusConnection::New) {
@@ -228,6 +231,29 @@ NAN_METHOD(BusConnection::AdvertiseName) {
 
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
   QStatus status = connection->bus->AdvertiseName(*NanUtf8String(args[0]), ajn::TRANSPORT_ANY);
+  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+}
+
+NAN_METHOD(BusConnection::RegisterSignalHandler) {
+  NanScope();
+  if (args.Length() < 4 || !args[0]->IsObject() || !args[1]->IsFunction() || !args[2]->IsObject() || !args[3]->IsString())
+    return NanThrowError("RegisterSignalHandler requires a receiver BusObject, signalHandler callback, interface, interface member name, and (optional) srcPath.");
+
+  BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
+  BusObjectWrapper* wrapper = node::ObjectWrap::Unwrap<BusObjectWrapper>(args[0].As<v8::Object>());
+  InterfaceWrapper* interface = node::ObjectWrap::Unwrap<InterfaceWrapper>(args[2].As<v8::Object>());
+  const ajn::InterfaceDescription::Member* signalMember = interface->interface->GetMember(*NanUtf8String(args[3]));
+
+  v8::Local<v8::Function> fn = args[1].As<v8::Function>();
+  NanCallback *callback = new NanCallback(fn);
+  wrapper->object->SetSignalCallback(callback);
+  QStatus status = ER_OK;
+  if(args.Length() == 5){
+    status = connection->bus->RegisterSignalHandler(wrapper->object, static_cast<ajn::MessageReceiver::SignalHandler>(&BusObjectImpl::Signal), signalMember, *NanUtf8String(args[4]));
+  }else{
+    status = connection->bus->RegisterSignalHandler(wrapper->object, static_cast<ajn::MessageReceiver::SignalHandler>(&BusObjectImpl::Signal), signalMember, NULL);
+  }
+
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 

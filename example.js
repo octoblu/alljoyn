@@ -35,6 +35,9 @@ console.log("RegisterBusListener "+bus.registerBusListener(listener));
 console.log("Start "+bus.start());
 var chatObject = alljoyn.BusObject("/chatService");
 console.log("chat.AddInterface "+chatObject.addInterface(inter));
+console.log("RegisterSignalHandler "+bus.registerSignalHandler(chatObject, function(name){
+  console.log("Signal received from: "+name);
+}, inter, "Chat"));
 console.log("RegisterBusObject "+bus.registerBusObject(chatObject));
 console.log("Connect"+bus.connect());
 //console.log("FindAdvertisedName "+bus.findAdvertisedName('org.alljoyn'));

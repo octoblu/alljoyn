@@ -65,8 +65,46 @@ NAN_METHOD(BusObjectWrapper::AddInterfaceInternal) {
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 
-BusObjectImpl::BusObjectImpl(const char* path):ajn::BusObject(path){}
+BusObjectImpl::BusObjectImpl(const char* path):ajn::BusObject(path){
+  loop = uv_default_loop();
+  signalCallback.callback = NULL;
+  uv_async_init(loop, &signal_async, signal_callback);
+}
+
 QStatus BusObjectImpl::AddInter(ajn::InterfaceDescription* interface){
     return AddInterface(*interface);
+}
+
+BusObjectImpl::~BusObjectImpl(){
+  if(signalCallback.callback){
+    delete signalCallback.callback;
+  }
+}
+
+void BusObjectImpl::signal_callback(uv_async_t *handle, int status) {
+    CallbackHolder* holder = (CallbackHolder*) handle->data;
+
+    v8::Handle<v8::Value> argv[] = {
+      NanNew<v8::String>((*holder->message)->GetSender())
+    };
+    holder->callback->Call(1, argv);
+    if(holder->message){
+      delete holder->message;
+      holder->message = NULL;
+    }
+}
+
+void BusObjectImpl::Signal(const ajn::InterfaceDescription::Member *member, const char *srcPath, ajn::Message &message){
+  if(signalCallback.callback){
+    printf("Got Signal for %s from id %s\n", srcPath, message->GetSender());
+    signal_async.data = (void*) &signalCallback;
+    //TODO message data
+    signalCallback.message = new ajn::Message(message);
+    uv_async_send(&signal_async);
+  }
+}
+
+void BusObjectImpl::SetSignalCallback(NanCallback* callback){
+  signalCallback.callback = callback;
 }
 

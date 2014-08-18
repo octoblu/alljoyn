@@ -12,12 +12,13 @@ class SessionPortListenerImpl : public ajn::SessionPortListener {
   private:
   	uv_loop_t *loop;
   	uv_async_t accept_async, joined_async;
+    uv_rwlock_t calllock;
 
   struct CallbackHolder{
     NanCallback* callback;
     const char* data;
     bool rval;
-    bool callback_finished;
+    bool complete;
   } acceptCallback, joinedCallback;
 
   public:

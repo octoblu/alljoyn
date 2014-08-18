@@ -1,5 +1,5 @@
-#ifndef LD_SignalHandlerIMPL_H
-#define LD_SignalHandlerIMPL_H
+#ifndef LD_SIGNALHANDLERIMPL_H
+#define LD_SIGNALHANDLERIMPL_H
 
 #include <nan.h>
 #include <uv.h>
