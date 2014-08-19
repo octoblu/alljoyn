@@ -34,6 +34,13 @@
           '-Wno-ignored-qualifiers'
          ]
     },
+    'link_settings': {
+      'libraries': [
+      '-lstdc++',
+      '-lcrypto',
+      '-lpthread'
+      ]
+    },
     'conditions': [
       ['OS=="mac"', {
         'defines': [
@@ -256,13 +263,6 @@
         'alljoyn',
         'ajrouter'
       ],
-      'link_settings': {
-        'libraries': [
-        '-lstdc++',
-        '-lcrypto',
-        '-lpthread'
-        ]
-      },
       'sources': [
         'src/test_allchat.cc',
         'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
