@@ -25,7 +25,7 @@
       "<!(node -e \"require('nan')\")"
     ],
     'cflags':[
-      '-Wno-error=non-pod-varargs',
+      '-Wno-deprecated',
       '-Wno-ignored-qualifiers'
     ],
     'xcode_settings': {
@@ -78,6 +78,7 @@
         'alljoynstatus'
       ],
       'sources': [
+        'alljoyn/alljoyn_core/src/BaseClientTransport.cc',
         'alljoyn/alljoyn_core/src/AllJoynCrypto.cc',
         'alljoyn/alljoyn_core/src/AuthMechSRP.cc',
         'alljoyn/alljoyn_core/src/InterfaceDescription.cc',
@@ -222,7 +223,6 @@
         'alljoyn/alljoyn_core/router/SessionlessObj.cc',
         'alljoyn/alljoyn_core/router/VirtualEndpoint.cc',
         'alljoyn/alljoyn_core/router/PermissionMgr.cc',
-        'alljoyn/alljoyn_core/router/darwin/DaemonTransport.cc',
         'alljoyn/alljoyn_core/router/posix/PermissionMgr2.cc',
         'alljoyn/alljoyn_core/router/posix/Socket.cc',
         'alljoyn/alljoyn_core/router/ns/IpNameService.cc',
