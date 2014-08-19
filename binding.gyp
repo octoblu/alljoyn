@@ -67,6 +67,7 @@
       'product_prefix': 'lib',
       'type': 'static_library',
       'sources': [
+        'gen/alljoyn/version.cc',
         'gen/alljoyn/Status.cc'
       ],
     },
