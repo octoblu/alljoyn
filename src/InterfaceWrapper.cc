@@ -54,7 +54,7 @@ NAN_METHOD(InterfaceWrapper::AddSignal) {
   }
 
   InterfaceWrapper* wrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(args.This());
-  QStatus status = wrapper->interface->AddSignal(*NanUtf8String(args[0]), *NanUtf8String(args[1]), *NanUtf8String(args[2]), annotation);
+  QStatus status = wrapper->interface->AddSignal(strdup(*NanUtf8String(args[0])), strdup(*NanUtf8String(args[1])), strdup(*NanUtf8String(args[2])), annotation);
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 

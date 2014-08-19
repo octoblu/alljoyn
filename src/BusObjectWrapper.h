@@ -21,7 +21,7 @@ class BusObjectImpl : public ajn::BusObject{
     ~BusObjectImpl();
     static void signal_callback(uv_async_t *handle, int status);
 	  QStatus AddInter(ajn::InterfaceDescription* interface);
-    void Signal(const ajn::InterfaceDescription::Member *member, const char *srcPath, ajn::Message &message);
+    void ReceiveSignal(const ajn::InterfaceDescription::Member *member, const char *srcPath, ajn::Message &message);
     void SetSignalCallback(NanCallback* callback);
 };
 
@@ -30,6 +30,7 @@ class BusObjectWrapper : public node::ObjectWrap {
 
     static NAN_METHOD(New);
     static NAN_METHOD(AddInterfaceInternal);
+    static NAN_METHOD(Signal);
   public:
   	BusObjectWrapper(const char* path);
     static void Init ();

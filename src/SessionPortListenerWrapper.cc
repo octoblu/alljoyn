@@ -37,7 +37,6 @@ SessionPortListenerWrapper::SessionPortListenerWrapper(NanCallback* accept, NanC
 }
 
 SessionPortListenerWrapper::~SessionPortListenerWrapper(){
-  printf("SessionPortListenerWrapper-destructor\n");
   if(listener){
     delete listener;
   }

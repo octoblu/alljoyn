@@ -17,6 +17,7 @@ class SessionPortListenerImpl : public ajn::SessionPortListener {
   struct CallbackHolder{
     NanCallback* callback;
     const char* data;
+    int id, port;
     bool rval;
     bool complete;
   } acceptCallback, joinedCallback;

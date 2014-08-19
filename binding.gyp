@@ -67,6 +67,7 @@
         'src/SessionPortListenerWrapper.cc',
         'src/SessionPortListenerImpl.cc',
         'src/SignalHandlerImpl.cc',
+        'src/util.cc',
         'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
       ]
     },

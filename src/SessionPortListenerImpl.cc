@@ -26,12 +26,12 @@ void SessionPortListenerImpl::accept_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
     v8::Handle<v8::Value> argv[] = {
+      NanNew<v8::Integer>(holder->port),
       NanNew<v8::String>(holder->data)
     };
-    v8::Handle<v8::Value> accept = holder->callback->Call(1, argv);
+    v8::Handle<v8::Value> accept = holder->callback->Call(2, argv);
     holder->rval = accept->BooleanValue();
 
-    printf("accept_callback result : %s\n", holder->rval ? "TRUE" : "FALSE");
     holder->complete = true;
 }
 
@@ -39,14 +39,18 @@ void SessionPortListenerImpl::joined_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
     v8::Handle<v8::Value> argv[] = {
+      NanNew<v8::Integer>(holder->port),
+      NanNew<v8::Integer>(holder->id),
       NanNew<v8::String>(holder->data)
     };
-    holder->callback->Call(1, argv);
+    holder->callback->Call(3, argv);
 }
 
 void SessionPortListenerImpl::SessionJoined(ajn::SessionPort sessionPort, ajn::SessionId id, const char* joiner){
     joined_async.data = (void*) &joinedCallback;
     joinedCallback.data = joiner;
+    joinedCallback.id = id;
+    joinedCallback.port = sessionPort;
     uv_async_send(&joined_async);
 }
 
@@ -54,6 +58,7 @@ bool SessionPortListenerImpl::AcceptSessionJoiner(ajn::SessionPort sessionPort, 
     accept_async.data = (void*) &acceptCallback;
     acceptCallback.data = joiner;
     acceptCallback.complete = false;
+    acceptCallback.port = sessionPort;
     uv_async_send(&accept_async);
     while(!acceptCallback.complete){sleep(1);}
     return acceptCallback.rval;
