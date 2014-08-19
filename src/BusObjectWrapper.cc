@@ -39,7 +39,7 @@ BusObjectWrapper::BusObjectWrapper(const char* path):object(new BusObjectImpl(pa
 void BusObjectWrapper::Init () {
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(BusObjectWrapper::New);
   NanAssignPersistent(busobject_constructor, tpl);
-  tpl->SetClassName(NanSymbol("BusObject"));
+  tpl->SetClassName(NanNew<v8::String>("BusObject"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   NODE_SET_PROTOTYPE_METHOD(tpl, "addInterface", BusObjectWrapper::AddInterfaceInternal);
   NODE_SET_PROTOTYPE_METHOD(tpl, "signal", BusObjectWrapper::Signal);

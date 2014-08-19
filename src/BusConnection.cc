@@ -39,7 +39,7 @@ BusConnection::BusConnection(const char* shortName, bool allowRemoteMessages, in
 void BusConnection::Init () {
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(BusConnection::New);
   NanAssignPersistent(bus_constructor, tpl);
-  tpl->SetClassName(NanSymbol("BusAttachment"));
+  tpl->SetClassName(NanNew<v8::String>("BusAttachment"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   NODE_SET_PROTOTYPE_METHOD(tpl, "start", BusConnection::Start);
   NODE_SET_PROTOTYPE_METHOD(tpl, "stop", BusConnection::Stop);
@@ -194,7 +194,7 @@ NAN_METHOD(BusConnection::JoinSession) {
   //   SessionPortListenerWrapper* wrapper = node::ObjectWrap::Unwrap<SessionPortListenerWrapper>(args[2].As<v8::Object>());
   //   QStatus status = connection->bus->JoinSession(*NanUtf8String(args[0]), args[1]->IntegerValue(), *(wrapper->listener), args[1]->IntegerValue(), opts);
   // }else{
-    QStatus status = connection->bus->JoinSession(strdup(*NanUtf8String(args[0])), static_cast<ajn::SessionPort>(args[1]->Int32Value()), NULL, sessionId, opts);
+  connection->bus->JoinSession(strdup(*NanUtf8String(args[0])), static_cast<ajn::SessionPort>(args[1]->Int32Value()), NULL, sessionId, opts);
   // }
 
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(sessionId)));

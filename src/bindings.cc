@@ -17,15 +17,15 @@ void init(Handle<Object> target) {
   SessionPortListenerWrapper::Init();
 
   Local<Function> busWrap = FunctionTemplate::New(BusAttachmentWrapper)->GetFunction();
-  target->Set(NanSymbol("BusAttachment"), busWrap);
+  target->Set(NanNew<String>("BusAttachment"), busWrap);
   Local<Function> interfaceWrap = FunctionTemplate::New(InterfaceDescriptionWrapper)->GetFunction();
-  target->Set(NanSymbol("InterfaceDescription"), interfaceWrap);
+  target->Set(NanNew<String>("InterfaceDescription"), interfaceWrap);
   Local<Function> listenerConstructor = FunctionTemplate::New(BusListenerConstructor)->GetFunction();
-  target->Set(NanSymbol("BusListener"), listenerConstructor);
+  target->Set(NanNew<String>("BusListener"), listenerConstructor);
   Local<Function> objectConstructor = FunctionTemplate::New(BusObjectConstructor)->GetFunction();
-  target->Set(NanSymbol("BusObject"), objectConstructor);
+  target->Set(NanNew<String>("BusObject"), objectConstructor);
   Local<Function> sessionPortListenerConstructor = FunctionTemplate::New(SessionPortListenerConstructor)->GetFunction();
-  target->Set(NanSymbol("SessionPortListener"), sessionPortListenerConstructor);
+  target->Set(NanNew<String>("SessionPortListener"), sessionPortListenerConstructor);
 }
 
 NODE_MODULE(node_alljoyn, init)

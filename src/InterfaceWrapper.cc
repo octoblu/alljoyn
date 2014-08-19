@@ -25,7 +25,7 @@ InterfaceWrapper::InterfaceWrapper():interface(NULL){}
 void InterfaceWrapper::Init () {
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(InterfaceWrapper::New);
   NanAssignPersistent(interface_constructor, tpl);
-  tpl->SetClassName(NanSymbol("InterfaceDescription"));
+  tpl->SetClassName(NanNew<v8::String>("InterfaceDescription"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   NODE_SET_PROTOTYPE_METHOD(tpl, "addSignal", InterfaceWrapper::AddSignal);
   NODE_SET_PROTOTYPE_METHOD(tpl, "activate", InterfaceWrapper::Activate);

@@ -1,0 +1,43 @@
+# Copyright (c) 2013 - 2014, AllSeen Alliance. All rights reserved.
+#
+#    Permission to use, copy, modify, and/or distribute this software for any
+#    purpose with or without fee is hereby granted, provided that the above
+#    copyright notice and this permission notice appear in all copies.
+#
+#    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+#    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+#    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+#    ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+#    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+#    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+#    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+Import('nsenv')
+
+samples_env = nsenv.Clone()
+
+samples_env.Append(CPPPATH = samples_env.Dir('common').srcnode())
+samples_env.Append(CPPPATH = samples_env.Dir('$APP_COMMON_DIR/cpp/samples_common').srcnode())
+samples_env.Prepend(LIBS = ['alljoyn_notification', 'alljoyn_about', 'alljoyn_services_common'])
+
+if samples_env['BR'] == 'on' and samples_env.has_key('brobj') and samples_env.has_key('ajrlib'):
+    # Build apps with bundled daemon support
+    samples_env.Prepend(LIBS = [samples_env['brobj'], samples_env['ajrlib']])
+    samples_env.Append(CPPDEFINES='QCC_USING_BD')
+
+
+cobjs = samples_env.SConscript('common/SConscript', {'env': samples_env})
+
+sample_dirs = [
+    'ConsumerService',
+    'ProducerBasic',
+    'ProducerService',
+    'TestService'
+    ]
+
+
+exports = { 'env':samples_env, 'cobjs': cobjs }
+
+progs = [ samples_env.SConscript('%s/SConscript' % sampleapp, exports = exports) for sampleapp in sample_dirs ]
+
+Return('progs')

@@ -18,19 +18,33 @@
       'alljoyn/alljoyn_core/router',
       'alljoyn/alljoyn_core/router/posix',
       'alljoyn/alljoyn_core/src',
-      'alljoyn/common/inc'
+      'alljoyn/common/inc',
+      'alljoyn/services/services_common/cpp/inc',
+      'alljoyn/services/about/cpp/inc',
+      'alljoyn/services/notification/cpp/inc',
+      "<!(node -e \"require('nan')\")"
     ],
     'cflags':[
-      '-Wno-error=non-pod-varargs'
+      '-Wno-error=non-pod-varargs',
+      '-Wno-ignored-qualifiers'
     ],
     'xcode_settings': {
-        'OTHER_CFLAGS': [ '-Wno-error=non-pod-varargs' ]
+        'OTHER_CFLAGS': [ 
+          '-Wno-error=non-pod-varargs',
+          '-Wno-ignored-qualifiers'
+         ]
     },
     'conditions': [
       ['OS=="mac"', {
         'defines': [
           'QCC_OS_GROUP_POSIX',
           'QCC_OS_DARWIN'
+        ]
+      }],
+      ['OS=="linux"', {
+        'defines': [
+          'QCC_OS_GROUP_POSIX',
+          'QCC_OS_LINUX'
         ]
       }]
     ]
@@ -40,34 +54,11 @@
       'target_name': 'node-alljoyn',
       'dependencies': [
         'alljoyn',
-        'ajrouter'
-      ],
-      'defines': [
-        'QCC_OS_GROUP_POSIX',
-        'QCC_OS_DARWIN'
-      ],
-      'include_dirs': [
-        'gen',
-        'gen/alljoyn',
-        'alljoyn/alljoyn_core/inc',
-        'alljoyn/alljoyn_core/inc/alljoyn',
-        'alljoyn/alljoyn_core/router',
-        'alljoyn/alljoyn_core/router/posix',
-        'alljoyn/alljoyn_core/src',
-        'alljoyn/common/inc',
-        "<!(node -e \"require('nan')\")"
+        'ajrouter',
+        'ajnotification'
       ],
       'sources': [
-        'src/bindings.cc',
-        'src/InterfaceWrapper.cc',
-        'src/BusConnection.cc',
-        'src/BusListenerWrapper.cc',
-        'src/BusListenerImpl.cc',
-        'src/BusObjectWrapper.cc',
-        'src/SessionPortListenerWrapper.cc',
-        'src/SessionPortListenerImpl.cc',
-        'src/SignalHandlerImpl.cc',
-        'src/util.cc',
+        '<!@(ls -1 src/*.cc)',
         'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
       ]
     },
@@ -89,7 +80,6 @@
       'sources': [
         'alljoyn/alljoyn_core/src/AllJoynCrypto.cc',
         'alljoyn/alljoyn_core/src/AuthMechSRP.cc',
-        'alljoyn/alljoyn_core/src/darwin/ClientTransport.cc',
         'alljoyn/alljoyn_core/src/InterfaceDescription.cc',
         'alljoyn/alljoyn_core/src/Message_Parse.cc',
         'alljoyn/alljoyn_core/src/ProtectedAuthListener.cc',
@@ -178,6 +168,32 @@
         'alljoyn/common/crypto/openssl/CryptoRand.cc',
         'alljoyn/common/crypto/openssl/OpenSsl.cc'
       ],
+      'conditions': [
+        ['OS=="mac"', {
+          'sources': [
+            'alljoyn/alljoyn_core/src/darwin/ClientTransport.cc'
+          ]
+        }],
+        ['OS=="linux"', {
+          'sources': [
+            'alljoyn/alljoyn_core/src/posix/ClientTransport.cc'
+          ]
+        }]
+      ]
+    },
+    {
+      'target_name': 'ajnotification',
+      'product_prefix': 'lib',
+      'type': 'static_library',
+      'dependencies': [
+        'alljoynstatus',
+        'alljoyn'
+      ],
+      'sources': [
+        '<!@(ls -1 alljoyn/services/about/cpp/src/*.cc)',
+        '<!@(ls -1 alljoyn/services/notification/cpp/src/*.cc)',
+        '<!@(ls -1 alljoyn/services/services_common/cpp/src/*.cc)'
+      ],
     },
     {
       'target_name': 'ajrouter',
@@ -186,9 +202,6 @@
       'dependencies': [
         'alljoynstatus',
         'alljoyn'
-      ],
-      'cflags_cc':[
-        '-Wno-error=non-pod-varargs'
       ],
       'sources': [
         'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc',
@@ -221,6 +234,18 @@
         'alljoyn/alljoyn_core/router/packetengine/PacketEngineStream.cc',
         'alljoyn/alljoyn_core/router/packetengine/PacketPool.cc'
       ],
+      'conditions': [
+        ['OS=="mac"', {
+          'sources': [
+            'alljoyn/alljoyn_core/router/darwin/DaemonTransport.cc'
+          ]
+        }],
+        ['OS=="linux"', {
+          'sources': [
+            'alljoyn/alljoyn_core/router/posix/DaemonTransport.cc'
+          ]
+        }]
+      ]
     },
     {
       'target_name': 'allchat',

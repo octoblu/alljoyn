@@ -1,0 +1,40 @@
+
+AllJoyn Notification Service Version 14.06 Release Notes
+--------------------------------------------------------
+
+Platform Support
+----------------
+
+ 1) Linux Ubuntu (64 bit x86)
+ 2) Android Gingerbread 2.3.4 (ARM7)
+ 3) Android Ice Cream Sandwich 4.0 (ARM7)
+ 4) Android JellyBean 4.1 (ARM7)
+ 5) Android KitKat 4.4 (ARM7)
+ 6) iOS 7 and 7.1
+ 7) OpenWRT 
+
+Features added in Version 14.06
+-------------------------------
+
+
+Issues Addressed in Version 14.06
+---------------------------------
+ASABASE-27 	Notification should not be sent when giving an empty/ null value for the appID 
+ASABASE-34 	IOS: It is not possible to scroll down to the bottom notification and perform an action/dismiss on it 
+ASABASE-73 Add notification + actions to ac sample app
+ASABASE-127 Remove the addMatch method call from the application layer of the sample applications 
+ASABASE-134 Align with changes made to aj_introspect.c where wildcard object path '*' was replaced with '!' 
+ASABASE-145 Setting DeviceName does not take effect in some applications 
+ASABASE-169 Notification sample app does not display CPS from notification with actions 
+ASABASE-181 No need to set password for router now that it is open 
+
+Known Issues
+------------
+
+Compatibility
+-------------
+
+Change history
+--------------
+14.06 - bug fixes, updates needed to match new core 14.06, added notification with actions to samples that didn't support it.
+14.02 - 1st AllSeen Alliance release

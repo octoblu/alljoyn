@@ -46,7 +46,7 @@ BusListenerWrapper::~BusListenerWrapper(){
 void BusListenerWrapper::Init () {
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(BusListenerWrapper::New);
   NanAssignPersistent(listener_constructor, tpl);
-  tpl->SetClassName(NanSymbol("BusListener"));
+  tpl->SetClassName(NanNew<v8::String>("BusListener"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 }
 

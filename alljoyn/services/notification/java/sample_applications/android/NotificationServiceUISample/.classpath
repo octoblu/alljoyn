@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="lib" path="libs/alljoyn_about.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/alljoyn_apps_android_utils.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/alljoyn.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/NotificationService.jar" sourcepath="libs/NotificationService_src.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/NSCommons.jar" sourcepath="libs/NSCommons_src.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/NSNativePlatformAndr.jar" sourcepath="libs/NSNativePlatformAndr_src.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/ControlPanelAdapter.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/ControlPanelService.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/android-support-v4.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

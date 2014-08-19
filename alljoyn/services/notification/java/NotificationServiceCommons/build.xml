@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <project name="NSCommons" basedir="." default="jar">
+     <property name="src.dir"     value="src"/>
+     <property name="build.dir"   value="build"/>
+     <property name="classes.dir" value="${build.dir}/classes" />
+     <property name="deploy.dir"  value="${build.dir}/deploy" /> 
+     
+     <target name="clean">
+         <echo message="${ant.project.name} Cleaning ${build.dir} directory..."/>
+         <delete dir="${build.dir}" includeemptydirs="true" quiet="true"/>
+     </target>
+     
+     <target name="init" depends="clean">
+         <echo message="${ant.project.name} Starting init..."/>
+         <echo message="${ant.project.name} Create build directory"/>
+         <mkdir dir="${build.dir}"/>
+         <echo message="${ant.project.name} Create ${classes.dir} directory"/>
+         <mkdir dir="${classes.dir}"/>
+         <echo message="${ant.project.name} Create ${deploy.dir} directory"/>
+         <mkdir dir="${deploy.dir}"/>                                  
+     </target>  
+     
+    <target name="compile" depends="init" description="${ant.project.name} Compiles the code">        
+         <echo message="${ant.project.name} Starting compilation..."/>        
+         <path id="classpath">
+                <fileset dir="${deploy.dir}" includes="**/*.jar"/>
+         </path>
+         <echo message="${ant.project.name} Compile project"/>
+         <javac source="1.6" target="1.6" srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" debug="true" includeantruntime="false"/>
+     </target>
+     
+     <target name="jar" depends="compile" description="${ant.project.name} Creates JAR file">
+          <echo message="${ant.project.name} Creates compiled JAR file"/>
+          <jar destfile="${deploy.dir}/${ant.project.name}.jar" basedir="${classes.dir}" />
+          
+           <echo message="${ant.project.name} Creates source JAR file. *** FOR PRODUCTION ? *** "/>
+          <jar destfile="${deploy.dir}/${ant.project.name}_src.jar" basedir="${src.dir}" />
+     </target>
+ </project>

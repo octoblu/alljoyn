@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (c) 2014, AllSeen Alliance. All rights reserved.
+
+     Permission to use, copy, modify, and/or distribute this software for any
+     purpose with or without fee is hereby granted, provided that the above
+     copyright notice and this permission notice appear in all copies.
+
+     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+     WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+     ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+     WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<resources>
+
+    <string name="app_name">NotificationService UI Sample</string>
+    <string name="menu_settings">Settings</string>
+    <string name="eymh">Enter your message here</string>
+    <string name="ean">Enter app name</string>
+    <string name="send">Send</string>
+    <string name="shutdown">Shutdown</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="msg_type">Message Type:</string>
+    <string name="ttl">TTL: </string>
+    <string name="ttl_dflt">40000</string>
+    <string name="colors">Color: </string>
+    <string name="producer">Producer</string>
+    <string name="consumer">Consumer</string>
+    <string name="defaultLang">English</string>
+    <string name="text_icon">Icon:</string>
+    <string name="text_audio">Audio:</string>
+    <string name="rich_icon">url</string>
+    <string name="rich_audio">url</string>
+    <string name="rich_icon_objPath">obj</string>
+    <string name="rich_audio_objPath">obj</string>
+    <string name="url_rich">URL</string>
+    <string name="content_rich">Content</string>
+    <string name="dismiss_btn_label">Dismiss</string>
+    <string name="action_btn_label">Action</string>
+    <string name="title_activity_display_message">DisplayMessageActivity</string>
+    <string name="title_activity_control_panel">Control Panel</string>
+    <string name="action_settings">Settings</string>
+    <string name="label_loading">Loading control panel</string>
+    <string name="label_language">Select panel language</string>
+
+</resources>
