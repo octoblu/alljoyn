@@ -11,7 +11,6 @@ NAN_METHOD(BusAttachmentWrapper);
 
 class BusConnection : public node::ObjectWrap {
   private:
-  	ajn::BusAttachment* bus;
 
     static NAN_METHOD(New);
     static NAN_METHOD(Start);
@@ -31,6 +30,7 @@ class BusConnection : public node::ObjectWrap {
     static NAN_METHOD(RegisterSignalHandler);
 
   public:
+    ajn::BusAttachment* bus;
   	BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent);
     static void Init ();
     static v8::Handle<v8::Value> NewInstance(v8::Local<v8::String> &appName);

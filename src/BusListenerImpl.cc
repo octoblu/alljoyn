@@ -66,8 +66,6 @@ void BusListenerImpl::LostAdvertisedName(const char* name, ajn::TransportMask tr
 }
 
 void BusListenerImpl::NameOwnerChanged(const char* busName, const char* previousOwner, const char* newOwner){
-    printf("NameOwnerChanged: name=%s, oldOwner=%s, newOwner=%s\n", busName, previousOwner ? previousOwner : "<none>",
-           newOwner ? newOwner : "<none>");
     name_change_async.data = (void*) &nameChanged;
     nameChanged.data = busName;
     uv_async_send(&name_change_async);

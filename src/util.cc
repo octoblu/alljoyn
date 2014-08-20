@@ -60,4 +60,3 @@ ajn::MsgArg* objToMsgArg(v8::Local<v8::Value> obj){
 	}
 	//TODO obj/array
 }
-
