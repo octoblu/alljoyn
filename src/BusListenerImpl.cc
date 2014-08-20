@@ -15,15 +15,6 @@ BusListenerImpl::BusListenerImpl(NanCallback* foundNameCallback, NanCallback* lo
 }
 
 BusListenerImpl::~BusListenerImpl(){
-  if(foundName.callback){
-    delete foundName.callback;
-  }
-  if(lostName.callback){
-    delete lostName.callback;
-  }
-  if(nameChanged.callback){
-    delete nameChanged.callback;
-  }
 }
 
 void BusListenerImpl::found_callback(uv_async_t *handle, int status) {

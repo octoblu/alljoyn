@@ -38,9 +38,6 @@ BusListenerWrapper::BusListenerWrapper(NanCallback* foundName, NanCallback* lost
 }
 
 BusListenerWrapper::~BusListenerWrapper(){
-  if(listener){
-    delete listener;
-  }
 }
 
 void BusListenerWrapper::Init () {

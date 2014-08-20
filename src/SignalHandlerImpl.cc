@@ -12,9 +12,6 @@ SignalHandlerImpl::SignalHandlerImpl(NanCallback* sig){
 }
 
 SignalHandlerImpl::~SignalHandlerImpl(){
-  if(signalCallback.callback){
-    delete signalCallback.callback;
-  }
 }
 
 void SignalHandlerImpl::signal_callback(uv_async_t *handle, int status) {

@@ -33,7 +33,10 @@ NAN_METHOD(BusAttachmentWrapper) {
 }
 
 BusConnection::BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent){
-    bus = new ajn::BusAttachment(shortName, allowRemoteMessages, maxConcurrent);
+  bus = new ajn::BusAttachment(shortName, allowRemoteMessages, maxConcurrent);
+}
+
+BusConnection::~BusConnection(){
 }
 
 void BusConnection::Init () {

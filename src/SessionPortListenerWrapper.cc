@@ -37,9 +37,6 @@ SessionPortListenerWrapper::SessionPortListenerWrapper(NanCallback* accept, NanC
 }
 
 SessionPortListenerWrapper::~SessionPortListenerWrapper(){
-  if(listener){
-    delete listener;
-  }
 }
 
 void SessionPortListenerWrapper::Init () {

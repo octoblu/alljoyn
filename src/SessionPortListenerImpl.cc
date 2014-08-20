@@ -14,12 +14,6 @@ SessionPortListenerImpl::SessionPortListenerImpl(NanCallback* accept, NanCallbac
 }
 
 SessionPortListenerImpl::~SessionPortListenerImpl(){
-  if(acceptCallback.callback){
-    delete acceptCallback.callback;
-  }
-  if(joinedCallback.callback){
-    delete joinedCallback.callback;
-  }
 }
 
 void SessionPortListenerImpl::accept_callback(uv_async_t *handle, int status) {

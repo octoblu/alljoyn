@@ -32,6 +32,7 @@ class BusConnection : public node::ObjectWrap {
   public:
     ajn::BusAttachment* bus;
   	BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent);
+    ~BusConnection();
     static void Init ();
     static v8::Handle<v8::Value> NewInstance(v8::Local<v8::String> &appName);
 };
