@@ -114,7 +114,7 @@ ajn::SessionPort NotificationBusListener::getSessionPort(){
 }
 
 bool NotificationBusListener::AcceptSessionJoiner(ajn::SessionPort port, const char* joiner, const ajn::SessionOpts& opts){
-  return sessionPort == this->sessionPort;
+  return true;
 }
 
 
