@@ -52,7 +52,12 @@
         'defines': [
           'QCC_OS_GROUP_POSIX',
           'QCC_OS_LINUX'
-        ]
+        ],
+        'link_settings': {
+          'libraries': [
+          '-lrt'
+          ]
+        },
       }]
     ]
   },
