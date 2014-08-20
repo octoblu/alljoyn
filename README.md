@@ -40,7 +40,7 @@ bus.createInterface('org.alljoyn.bus.samples.chat', interface);
 
 // add a signal to the interface, specifying what kind of message we will accept
 // s = string, d = number, b = boolean
-interface.addSignal("Chat", "s",  "msg"));
+interface.addSignal("Chat", "s",  "msg");
 
 // register the listener on the bus
 bus.registerBusListener(listener)
@@ -72,7 +72,7 @@ var portListener = alljoyn.SessionPortListener(
 );
 
 // add the chat interface to the BusObject
-object.addInterface(interface));
+object.addInterface(interface);
 
 // register signal handler for BusObject
 // this function will be called for each received message
@@ -87,6 +87,7 @@ bus.registerSignalHandler(object,
 ## Currently Supported Operating Systems
 
 * Mac OSX
+* Linux (Ubuntu 14.04 tested)
 
 ## License
 
