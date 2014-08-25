@@ -1,4 +1,4 @@
-var alljoyn = require('./');
+var alljoyn = require('alljoyn');
 
 console.log("Test loading alljoyn bus...", alljoyn);
 var sessionId = 0;
@@ -45,7 +45,7 @@ console.log("RegisterSignalHandler "+bus.registerSignalHandler(chatObject, funct
   console.log(msg["0"]);
 }, inter, "Chat"));
 console.log("RegisterBusObject "+bus.registerBusObject(chatObject));
-console.log("Connect"+bus.connect());
+console.log("Connect "+bus.connect());
 
 console.log("RequestName "+bus.requestName(advertisedName));
 console.log("BindSessionPort "+bus.bindSessionPort(27, portListener));

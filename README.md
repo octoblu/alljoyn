@@ -91,4 +91,4 @@ bus.registerSignalHandler(object,
 
 ## License
 
-MIT
+[ISC](http://en.wikipedia.org/wiki/ISC_license)
