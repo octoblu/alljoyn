@@ -27,6 +27,8 @@
 #include <Mswsock.h>
 #include <ws2tcpip.h>
 
+#include <algorithm>
+
 #include <qcc/IPAddress.h>
 #include <qcc/Socket.h>
 #include <qcc/IfConfig.h>

@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <algorithm>
 
 #include <qcc/BufferedSource.h>
 #include <qcc/Thread.h>

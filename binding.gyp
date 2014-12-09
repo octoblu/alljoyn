@@ -16,7 +16,6 @@
       'alljoyn/alljoyn_core/inc',
       'alljoyn/alljoyn_core/inc/alljoyn',
       'alljoyn/alljoyn_core/router',
-      'alljoyn/alljoyn_core/router/posix',
       'alljoyn/alljoyn_core/src',
       'alljoyn/common/inc',
       'alljoyn/services/services_common/cpp/inc',
@@ -34,27 +33,56 @@
           '-Wno-ignored-qualifiers'
          ]
     },
-    'link_settings': {
-      'libraries': [
-      '-lstdc++',
-      '-lcrypto',
-      '-lpthread'
-      ]
-    },
     'conditions': [
       ['OS=="mac"', {
         'defines': [
           'QCC_OS_GROUP_POSIX',
           'QCC_OS_DARWIN'
-        ]
+        ],
+        'include_dirs': [
+          'alljoyn/alljoyn_core/router/posix',
+        ],
+        'link_settings': {
+          'libraries': [
+          '-lstdc++',
+          '-lcrypto',
+          '-lpthread'
+          ]
+        },
+      }],
+      ['OS=="win"', {
+        'defines': [
+          'QCC_OS_GROUP_WINDOWS',
+          'WIN32_LEAN_AND_MEAN',
+          'UNICODE'
+        ],
+        'include_dirs': [
+          'alljoyn/alljoyn_core/router/windows',
+        ],
+        'link_settings': {
+          'libraries': [
+          '-lws2_32',
+          '-lSecur32',
+          '-lIphlpapi',
+          '-lcrypt32',
+          '-lNcrypt',
+          '-lBcrypt'
+          ]
+        }
       }],
       ['OS=="linux"', {
         'defines': [
           'QCC_OS_GROUP_POSIX',
           'QCC_OS_LINUX'
         ],
+        'include_dirs': [
+          'alljoyn/alljoyn_core/router/posix',
+        ],
         'link_settings': {
           'libraries': [
+          '-lstdc++',
+          '-lcrypto',
+          '-lpthread',
           '-lrt'
           ]
         },
@@ -66,8 +94,19 @@
       'target_name': 'node-alljoyn',
       'dependencies': [
         'alljoyn',
-        'ajrouter',
-        'ajnotification'
+        'ajrouter'
+      ],
+      'conditions': [
+        ['OS=="linux"', {
+          'dependencies': [
+            'ajnotification'
+          ],
+        }],
+        ['OS=="mac"', {
+          'dependencies': [
+            'ajnotification'
+          ],
+        }],
       ],
       'sources': [
         '<!@(ls -1 src/*.cc)',
@@ -132,22 +171,6 @@
         'alljoyn/alljoyn_core/src/Message_Gen.cc',
         'alljoyn/alljoyn_core/src/PeerState.cc',
         'alljoyn/alljoyn_core/src/SignalTable.cc',
-        'alljoyn/common/os/posix/Environ.cc',
-        'alljoyn/common/os/posix/FileStream.cc',
-        'alljoyn/common/os/posix/IfConfigLinux.cc',
-        'alljoyn/common/os/posix/OSLogger.cc',
-        'alljoyn/common/os/posix/Socket.cc',
-        'alljoyn/common/os/posix/Thread.cc',
-        'alljoyn/common/os/posix/UARTStreamDarwin.cc',
-        'alljoyn/common/os/posix/atomic.cc',
-        'alljoyn/common/os/posix/osUtil.cc',
-        'alljoyn/common/os/posix/Event.cc',
-        'alljoyn/common/os/posix/IfConfigDarwin.cc',
-        'alljoyn/common/os/posix/Mutex.cc',
-        'alljoyn/common/os/posix/RWLock.cc',
-        'alljoyn/common/os/posix/SslSocket.cc',
-        'alljoyn/common/os/posix/UARTStreamLinux.cc',
-        'alljoyn/common/os/posix/time.cc',
         'alljoyn/common/src/ASN1.cc',
         'alljoyn/common/src/BufferedSource.cc',
         'alljoyn/common/src/Crypto.cc',
@@ -176,20 +199,80 @@
         'alljoyn/common/src/StringSource.cc',
         'alljoyn/common/src/Timer.cc',
         'alljoyn/common/src/Util.cc',
-        'alljoyn/common/crypto/openssl/CryptoAES.cc',
-        'alljoyn/common/crypto/openssl/CryptoHash.cc',
-        'alljoyn/common/crypto/openssl/CryptoRSA.cc',
-        'alljoyn/common/crypto/openssl/CryptoRand.cc',
-        'alljoyn/common/crypto/openssl/OpenSsl.cc'
       ],
       'conditions': [
+        ['OS=="win"', {
+          'sources': [
+            'alljoyn/common/os/windows/Environ.cc',
+            'alljoyn/common/os/windows/FileStream.cc',
+            'alljoyn/common/os/windows/OSLogger.cc',
+            'alljoyn/common/os/windows/Socket.cc',
+            'alljoyn/common/os/windows/Thread.cc',
+            'alljoyn/common/os/windows/UARTStream.cc',
+            'alljoyn/common/os/windows/IfConfig.cc',
+            'alljoyn/common/os/windows/osUtil.cc',
+            'alljoyn/common/os/windows/Event.cc',
+            'alljoyn/common/os/windows/Mutex.cc',
+            'alljoyn/common/os/windows/RWLock.cc',
+            'alljoyn/common/os/windows/SslSocket.cc',
+            'alljoyn/common/os/windows/time.cc',
+            'alljoyn/common/os/windows/utility.cc',
+            'alljoyn/common/crypto/cng/CryptoAES.cc',
+            'alljoyn/common/crypto/cng/CryptoHash.cc',
+            'alljoyn/common/crypto/cng/CryptoRSA.cc',
+            'alljoyn/common/crypto/cng/CryptoRand.cc',
+            'alljoyn/alljoyn_core/src/windows/ClientTransport.cc'
+          ]
+        }],
         ['OS=="mac"', {
           'sources': [
+            'alljoyn/common/os/posix/Environ.cc',
+            'alljoyn/common/os/posix/FileStream.cc',
+            'alljoyn/common/os/posix/IfConfigLinux.cc',
+            'alljoyn/common/os/posix/OSLogger.cc',
+            'alljoyn/common/os/posix/Socket.cc',
+            'alljoyn/common/os/posix/Thread.cc',
+            'alljoyn/common/os/posix/UARTStreamDarwin.cc',
+            'alljoyn/common/os/posix/atomic.cc',
+            'alljoyn/common/os/posix/osUtil.cc',
+            'alljoyn/common/os/posix/Event.cc',
+            'alljoyn/common/os/posix/IfConfigDarwin.cc',
+            'alljoyn/common/os/posix/Mutex.cc',
+            'alljoyn/common/os/posix/RWLock.cc',
+            'alljoyn/common/os/posix/SslSocket.cc',
+            'alljoyn/common/os/posix/UARTStreamLinux.cc',
+            'alljoyn/common/os/posix/time.cc',
+            'alljoyn/common/crypto/openssl/CryptoAES.cc',
+            'alljoyn/common/crypto/openssl/CryptoHash.cc',
+            'alljoyn/common/crypto/openssl/CryptoRSA.cc',
+            'alljoyn/common/crypto/openssl/CryptoRand.cc',
+            'alljoyn/common/crypto/openssl/OpenSsl.cc',
             'alljoyn/alljoyn_core/src/darwin/ClientTransport.cc'
           ]
         }],
         ['OS=="linux"', {
           'sources': [
+            'alljoyn/common/os/posix/Environ.cc',
+            'alljoyn/common/os/posix/FileStream.cc',
+            'alljoyn/common/os/posix/IfConfigLinux.cc',
+            'alljoyn/common/os/posix/OSLogger.cc',
+            'alljoyn/common/os/posix/Socket.cc',
+            'alljoyn/common/os/posix/Thread.cc',
+            'alljoyn/common/os/posix/UARTStreamDarwin.cc',
+            'alljoyn/common/os/posix/atomic.cc',
+            'alljoyn/common/os/posix/osUtil.cc',
+            'alljoyn/common/os/posix/Event.cc',
+            'alljoyn/common/os/posix/IfConfigDarwin.cc',
+            'alljoyn/common/os/posix/Mutex.cc',
+            'alljoyn/common/os/posix/RWLock.cc',
+            'alljoyn/common/os/posix/SslSocket.cc',
+            'alljoyn/common/os/posix/UARTStreamLinux.cc',
+            'alljoyn/common/os/posix/time.cc',
+            'alljoyn/common/crypto/openssl/CryptoAES.cc',
+            'alljoyn/common/crypto/openssl/CryptoHash.cc',
+            'alljoyn/common/crypto/openssl/CryptoRSA.cc',
+            'alljoyn/common/crypto/openssl/CryptoRand.cc',
+            'alljoyn/common/crypto/openssl/OpenSsl.cc',
             'alljoyn/alljoyn_core/src/posix/ClientTransport.cc'
           ]
         }]
@@ -203,10 +286,21 @@
         'alljoynstatus',
         'alljoyn'
       ],
-      'sources': [
-        '<!@(ls -1 alljoyn/services/about/cpp/src/*.cc)',
-        '<!@(ls -1 alljoyn/services/notification/cpp/src/*.cc)',
-        '<!@(ls -1 alljoyn/services/services_common/cpp/src/*.cc)'
+      'conditions': [
+        ['OS=="linux"', {
+          'sources': [
+            '<!@(ls -1 alljoyn/services/about/cpp/src/*.cc)',
+            '<!@(ls -1 alljoyn/services/notification/cpp/src/*.cc)',
+            '<!@(ls -1 alljoyn/services/services_common/cpp/src/*.cc)'
+          ],
+        }],
+        ['OS=="mac"', {
+          'sources': [
+            '<!@(ls -1 alljoyn/services/about/cpp/src/*.cc)',
+            '<!@(ls -1 alljoyn/services/notification/cpp/src/*.cc)',
+            '<!@(ls -1 alljoyn/services/services_common/cpp/src/*.cc)'
+          ],
+        }],
       ],
     },
     {
@@ -236,8 +330,6 @@
         'alljoyn/alljoyn_core/router/SessionlessObj.cc',
         'alljoyn/alljoyn_core/router/VirtualEndpoint.cc',
         'alljoyn/alljoyn_core/router/PermissionMgr.cc',
-        'alljoyn/alljoyn_core/router/posix/PermissionMgr2.cc',
-        'alljoyn/alljoyn_core/router/posix/Socket.cc',
         'alljoyn/alljoyn_core/router/ns/IpNameService.cc',
         'alljoyn/alljoyn_core/router/ns/IpNameServiceImpl.cc',
         'alljoyn/alljoyn_core/router/ns/IpNsProtocol.cc',
@@ -250,11 +342,22 @@
       'conditions': [
         ['OS=="mac"', {
           'sources': [
-            'alljoyn/alljoyn_core/router/darwin/DaemonTransport.cc'
+            'alljoyn/alljoyn_core/router/darwin/DaemonTransport.cc',
+            'alljoyn/alljoyn_core/router/posix/PermissionMgr2.cc',
+            'alljoyn/alljoyn_core/router/posix/Socket.cc',
+          ]
+        }],
+        ['OS=="win"', {
+          'sources': [
+            'alljoyn/alljoyn_core/router/windows/PermissionMgr2.cc',
+            'alljoyn/alljoyn_core/router/windows/Socket.cc',
+            'alljoyn/alljoyn_core/router/windows/DaemonTransport.cc'
           ]
         }],
         ['OS=="linux"', {
           'sources': [
+            'alljoyn/alljoyn_core/router/posix/PermissionMgr2.cc',
+            'alljoyn/alljoyn_core/router/posix/Socket.cc',
             'alljoyn/alljoyn_core/router/posix/DaemonTransport.cc'
           ]
         }]

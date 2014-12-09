@@ -174,14 +174,14 @@ bool DebugControl::Check(DbgMsgType type, const char* module)
         return (level & 0x1);
 
     case DBG_GEN_MESSAGE:
-        return (level & 0x2);
+        return !!(level & 0x2);
 
     case DBG_API_TRACE:
-        return (level & 0x4);
+        return !!(level & 0x4);
 
     case DBG_REMOTE_DATA:
     case DBG_LOCAL_DATA:
-        return (level & 0x8);
+        return !!(level & 0x8);
 
     }
 

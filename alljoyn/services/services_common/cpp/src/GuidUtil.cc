@@ -72,7 +72,7 @@ const char* GuidUtil::GetDeviceIdFileName()
     if (sFileName.length() == 0) {
         //Get the path of the binary
         char buf[PATH_MAX] = { 0 };
-        ssize_t ret = readlink("/proc/self/exe", buf, PATH_MAX);
+        size_t ret = readlink("/proc/self/exe", buf, PATH_MAX);
         if (ret < 0) {
             //In that case the file will be created at the current dir
             perror("lstat");

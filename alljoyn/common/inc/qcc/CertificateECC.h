@@ -241,7 +241,7 @@ class CertificateType1 : public CertificateECC {
 
     const bool IsDelegate()
     {
-        return (bool) encoded[OFFSET_DELEGATE];
+        return encoded[OFFSET_DELEGATE] == 1;
     }
 
     void SetDelegate(bool enabled)
@@ -381,7 +381,7 @@ class CertificateType2 : public CertificateECC {
 
     const bool IsDelegate()
     {
-        return (bool) encoded[OFFSET_DELEGATE];
+        return encoded[OFFSET_DELEGATE] == 1;
     }
 
     void SetDelegate(bool enabled)
