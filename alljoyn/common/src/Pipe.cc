@@ -22,6 +22,7 @@
 #include <qcc/platform.h>
 
 #include <cstring>
+#include <algorithm>
 
 #include <qcc/Event.h>
 #include <qcc/Pipe.h>

@@ -24,6 +24,7 @@
 #include <qcc/String.h>
 #include <qcc/StringMapKey.h>
 #include <map>
+#include <algorithm>
 #include <alljoyn/AllJoynStd.h>
 #include <alljoyn/Status.h>
 

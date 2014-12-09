@@ -995,7 +995,7 @@ QStatus MsgArg::VBuildArgs(const char*& signature, size_t sigLen, MsgArg* arg, s
 
         case 'b':
             arg->typeId = ALLJOYN_BOOLEAN;
-            arg->v_bool = (bool)va_arg(argp, int);
+            arg->v_bool = va_arg(argp, int) > 0;
             break;
 
         case 'd':

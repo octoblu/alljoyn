@@ -54,7 +54,14 @@ bool SessionPortListenerImpl::AcceptSessionJoiner(ajn::SessionPort sessionPort, 
     acceptCallback.complete = false;
     acceptCallback.port = sessionPort;
     uv_async_send(&accept_async);
-    while(!acceptCallback.complete){sleep(1);}
+    while(!acceptCallback.complete)
+    {
+#ifdef _WIN32
+        SleepEx(1, TRUE);
+#else
+        sleep(1);
+#endif
+    }
     return acceptCallback.rval;
 }
 

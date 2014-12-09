@@ -227,7 +227,7 @@ QStatus AboutIconClient::GetSize(const char* busName, size_t& size, ajn::Session
     if (ER_OK == proxyBusObj->AddInterface(*p_InterfaceDescription)) {
         status = proxyBusObj->GetProperty(ABOUT_ICON_INTERFACE_NAME, "Size", arg);
         if (ER_OK == status) {
-            size = arg.v_variant.val->v_uint64;
+            size = (size_t)arg.v_variant.val->v_uint64;
         }
     }
     delete proxyBusObj;

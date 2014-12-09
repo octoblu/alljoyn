@@ -63,10 +63,10 @@
  * fpclassify does not properly map in windows this is needed to insure calls to
  * fpclassify(x) will compile in Windows.
  */
-#define fpclassify _fpclass
+//#define fpclassify _fpclass
 
-#define FP_NAN (_FPCLASS_SNAN | _FPCLASS_QNAN)
-#define FP_ZERO (_FPCLASS_NZ | _FPCLASS_PZ)
-#define FP_INFINITE (_FPCLASS_NINF | _FPCLASS_PINF)
+//#define FP_NAN (_FPCLASS_SNAN | _FPCLASS_QNAN)
+//#define FP_ZERO (_FPCLASS_NZ | _FPCLASS_PZ)
+//#define FP_INFINITE (_FPCLASS_NINF | _FPCLASS_PINF)
 /// @endcond
 #endif

@@ -1,3 +1,4 @@
+#ifndef _WIN32
 #include "nan.h"
 
 #include "NotificationWrapper.h"
@@ -117,5 +118,5 @@ bool NotificationBusListener::AcceptSessionJoiner(ajn::SessionPort port, const c
   return true;
 }
 
-
+#endif
 
