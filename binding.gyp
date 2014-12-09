@@ -246,7 +246,7 @@
             'alljoyn/common/crypto/openssl/CryptoHash.cc',
             'alljoyn/common/crypto/openssl/CryptoRSA.cc',
             'alljoyn/common/crypto/openssl/CryptoRand.cc',
-            'alljoyn/common/crypto/openssl/OpenSsl.cc'
+            'alljoyn/common/crypto/openssl/OpenSsl.cc',
             'alljoyn/alljoyn_core/src/darwin/ClientTransport.cc'
           ]
         }],
@@ -272,7 +272,7 @@
             'alljoyn/common/crypto/openssl/CryptoHash.cc',
             'alljoyn/common/crypto/openssl/CryptoRSA.cc',
             'alljoyn/common/crypto/openssl/CryptoRand.cc',
-            'alljoyn/common/crypto/openssl/OpenSsl.cc'
+            'alljoyn/common/crypto/openssl/OpenSsl.cc',
             'alljoyn/alljoyn_core/src/posix/ClientTransport.cc'
           ]
         }]
@@ -342,7 +342,7 @@
       'conditions': [
         ['OS=="mac"', {
           'sources': [
-            'alljoyn/alljoyn_core/router/darwin/DaemonTransport.cc'
+            'alljoyn/alljoyn_core/router/darwin/DaemonTransport.cc',
             'alljoyn/alljoyn_core/router/posix/PermissionMgr2.cc',
             'alljoyn/alljoyn_core/router/posix/Socket.cc',
           ]

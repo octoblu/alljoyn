@@ -114,7 +114,7 @@ class LoggerSetting {
      *
      * @return  true = STDIO FILE stream in use; false = STDIO FILE stream not in use.
      */
-    bool UseStdio() const { return file != nullptr; }
+    bool UseStdio() const { return file != NULL; }
 
     /**
      * Get the current logging filter level.
