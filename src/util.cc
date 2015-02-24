@@ -18,17 +18,11 @@ void msgArgToObject(const ajn::MsgArg* arg, size_t index, v8::Local<v8::Object> 
 		case ajn::ALLJOYN_INT32:
 		  out->Set(index, NanNew<v8::Integer>(arg->v_int32));
 		  break;
-		case ajn::ALLJOYN_INT64:
-		  out->Set(index, NanNew<v8::Integer>(arg->v_int64));
-		  break;
 		case ajn::ALLJOYN_UINT16:
 		  out->Set(index, NanNew<v8::Integer>(arg->v_uint16));
 		  break;
 		case ajn::ALLJOYN_UINT32:
 		  out->Set(index, NanNew<v8::Integer>(arg->v_uint32));
-		  break;
-		case ajn::ALLJOYN_UINT64:
-		  out->Set(index, NanNew<v8::Integer>(arg->v_uint64));
 		  break;
 		case ajn::ALLJOYN_DOUBLE:
 		  out->Set(index, NanNew<v8::Number>(arg->v_double));
@@ -42,6 +36,10 @@ void msgArgToObject(const ajn::MsgArg* arg, size_t index, v8::Local<v8::Object> 
 			  out->Set(index, inner);
 			}
 		  break;
+		case ajn::ALLJOYN_INT64:
+		  // Fallthrough to default because V8::Integer cannot be initialized from 64-bit integer
+		case ajn::ALLJOYN_UINT64:
+		  // Fallthrough to default because V8::Integer cannot be initialized from 64-bit integer
 		default:
 		  printf("Unhandled type: %i - arg#%lu", arg->typeId, index);
 		  break;
