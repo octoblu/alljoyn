@@ -15,7 +15,8 @@ class BusListenerImpl : public ajn::BusListener {
 
     struct CallbackHolder{
       NanCallback* callback;
-      const char* data;
+      char* data;
+      uv_rwlock_t datalock;
     } foundName, lostName, nameChanged;
 
   public:
