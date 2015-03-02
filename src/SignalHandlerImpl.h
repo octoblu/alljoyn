@@ -7,16 +7,17 @@
 #include <InterfaceDescription.h>
 #include <TransportMask.h>
 #include <alljoyn/AllJoynStd.h>
+#include <alljoyn/MessageReceiver.h>
 #include <Message.h>
 
-class SignalHandlerImpl {
+class SignalHandlerImpl : public ajn::MessageReceiver {
   private:
   	uv_loop_t *loop;
   	uv_async_t signal_async;
 
   struct CallbackHolder{
     NanCallback* callback;
-    const char* data;
+    ajn::Message* message;
   } signalCallback;
 
   public:
