@@ -9,9 +9,9 @@ NAN_METHOD(BusObjectConstructor);
 
 class BusObjectImpl : public ajn::BusObject{
 public:
-	BusObjectImpl(const char* path);
+    BusObjectImpl(const char* path);
     ~BusObjectImpl();
-	QStatus AddInter(ajn::InterfaceDescription* interface);
+    QStatus AddInter(ajn::InterfaceDescription* interface);
 };
 
 class BusObjectWrapper : public node::ObjectWrap {
