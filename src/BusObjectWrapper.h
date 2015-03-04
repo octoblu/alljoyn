@@ -8,21 +8,10 @@
 NAN_METHOD(BusObjectConstructor);
 
 class BusObjectImpl : public ajn::BusObject{
-    uv_loop_t *loop;
-    uv_async_t signal_async;
-
-    struct CallbackHolder{
-      NanCallback* callback;
-      ajn::Message *message;
-    } signalCallback;
-
-	public:
-		BusObjectImpl(const char* path);
+public:
+    BusObjectImpl(const char* path);
     ~BusObjectImpl();
-    static void signal_callback(uv_async_t *handle, int status);
-	  QStatus AddInter(ajn::InterfaceDescription* interface);
-    void ReceiveSignal(const ajn::InterfaceDescription::Member *member, const char *srcPath, ajn::Message &message);
-    void SetSignalCallback(NanCallback* callback);
+    QStatus AddInter(ajn::InterfaceDescription* interface);
 };
 
 class BusObjectWrapper : public node::ObjectWrap {

@@ -243,18 +243,17 @@ NAN_METHOD(BusConnection::RegisterSignalHandler) {
     return NanThrowError("RegisterSignalHandler requires a receiver BusObject, signalHandler callback, interface, interface member name, and (optional) srcPath.");
 
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
-  BusObjectWrapper* wrapper = node::ObjectWrap::Unwrap<BusObjectWrapper>(args[0].As<v8::Object>());
   InterfaceWrapper* interface = node::ObjectWrap::Unwrap<InterfaceWrapper>(args[2].As<v8::Object>());
   const ajn::InterfaceDescription::Member* signalMember = interface->interface->GetMember(*NanUtf8String(args[3]));
 
   v8::Local<v8::Function> fn = args[1].As<v8::Function>();
   NanCallback *callback = new NanCallback(fn);
-  wrapper->object->SetSignalCallback(callback);
+  SignalHandlerImpl* signalHandler = new SignalHandlerImpl(callback);
   QStatus status = ER_OK;
   if(args.Length() == 5){
-    status = connection->bus->RegisterSignalHandler(wrapper->object, static_cast<ajn::MessageReceiver::SignalHandler>(&BusObjectImpl::ReceiveSignal), signalMember, strdup(*NanUtf8String(args[4])));
+    status = connection->bus->RegisterSignalHandler(signalHandler, static_cast<ajn::MessageReceiver::SignalHandler>(&SignalHandlerImpl::Signal), signalMember, strdup(*NanUtf8String(args[4])));
   }else{
-    status = connection->bus->RegisterSignalHandler(wrapper->object, static_cast<ajn::MessageReceiver::SignalHandler>(&BusObjectImpl::ReceiveSignal), signalMember, NULL);
+    status = connection->bus->RegisterSignalHandler(signalHandler, static_cast<ajn::MessageReceiver::SignalHandler>(&SignalHandlerImpl::Signal), signalMember, NULL);
   }
 
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
