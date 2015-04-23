@@ -8,7 +8,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2010-2011,2014 AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2010-2011, 2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -28,15 +28,11 @@
 #elif defined(QCC_OS_GROUP_WINDOWS)
 #include <qcc/windows/platform_types.h>
 #include <qcc/windows/mapping.h>
-#elif defined(QCC_OS_GROUP_WINRT)
-#include <qcc/winrt/platform_types.h>
-#include <qcc/winrt/mapping.h>
 #else
 #error No OS GROUP defined.
 #endif
 
 #if defined(__GNUC__)
-
 
 #define GCC_VERSION ((__GNUC__ * 10000) + (__GNUC_MINOR__ * 100) + __GNUC_PATCHLEVEL__)
 #if (GCC_VERSION < 40700L)
@@ -64,14 +60,10 @@
 #define QCC_DEPRECATED(func) func /**< not all gcc versions support the deprecated attribute. */
 #endif
 
-#define QCC_DLLEXPORT
-
 
 #elif defined(_MSC_VER)
 
 #define QCC_DEPRECATED(func) __declspec(deprecated) func /**< mark a function as deprecated in msvc. */
-
-#define QCC_DLLEXPORT __declspec(dllexport)
 
 
 #else /* Some unknown compiler */
@@ -80,6 +72,23 @@
 
 #endif /* Compiler type */
 
+/**
+ * Macro used to avoid unused variable warning in release code.
+ * This Macro is only used when a variable is only used in the debug build
+ * variant. When building in release mode the compiler will give an unused
+ * variable warning.
+ *
+ * Example usage:
+   @code
+     String errMsg
+     const char* errName = reply->GetErrorName(&errMsg);
+     QCC_LogError(status, ("TimedPing returned ERROR_MESSAGE (error=%s, \"%s\")", errName, errMsg.c_str()));
+     QCC_UNUSED(errName); // avoid unused variable warning in release build
+   @endcode
+ *
+ * The `QCC_LogError` is an empty macro for release build variants but in debug
+ * build variants it is not empty so it uses the errName variable.
+ */
 #define QCC_UNUSED(x) (void)(x)
 
 /** Boolean type for C */
@@ -89,4 +98,19 @@ typedef int32_t QCC_BOOL;
 /** Boolean logic false for QCC_BOOL type*/
 #define QCC_FALSE 0
 
+#ifdef __cplusplus
+/** Nifty counter used to ensure that AllJoyn Globals are initialized before any other client code static
+ *  or global variables
+ */
+static struct StaticGlobalsInit {
+    StaticGlobalsInit();
+    ~StaticGlobalsInit();
+    static void Cleanup();
+
+  private:
+    static bool cleanedup;
+
+} staticGlobalsInit;
+
+#endif
 #endif // _QCC_PLATFORM_H

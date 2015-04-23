@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2010-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2010-2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -46,7 +46,7 @@
 
 uint32_t qcc::GetPid()
 {
-    return static_cast<uint32_t>(_getpid());
+    return static_cast<uint32_t>(GetCurrentProcessId());
 }
 
 static uint32_t ComputeId(const char* buf, size_t len)
@@ -105,7 +105,11 @@ uint32_t qcc::GetUsersGid(const char* name)
 
 qcc::String qcc::GetHomeDir()
 {
-    return Environ::GetAppEnviron()->Find("USERPROFILE");
+    qcc::String homeDir = Environ::GetAppEnviron()->Find("LOCALAPPDATA");
+    if (homeDir.empty()) {
+        homeDir = Environ::GetAppEnviron()->Find("USERPROFILE");
+    }
+    return homeDir;
 }
 
 qcc::OSType qcc::GetSystemOSType(void)
@@ -132,7 +136,7 @@ QStatus qcc::ExecAs(const char* user, const char* exec, const ExecArgs& args, co
 
 class ResolverThread : public qcc::Thread, public qcc::ThreadListener {
   public:
-    ResolverThread(qcc::String& hostname, uint8_t*addr, size_t* addrLen);
+    ResolverThread(qcc::String& hostname, uint8_t* addr, size_t* addrLen);
     virtual ~ResolverThread() { }
     QStatus Get(uint32_t timeoutMs);
 

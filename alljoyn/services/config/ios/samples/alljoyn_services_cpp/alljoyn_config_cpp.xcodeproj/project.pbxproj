@@ -1,0 +1,395 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		196BC69318608C4100049F52 /* ConfigClient.cc in Sources */ = {isa = PBXBuildFile; fileRef = 196BC69118608C4100049F52 /* ConfigClient.cc */; };
+		196BC69418608C4100049F52 /* ConfigService.cc in Sources */ = {isa = PBXBuildFile; fileRef = 196BC69218608C4100049F52 /* ConfigService.cc */; };
+		9A4D0373186810EC00C9EFA4 /* ConfigClient.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 196BC68F18608C2C00049F52 /* ConfigClient.h */; };
+		9A4D0374186810F200C9EFA4 /* ConfigService.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 196BC69018608C2C00049F52 /* ConfigService.h */; };
+		9AB9CDD618547B37004660C5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AB9CDD518547B37004660C5 /* Foundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9AA93A7C1855C1B200378361 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = inc/alljoyn/services_common;
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AA93A7F1855C1F600378361 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = inc/alljoyn/config;
+			dstSubfolderSpec = 16;
+			files = (
+				9A4D0373186810EC00C9EFA4 /* ConfigClient.h in CopyFiles */,
+				9A4D0374186810F200C9EFA4 /* ConfigService.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AB9CDD018547B37004660C5 /* Copy Files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = inc/alljoyn/about;
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			name = "Copy Files";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		196BC68F18608C2C00049F52 /* ConfigClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConfigClient.h; path = ../../../../cpp/inc/alljoyn/config/ConfigClient.h; sourceTree = "<group>"; };
+		196BC69018608C2C00049F52 /* ConfigService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConfigService.h; path = ../../../../cpp/inc/alljoyn/config/ConfigService.h; sourceTree = "<group>"; };
+		196BC69118608C4100049F52 /* ConfigClient.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConfigClient.cc; path = ../../../../cpp/src/ConfigClient.cc; sourceTree = "<group>"; };
+		196BC69218608C4100049F52 /* ConfigService.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConfigService.cc; path = ../../../../cpp/src/ConfigService.cc; sourceTree = "<group>"; };
+		9AB9CDD218547B37004660C5 /* liballjoyn_config_cpp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liballjoyn_config_cpp.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AB9CDD518547B37004660C5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		9AB9CDD918547B37004660C5 /* alljoyn_config_cpp-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "alljoyn_config_cpp-Prefix.pch"; sourceTree = "<group>"; };
+		9AB9CDE318547B37004660C5 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		9AB9CDE618547B37004660C5 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9AB9CDCF18547B37004660C5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9AB9CDD618547B37004660C5 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		196BC68918608BF200049F52 /* config */ = {
+			isa = PBXGroup;
+			children = (
+				196BC68A18608BFA00049F52 /* cpp */,
+			);
+			name = config;
+			sourceTree = "<group>";
+		};
+		196BC68A18608BFA00049F52 /* cpp */ = {
+			isa = PBXGroup;
+			children = (
+				196BC68E18608C1900049F52 /* src */,
+				196BC68B18608C0300049F52 /* inc */,
+			);
+			name = cpp;
+			sourceTree = "<group>";
+		};
+		196BC68B18608C0300049F52 /* inc */ = {
+			isa = PBXGroup;
+			children = (
+				196BC68C18608C0B00049F52 /* alljoyn */,
+			);
+			name = inc;
+			sourceTree = "<group>";
+		};
+		196BC68C18608C0B00049F52 /* alljoyn */ = {
+			isa = PBXGroup;
+			children = (
+				196BC68D18608C1200049F52 /* about */,
+			);
+			name = alljoyn;
+			sourceTree = "<group>";
+		};
+		196BC68D18608C1200049F52 /* about */ = {
+			isa = PBXGroup;
+			children = (
+				196BC68F18608C2C00049F52 /* ConfigClient.h */,
+				196BC69018608C2C00049F52 /* ConfigService.h */,
+			);
+			name = about;
+			sourceTree = "<group>";
+		};
+		196BC68E18608C1900049F52 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				196BC69118608C4100049F52 /* ConfigClient.cc */,
+				196BC69218608C4100049F52 /* ConfigService.cc */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		9AB9CDC918547B37004660C5 = {
+			isa = PBXGroup;
+			children = (
+				9AB9CDD718547B37004660C5 /* alljoyn_services_cpp */,
+				9AB9CDD418547B37004660C5 /* Frameworks */,
+				9AB9CDD318547B37004660C5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9AB9CDD318547B37004660C5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9AB9CDD218547B37004660C5 /* liballjoyn_config_cpp.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9AB9CDD418547B37004660C5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9AB9CDD518547B37004660C5 /* Foundation.framework */,
+				9AB9CDE318547B37004660C5 /* XCTest.framework */,
+				9AB9CDE618547B37004660C5 /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9AB9CDD718547B37004660C5 /* alljoyn_services_cpp */ = {
+			isa = PBXGroup;
+			children = (
+				196BC68918608BF200049F52 /* config */,
+				9AB9CDD818547B37004660C5 /* Supporting Files */,
+			);
+			path = alljoyn_services_cpp;
+			sourceTree = "<group>";
+		};
+		9AB9CDD818547B37004660C5 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				9AB9CDD918547B37004660C5 /* alljoyn_config_cpp-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9AB9CDD118547B37004660C5 /* alljoyn_config_cpp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9AB9CDF518547B37004660C5 /* Build configuration list for PBXNativeTarget "alljoyn_config_cpp" */;
+			buildPhases = (
+				9AB9CDCE18547B37004660C5 /* Sources */,
+				9AB9CDCF18547B37004660C5 /* Frameworks */,
+				9AB9CDD018547B37004660C5 /* Copy Files */,
+				9AA93A7C1855C1B200378361 /* CopyFiles */,
+				9AA93A7F1855C1F600378361 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = alljoyn_config_cpp;
+			productName = alljoyn_services_cpp;
+			productReference = 9AB9CDD218547B37004660C5 /* liballjoyn_config_cpp.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9AB9CDCA18547B37004660C5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = AllJoyn;
+			};
+			buildConfigurationList = 9AB9CDCD18547B37004660C5 /* Build configuration list for PBXProject "alljoyn_config_cpp" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 9AB9CDC918547B37004660C5;
+			productRefGroup = 9AB9CDD318547B37004660C5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9AB9CDD118547B37004660C5 /* alljoyn_config_cpp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9AB9CDCE18547B37004660C5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				196BC69318608C4100049F52 /* ConfigClient.cc in Sources */,
+				196BC69418608C4100049F52 /* ConfigService.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9AB9CDF318547B37004660C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		9AB9CDF418547B37004660C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9AB9CDF618547B37004660C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES;
+				DSTROOT = /tmp/alljoyn_services_cpp.dst;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_services_cpp/alljoyn_config_cpp-Prefix.pch";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(ALLJOYN_SDK_ROOT)/build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc/\"",
+					"$(inherited)",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/config/cpp/inc\"",
+					"\"$(ALLJOYN_SDK_ROOT)/services/about/cpp/inc\"",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/services_common/cpp/inc\"",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-DQCC_OS_GROUP_POSIX",
+					"-DQCC_OS_DARWIN",
+					"-DUSE_SAMPLE_LOGGER",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = alljoyn_config_cpp;
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "armv7 armv7s i386";
+			};
+			name = Debug;
+		};
+		9AB9CDF718547B37004660C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES;
+				DSTROOT = /tmp/alljoyn_services_cpp.dst;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_services_cpp/alljoyn_config_cpp-Prefix.pch";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(ALLJOYN_SDK_ROOT)/build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc/\"",
+					"$(inherited)",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/config/cpp/inc\"",
+					"\"$(ALLJOYN_SDK_ROOT)/services/about/cpp/inc\"",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/services_common/cpp/inc\"",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				OTHER_CFLAGS = (
+					"-DQCC_OS_GROUP_POSIX",
+					"-DQCC_OS_DARWIN",
+					"-DUSE_SAMPLE_LOGGER",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = alljoyn_config_cpp;
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "armv7 armv7s i386";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9AB9CDCD18547B37004660C5 /* Build configuration list for PBXProject "alljoyn_config_cpp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AB9CDF318547B37004660C5 /* Debug */,
+				9AB9CDF418547B37004660C5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9AB9CDF518547B37004660C5 /* Build configuration list for PBXNativeTarget "alljoyn_config_cpp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AB9CDF618547B37004660C5 /* Debug */,
+				9AB9CDF718547B37004660C5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9AB9CDCA18547B37004660C5 /* Project object */;
+}

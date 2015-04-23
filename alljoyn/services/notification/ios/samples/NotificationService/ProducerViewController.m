@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@
 #import <alljoyn/Status.h>
 #import "AJNVersion.h"
 #import "alljoyn/about/AJNAboutServiceApi.h"
-#import "alljoyn/samples_common/AJSCCommonBusListener.h"
+#import "samples_common/AJSCCommonBusListener.h"
 #import "AJNPasswordManager.h"
 #import "alljoyn/notification/AJNSNotificationSender.h"
 #import "alljoyn/notification/AJNSNotificationService.h"
@@ -320,10 +320,17 @@ static NSString *const DEFAULT_MSG_TYPE = @"INFO";
 		
 	}
     
-	// Set audio
+	// Set English audio
 	if (self.audioSwitch.on == true && ([NotificationUtils textFieldIsValid:(self.audioTextField.text)])) {
 		AJNSRichAudioUrl *richAudioUrlObj = [[AJNSRichAudioUrl alloc] initRichAudioUrlWithLang:@"en" andUrl:self.audioTextField.text];
 		[self.richAudioUrlArray addObject:richAudioUrlObj];
+
+        // Set other language audio
+        if (self.otherLang)
+        {
+            AJNSRichAudioUrl *richAudioUrlObj = [[AJNSRichAudioUrl alloc] initRichAudioUrlWithLang:self.otherLang andUrl:self.audioTextField.text];
+            [self.richAudioUrlArray addObject:richAudioUrlObj];
+        }
 	}
     
 	// Set icon

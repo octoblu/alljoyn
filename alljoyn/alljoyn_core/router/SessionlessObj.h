@@ -136,16 +136,9 @@ class SessionlessObj : public BusObject, public NameListener, public SessionList
      */
     QStatus CancelMessage(const qcc::String& sender, uint32_t serialNum);
 
-    /**
-     * NameListener implementation called when a bus name changes ownership.
-     *
-     * @param busName   Unique or well-known bus name.
-     * @param oldOwner  Unique name of old owner of name or NULL if none existed.
-     * @param newOwner  Unique name of new owner of name or NULL if none (now) exists.
-     */
     void NameOwnerChanged(const qcc::String& busName,
-                          const qcc::String* oldOwner,
-                          const qcc::String* newOwner);
+                          const qcc::String* oldOwner, SessionOpts::NameTransferType oldOwnerNameTransfer,
+                          const qcc::String* newOwner, SessionOpts::NameTransferType newOwnerNameTransfer);
 
     /**
      * Receive FoundAdvertisedName signals.
@@ -227,6 +220,33 @@ class SessionlessObj : public BusObject, public NameListener, public SessionList
     void RequestRangeMatchSignalHandler(const InterfaceDescription::Member* member,
                                         const char* sourcePath,
                                         Message& msg);
+    /**
+     * The parameters of the backoff algorithm.
+     */
+    struct BackoffLimits {
+        uint32_t periodMs; /**< the initial backoff period */
+        uint32_t linear; /**< the maximum linear backoff coefficient before switching to exponential */
+        uint32_t exponential; /**< the maximum exponential backoff coefficient before switching to constant */
+        uint32_t maxSecs; /**< the total backoff time in seconds before giving up */
+        BackoffLimits(uint32_t periodMs, uint32_t linear, uint32_t exponential, uint32_t maxSecs)
+            : periodMs(periodMs), linear(linear), exponential(exponential), maxSecs(maxSecs) { }
+    };
+
+    /**
+     * Computes the next time to try fetching signals from a remote router.
+     *
+     * This implements the backoff algorithm.
+     *
+     * @param[in] backoff the backoff algorithm parameters
+     * @param[in] doInitialBackoff true to do the initial backoff or false to skip.
+     * @param[in] retries the number of fetches tried so far.
+     * @param[in,out] firstJoinTime set when retries is 0, used in computing nextJoinTime when retries is greater than 0.
+     * @param[out] nextJoinTime the next time to try fetching signals.
+     *
+     * @return ER_FAIL if the total retry time is exhausted, ER_OK otherwise
+     */
+    static QStatus GetNextJoinTime(const BackoffLimits& backoff, bool doInitialBackoff,
+                                   uint32_t retries, qcc::Timespec& firstJoinTime, qcc::Timespec& nextJoinTime);
 
   private:
     friend struct RemoteCacheSnapshot;
@@ -362,14 +382,17 @@ class SessionlessObj : public BusObject, public NameListener, public SessionList
     /** Find the remote cache work item with the matching session ID */
     RemoteCaches::iterator FindRemoteCache(SessionId sid);
 
-    qcc::Mutex lock;            /**< Mutex that protects this object's data structures */
-    uint32_t curChangeId;       /**< Change id assoc with current pushed signal(s) */
-    bool isDiscoveryStarted;    /**< True when FindAdvetiseName is ongoing */
-    SessionOpts sessionOpts;    /**< SessionOpts used by internal session */
-    SessionPort sessionPort;    /**< SessionPort used by internal session */
-    bool advanceChangeId;       /**< Set to true when changeId should be advanced on next SLS send request */
-    uint32_t backoffDelayMs;    /**< The backoff delay is in the range [0,backoffDelayMs] */
-    uint32_t nextRulesId;       /**< The next added rule change ID */
+    /** Erase info associated with the remote cache */
+    void EraseRemoteCache(RemoteCaches::iterator cit);
+
+    qcc::Mutex lock;             /**< Mutex that protects this object's data structures */
+    uint32_t curChangeId;        /**< Change id assoc with current pushed signal(s) */
+    bool isDiscoveryStarted;     /**< True when FindAdvetiseName is ongoing */
+    SessionOpts sessionOpts;     /**< SessionOpts used by internal session */
+    SessionPort sessionPort;     /**< SessionPort used by internal session */
+    bool advanceChangeId;        /**< Set to true when changeId should be advanced on next SLS send request */
+    uint32_t nextRulesId;        /**< The next added rule change ID */
+    const BackoffLimits backoff; /**< The backoff algorithm parameters */
 
     /**
      * Internal helper for parsing an advertised name into its guid, change
@@ -437,7 +460,8 @@ class SessionlessObj : public BusObject, public NameListener, public SessionList
      * @param[in] fromRulesId Beginning of rules ID range (inclusive)
      * @param[in] toRulesId End of rules ID range (exclusive)
      */
-    void SendMatchingThroughEndpoint(SessionId sid, Message msg, uint32_t fromRulesId, uint32_t toRulesId);
+    void SendMatchingThroughEndpoint(SessionId sid, Message msg, uint32_t fromRulesId, uint32_t toRulesId,
+                                     bool onlySendIfImplicit = false);
 
     /**
      * A match rule that includes a change ID for recording when it was entered
@@ -453,6 +477,72 @@ class SessionlessObj : public BusObject, public NameListener, public SessionList
 
     /** Rule iterator */
     typedef std::multimap<qcc::String, TimestampedRule>::iterator RuleIterator;
+
+    /**
+     * An implicit match rule that includes a list of explicit rules that it is
+     * associated with.
+     */
+    struct ImplicitRule : public Rule {
+        ImplicitRule(const Rule& rule, const RuleIterator& explicitRule) : Rule(rule) { explicitRules.push_back(explicitRule); }
+        std::vector<RuleIterator> explicitRules;
+    };
+
+    /** List of implicit rules. */
+    std::vector<ImplicitRule> implicitRules;
+
+    /** Implicit rule iterator */
+    typedef std::vector<ImplicitRule>::iterator ImplicitRuleIterator;
+
+    /**
+     * Add an implicit, explicit rule entry.  Each implicit rule is associated
+     * with at least one explicit rule.
+     *
+     * @param[in] implicitRule the implicit rule
+     * @param[in] explicitRule the iterator of the explicit rule in rules
+     */
+    void AddImplicitRule(const Rule& implicitRule, const RuleIterator& explicitRule);
+
+    /**
+     * Remove explicit rules associated with an endpoint from the implicit
+     * rules.  When all explicit associations are removed, the implicit rule is
+     * removed.
+     *
+     * @param[in] epName the name of the endpoint
+     */
+    void RemoveImplicitRules(const qcc::String& epName);
+
+    /**
+     * Remove an explicit rule from all implicit rule entries.  When all
+     * explicit associations for an implicit rule are removed, the implicit
+     * rule is removed.
+     *
+     * @param[in] explicitRule the iterator of the explicit rule in rules
+     */
+    void RemoveImplicitRules(const RuleIterator& explicitRule);
+
+    /**
+     * Remove implicit rules that have the sender value of the remote cache.
+     *
+     * @param[in] cache the remote cache
+     */
+    void RemoveImplicitRules(const RemoteCache& cache);
+
+    /**
+     * Returns true if the message matches the implicit rule associated with
+     * an endpoint and a message's sender, but does not match any explicit
+     * rule associated with the endpoint.
+     *
+     * If true is returned, the implicit rule in question is disassociated
+     * from the endpoint (i.e. all of its explicit rules that were associated
+     * with the endpoint are removed).
+     *
+     * @param[in] epName the name of the endpoint
+     * @param[in] msg the Message to compare with the implicit rules
+     *
+     * @return true if the Message matches only the implicit rule associated with
+     *              the endpoint and the Message's sender.
+     */
+    bool IsOnlyImplicitMatch(const qcc::String& epName, Message& msg);
 
     /*
      * Advertise or cancel the SL advertisements.

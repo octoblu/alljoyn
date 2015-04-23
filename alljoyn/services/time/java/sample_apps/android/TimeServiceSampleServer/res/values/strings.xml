@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright AllSeen Alliance. All rights reserved.
+
+     Permission to use, copy, modify, and/or distribute this software for any
+     purpose with or without fee is hereby granted, provided that the above
+     copyright notice and this permission notice appear in all copies.
+
+     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+     WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+     ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+     WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<resources>
+
+    <string name="app_name">Time Sample Server</string>
+    <string name="action_settings">Settings</string>
+    <string name="clock_setable">Clock can be set</string>
+    <string name="time_authority">Time Authority support</string>
+    <string name="timer_manager">Timer Manager support</string>
+    <string name="alarm_manager">Alaram Manager support</string>
+    <string name="logTitle">Busname:  %s</string>
+    <string name="settings_general">General</string>
+    <string name="settings_clock_title">Clock Setable</string>
+    <string name="settings_clock_description">The clock can be set by remote client</string>
+    <string name="settings_clock_key">clock_set_key</string>
+    <string name="settings_autherity_title">Time Authority</string>
+    <string name="settings_autherity_description">Service supports Time Autherity</string>
+    <string name="settings_autherity_key">time_authority_key</string>
+    <string name="settings_time_sync_title">Sync now</string>
+    <string name="settings_time_sync_key">time_sync_key</string>
+    <string name="settings_timers_title">Timers</string>
+    <string name="settings_timers_factory_title">Service supports Timer Factory</string>
+    <string name="settings_timers_factory_key">time_factory_key</string>
+    <string name="settings_timers_timer1_title">Timer1</string>
+    <string name="settings_timers_timer1_key">timer1_key</string>
+    <string name="settings_alarm_factory_title">Service supports Alarm Factory</string>
+    <string name="settings_alarm_factory_key">alarm_factory_key</string>
+    <string name="settings_alarm_alarm1_title">Alarm1</string>
+    <string name="settings_alarm_alarm1_key">alarm1_key</string>
+    <string name="clear_list">Clear List</string>
+    <string name="message">Message: </string>
+    <string name="object_path">ObjectPath :</string>
+    <string name="commit">Commit</string>
+    <string name="defaults">Defaults</string>
+    <string name="wait_message">Please wait while sending Time sync signal</string>
+
+</resources>

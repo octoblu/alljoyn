@@ -73,6 +73,11 @@ const uint32_t QCC_AF_UNSPEC_INDEX = 0x0;
 const uint32_t QCC_AF_INET_INDEX = 0x1;
 const uint32_t QCC_AF_INET6_INDEX = 0x2;
 
+typedef uint32_t NetworkEvent;
+typedef std::set<NetworkEvent> NetworkEventSet;
+#define NETWORK_EVENT_IF_INDEX(x) ((x) >> 2)
+#define NETWORK_EVENT_IF_FAMILY(x) ((x) & 0x3)
+
 /**
  * @brief Get information regarding the network interfaces on the
  * host.
@@ -105,19 +110,6 @@ const uint32_t QCC_AF_INET6_INDEX = 0x2;
 QStatus IfConfig(std::vector<IfConfigEntry>& entries);
 
 /**
- * @brief Lightweight version of IfConfig that reports only entries
- * with an IPv4 address assigned.
- *
- * The running time of this is much lower than IfConfig().  (An order
- * of magnitude less on the Linux implementation, for example).
- *
- * @param entries A vector of IfConfigEntry that will be filled out
- *     with information on the found network interfaces.  This
- *     information will only include m_name, m_addr, and m_family.
- */
-QStatus IfConfigIPv4(std::vector<IfConfigEntry>& entries);
-
-/**
  * @brief Watch for network event notifications.
  *
  */
@@ -127,7 +119,7 @@ SocketFd NetworkEventSocket();
  * @brief Process network event notifications.
  *
  */
-NetworkEventType NetworkEventReceive(SocketFd sockFd, std::set<uint32_t>& networkRefreshSet);
+NetworkEventType NetworkEventReceive(SocketFd sockFd, NetworkEventSet& networkEvents);
 
 } // namespace ajn
 

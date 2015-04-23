@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Copyright AllSeen Alliance. All rights reserved.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<resources>
+
+    <!-- General -->
+    <string name="app_name">Onboarding Manager Sample App</string>
+
+    <!-- main layout -->
+
+    <string name="scan_wifi">Scan Wi-Fi</string>
+    <string name="connect_to_network">Connect to network</string>
+    <string name="get_candidate_target_networks">Select target network</string>
+    <string name="get_all_networks">View scan results</string>
+    <string name="get_current_network">Current network</string>
+    <string name="get_onboardable_devices">Select device</string>
+    <string name="run_onboarding">Run onboarding</string>
+    <string name="abort_onboarding">Abort onboarding</string>
+    <string name="get_onboarded_devices">Run offboarding</string>
+
+    <!-- main activity -->
+
+    <string name="cancel">Cancel</string>
+    <string name="wifi_activity_scanning">Scanning&#8230;</string>
+    <string name="alert_title_scan_wifi_completed">Scan Wi-Fi done</string>
+    <string name="alert_message_scan_wifi_completed">Results available at %1$s, %2$s and %3$s button.</string>
+    <string name="alert_title_confirm_ap_passphrase">Enter AP security passphrase</string>
+    <string name="alert_message_confirm_ap_passphrase">Please confirm this AP\'s security passphrase.</string>
+    <string name="connect">Connect</string>
+    <string name="candidate_targets">Select target network</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="alert_title_get_current_network">Current network</string>
+    <string name="alert_msg_get_current_network">SSID = %1$s \nAuth type = %2$s \nSignal level = %3$s dBm</string>
+    <string name="getcurrentnetwork_returned_null">Get current network returned null.</string>
+    <string name="alert_generic_network_item">SSID = %1$s \nAuth type = %2$s \nSignal level = %3$s dBm</string>
+    <string name="onboardable_devices">Select device</string>
+    <string name="select">Select</string>
+    <string name="onboard">Onboard</string>
+    <string name="alert_title_onboarded_devices">Onboarded devices</string>
+    <string name="alert_item_onboarded_devices">"Friendly name = %1$s\nBus name = %2$s\nPort = %3$s"</string>
+    <string name="offboard">Offboard</string>
+    <string name="alert_title_connect_to_network">Connect to network</string>
+    <string name="offboarding_service_name">Service name</string>
+    <string name="offboarding_port">Port</string>
+    <string name="error">Error</string>
+    <string name="alert_title_wifi_error">Wi-Fi error</string>
+    <string name="auth_failed_msg">Auth failed: mechanism = %1$s, authPeer= %2$s</string>
+
+    <!-- run onboarding layout -->
+
+    <string name="onboarding_ssid">SSID</string>
+    <string name="onboarding_password">Password</string>
+    <string name="onboarding_connection_timeout">Connection timeout Msec</string>
+    <string name="onboarding_annoucement_timeout">Annoucement timeout Msec</string>
+    <string name="onboarding_authentication">Auth type</string>
+    <string name="target_info">Target info</string>
+    <string name="onboardee_info">Onboardee info</string>
+
+    <!-- connect to network layout -->
+    <string name="name_of_network_hint">Network SSID</string>
+    <string name="wifi_password_hint">Password</string>
+    <string name="timeout_hint">Timeout in Msec</string>
+    <string name="alert_msg_wifi_disabled">Wi-Fi is disabled.</string>
+    <string name="alert_title_runoffboarding_error">RunOffboarding error</string>
+    <string name="alert_msg_invalid_configuration">Invalid configuration</string>
+    <string name="alert_msg_runonboarding_invalid_state">Unable to runonboarding invalid state</string>
+    <string name="alert_title_abort_error">Abort error</string>
+    <string name="alert_title_runonboarding_error">Runonboarding error</string>
+    <string name="alert_title_init_error">Init error</string>
+    <string name="alert_msg_invalid_arguments">invalid arguments</string>
+    <string name="hidden_network">Hidden network</string>
+
+</resources>

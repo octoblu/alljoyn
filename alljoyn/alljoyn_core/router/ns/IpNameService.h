@@ -64,18 +64,15 @@ class IpNameServiceListener {
  * The BundledRouter is a static and so the destruction order of the two objects
  * (him and us) depends on whatever the linker decides the order should be.
  *
- * We use a Meyers Singleton, and therefore we defer construction of the
- * underlying object to the time of first use, which is going to be when the
- * transports are created, well after main() has started.  We want to have all
- * of the tear-down of the threads performed before main() ends, so we need to
- * have knowledge of when the singleton is no longer required.  We reference
+ * We use the nifty counter mechanism to create the IpNameService static object
+ * We want to have all of the tear-down of the threads performed before main() ends
+ * The singleton will be destructed during the static destruction phase.  We reference
  * count instances of transports that register with the IpNameService to
- * accomplish this.
+ * stop and join the IpNameService object.
  *
  * Whenever a transport comes up and wants to interact with the IpNameService it
  * calls our static Instance() method to get a reference to the underlying name
- * service object.  This accomplishes the construction on first use idiom.  This
- * is a very lightweight operation that does almost nothing.  The first thing
+ * service object.  The first thing
  * that a transport must do is to Acquire() the instance of the name service,
  * which is going to bump a reference count and do the hard work of starting the
  * IpNameService.  The last thing a transport must do is to Release() the
@@ -85,6 +82,7 @@ class IpNameServiceListener {
  * only be done in the transport's Join() method.
  */
 class IpNameService {
+    friend class IpNameServiceInit;
   public:
 
     /**
@@ -97,11 +95,7 @@ class IpNameService {
     /**
      * @brief Return a reference to the IpNameService singleton.
      */
-    static IpNameService& Instance()
-    {
-        static IpNameService ipNameService;
-        return ipNameService;
-    }
+    static IpNameService& Instance();
 
     /**
      * @brief Notify the singleton that there is a transport coming up that will
@@ -109,9 +103,8 @@ class IpNameService {
      *
      * Whenever a transport comes up and wants to interact with the
      * IpNameService it calls our static Instance() method to get a reference to
-     * the underlying name service object.  This accomplishes the construction
-     * on first use idiom.  This is a very lightweight operation that does
-     * almost nothing.  The first thing that a transport must do is to Acquire()
+     * the underlying name service object.
+     * The first thing that a transport must do is to Acquire()
      * the instance of the name service, which is going to bump a reference
      * count and do the hard work of starting the IpNameService.  A transport
      * author can think of this call as performin a reference-counted Start()
@@ -161,6 +154,12 @@ class IpNameService {
      */
     void SetCallback(TransportMask transportMask,
                      Callback<void, const qcc::String&, const qcc::String&, std::vector<qcc::String>&, uint32_t>* cb);
+
+    /**
+     * @brief Set the Callback for notification of network interface events.
+     */
+    void SetNetworkEventCallback(TransportMask transportMask,
+                                 Callback<void, const std::map<qcc::String, qcc::IPAddress>&>* cb);
 
     void RegisterListener(IpNameServiceListener& listener);
 
@@ -330,12 +329,12 @@ class IpNameService {
      *
      * @param transportMask A bitmask containing the transport handling the specified
      *     endpoints.
-     * @param reliableIPv4Port Indicates the port number of a server listening for
-     *     connections if enableReliableIPv4 is true
+     * @param reliableIPv4PortMap Indicates a map of interfaces to port numbers
+     *     of a server listening for connections if enableReliableIPv4 is true
      * @param reliableIPv6Port Indicates the port number of a server listening for
      *     connections if enableUnreliableIPv4 is true
-     * @param unreliableIPv4Port Indicates the port number of a server listening for
-     *     connections if enableReliableIPv6 is true
+     * @param unreliableIPv4PortMap Indicates a map of interfaces to port numbers
+     *     of a server listening for connections if enableReliableIPv6 is true
      * @param unreliableIPv6Port Indicates the port number of a server listening for
      *     connections if enableUnreliableIPv6 is true.
      * @param enableReliableIPv4
@@ -352,8 +351,8 @@ class IpNameService {
      *     - false indicates this protocol is not enabled.
      */
     QStatus Enable(TransportMask transportMask,
-                   uint16_t reliableIPv4Port, uint16_t reliableIPv6Port,
-                   uint16_t unreliableIPv4Port, uint16_t unreliableIPv6Port,
+                   const std::map<qcc::String, uint16_t>& reliableIPv4PortMap, uint16_t reliableIPv6Port,
+                   const std::map<qcc::String, uint16_t>& unreliableIPv4PortMap, uint16_t unreliableIPv6PortMap,
                    bool enableReliableIPv4, bool enableReliableIPv6,
                    bool enableUnreliableIPv4, bool enableUnreliableIPv6);
 
@@ -363,18 +362,18 @@ class IpNameService {
      *
      * @param transportMask A bitmask containing the transport handling the specified
      *     endpoints.
-     * @param reliableIPv4Port If zero, indicates this protocol is not enabled.  If
-     *     non-zero, indicates the port number of a server listening for connections.
+     * @param reliableIPv4PortMap If empty, indicates this protocol is not enabled.  If
+     *     not empty, indicates the interfaces/port numbers of a server listening for connections.
      * @param reliableIPv6Port If zero, indicates this protocol is not enabled.  If
      *     non-zero, indicates the port number of a server listening for connections.
-     * @param unreliableIPv4Port If zero, indicates this protocol is not enabled.  If
-     *     non-zero, indicates the port number of a server listening for connections.
+     * @param unreliableIPv4PortMap If empty, indicates this protocol is not enabled.  If
+     *     not empty, indicates the interfaces/port numbers of a server listening for connections.
      * @param unreliableIPv6Port If zero, indicates this protocol is not enabled.  If
      *     non-zero, indicates the port number of a server listening for connections.
      */
     QStatus Enabled(TransportMask transportMask,
-                    uint16_t& reliableIPv4Port, uint16_t& reliableIPv6Port,
-                    uint16_t& unreliableIPv4Port, uint16_t& unreliableIPv6Port);
+                    std::map<qcc::String, uint16_t>& reliableIPv4PortMap, uint16_t& reliableIPv6Port,
+                    std::map<qcc::String, uint16_t>& unreliableIPv4PortMap, uint16_t& unreliableIPv6Port);
 
     /**
      * @brief Discover well-known names starting with the specified prefix over
@@ -444,7 +443,7 @@ class IpNameService {
     /**
      * This is a singleton so the constructor is marked private to prevent
      * construction of an IpNameService instance in any other sneaky way than
-     * the Meyers singleton mechanism.
+     * the nifty counter mechanism.
      */
     IpNameService();
 
@@ -533,6 +532,17 @@ class IpNameService {
     int32_t m_refCount;          /**< The number of transports that have registered as users of the singleton */
     IpNameServiceImpl* m_pimpl;  /**< A pointer to the private implementation of the name service */
 };
+
+static class IpNameServiceInit {
+  public:
+    IpNameServiceInit();
+    ~IpNameServiceInit();
+    static void Cleanup();
+
+  private:
+    static bool cleanedup;
+
+} ipNameServiceInit;
 
 } // namespace ajn
 

@@ -6,7 +6,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -58,14 +58,17 @@ static const uint32_t LOCAL_ENDPOINT_CONCURRENCY = 4;
 
 class _LocalEndpoint::Dispatcher : public qcc::Timer, public qcc::AlarmListener {
   public:
-    Dispatcher(_LocalEndpoint* endpoint, uint32_t concurrency = LOCAL_ENDPOINT_CONCURRENCY) : Timer("lepDisp", true, concurrency, true, 10), AlarmListener(), endpoint(endpoint) { }
+    Dispatcher(_LocalEndpoint* endpoint, uint32_t concurrency = LOCAL_ENDPOINT_CONCURRENCY) : Timer("lepDisp" + U32ToString(qcc::IncrementAndFetch(&dispatcherCnt)), true, concurrency, true, 10), AlarmListener(), endpoint(endpoint) { }
     QStatus DispatchMessage(Message& msg);
 
     void AlarmTriggered(const qcc::Alarm& alarm, QStatus reason);
 
   private:
     _LocalEndpoint* endpoint;
+    static int32_t dispatcherCnt;
 };
+
+int32_t _LocalEndpoint::Dispatcher::dispatcherCnt = 0;
 
 class _LocalEndpoint::DeferredCallbacks : public qcc::AlarmListener {
   public:
@@ -310,7 +313,6 @@ QStatus _LocalEndpoint::Stop(void)
 
     /* Stop the replyTimer */
     replyTimer.Stop();
-
     return ER_OK;
 }
 
@@ -444,7 +446,8 @@ QStatus _LocalEndpoint::PushMessage(Message& message)
     if (running) {
         BusEndpoint ep = bus->GetInternal().GetRouter().FindEndpoint(message->GetSender());
         /* Determine if the source of this message is local to the process */
-        if (ep->GetEndpointType() == ENDPOINT_TYPE_LOCAL) {
+        Thread* curThread = Thread::GetThread();
+        if (ep->GetEndpointType() == ENDPOINT_TYPE_LOCAL && (strncmp(curThread->GetThreadName(), "lepDisp", 7) == 0)) {
             ret = DoPushMessage(message);
         } else {
             ret = dispatcher->DispatchMessage(message);
@@ -598,7 +601,10 @@ void _LocalEndpoint::UnregisterBusObject(BusObject& object)
     objectsLock.Unlock(MUTEX_CONTEXT);
 
     /* Notify object and detach from bus*/
-    object.ObjectUnregistered();
+    if (object.isRegistered) {
+        object.ObjectUnregistered();
+        object.isRegistered = false;
+    }
 
     /* Detach object from parent */
     objectsLock.Lock(MUTEX_CONTEXT);
@@ -612,7 +618,11 @@ void _LocalEndpoint::UnregisterBusObject(BusObject& object)
         if (!child) {
             break;
         }
+        object.InUseIncrement();
+        objectsLock.Unlock(MUTEX_CONTEXT);
         UnregisterBusObject(*child);
+        objectsLock.Lock(MUTEX_CONTEXT);
+        object.InUseDecrement();
     }
     /* Delete the object if it was a default object */
     vector<BusObject*>::iterator dit = defaultObjects.begin();
@@ -634,6 +644,50 @@ BusObject* _LocalEndpoint::FindLocalObject(const char* objectPath) {
     BusObject* ret = (iter == localObjects.end()) ? NULL : iter->second;
     objectsLock.Unlock(MUTEX_CONTEXT);
     return ret;
+}
+
+QStatus _LocalEndpoint::GetAnnouncedObjectDescription(MsgArg& objectDescriptionArg) {
+    QStatus status = ER_OK;
+    objectDescriptionArg.Clear();
+
+    objectsLock.Lock(MUTEX_CONTEXT);
+    size_t announcedObjectsCount = 0;
+    // Find out how many of the localObjects contain Announced interfaces
+    for (std::unordered_map<const char*, BusObject*, Hash, PathEq>::iterator it = localObjects.begin(); it != localObjects.end(); ++it) {
+        if (it->second->GetAnnouncedInterfaceNames() > 0) {
+            ++announcedObjectsCount;
+        }
+    }
+    // Now that we know how many objects are have AnnouncedInterfaces lets Create
+    // an array of MsgArgs. One MsgArg for each Object with Announced interfaces.
+    MsgArg* announceObjectsArg = new MsgArg[announcedObjectsCount];
+    size_t argCount = 0;
+    // Fill the MsgArg for the announcedObjects.
+    for (std::unordered_map<const char*, BusObject*, Hash, PathEq>::iterator it = localObjects.begin(); it != localObjects.end(); ++it) {
+        size_t numInterfaces = it->second->GetAnnouncedInterfaceNames();
+        if (numInterfaces > 0) {
+            const char** interfaces = new const char*[numInterfaces];
+            it->second->GetAnnouncedInterfaceNames(interfaces, numInterfaces);
+            status = announceObjectsArg[argCount].Set("(oas)", it->first, numInterfaces, interfaces);
+            announceObjectsArg[argCount].Stabilize();
+            delete [] interfaces;
+            ++argCount;
+        }
+        if (ER_OK != status) {
+            delete [] announceObjectsArg;
+            objectsLock.Unlock(MUTEX_CONTEXT);
+            return status;
+        }
+    }
+    // If argCount and announcedObjectsCount don't match something has gone wrong
+    assert(argCount == announcedObjectsCount);
+
+    status = objectDescriptionArg.Set("a(oas)", announcedObjectsCount, announceObjectsArg);
+    objectDescriptionArg.Stabilize();
+    delete [] announceObjectsArg;
+    objectsLock.Unlock(MUTEX_CONTEXT);
+
+    return status;
 }
 
 void _LocalEndpoint::UpdateSerialNumber(Message& msg)
@@ -758,7 +812,7 @@ bool _LocalEndpoint::ResumeReplyHandlerTimeout(Message& methodCallMsg)
 QStatus _LocalEndpoint::RegisterSignalHandler(MessageReceiver* receiver,
                                               MessageReceiver::SignalHandler signalHandler,
                                               const InterfaceDescription::Member* member,
-                                              const char* srcPath)
+                                              const char* matchRule)
 {
     if (!receiver) {
         return ER_BAD_ARG_1;
@@ -769,14 +823,17 @@ QStatus _LocalEndpoint::RegisterSignalHandler(MessageReceiver* receiver,
     if (!member) {
         return ER_BAD_ARG_3;
     }
-    signalTable.Add(receiver, signalHandler, member, srcPath ? srcPath : "");
+    if (!matchRule) {
+        return ER_BAD_ARG_4;
+    }
+    signalTable.Add(receiver, signalHandler, member, matchRule);
     return ER_OK;
 }
 
 QStatus _LocalEndpoint::UnregisterSignalHandler(MessageReceiver* receiver,
                                                 MessageReceiver::SignalHandler signalHandler,
                                                 const InterfaceDescription::Member* member,
-                                                const char* srcPath)
+                                                const char* matchRule)
 {
     if (!receiver) {
         return ER_BAD_ARG_1;
@@ -787,8 +844,10 @@ QStatus _LocalEndpoint::UnregisterSignalHandler(MessageReceiver* receiver,
     if (!member) {
         return ER_BAD_ARG_3;
     }
-    signalTable.Remove(receiver, signalHandler, member, srcPath ? srcPath : "");
-    return ER_OK;
+    if (!matchRule) {
+        return ER_BAD_ARG_4;
+    }
+    return signalTable.Remove(receiver, signalHandler, member, matchRule);
 }
 
 QStatus _LocalEndpoint::UnregisterAllHandlers(MessageReceiver* receiver)
@@ -972,7 +1031,7 @@ QStatus _LocalEndpoint::HandleSignal(Message& message)
 
     /* Look up the signal */
     pair<SignalTable::const_iterator, SignalTable::const_iterator> range =
-        signalTable.Find(message->GetObjectPath(), message->GetInterface(), message->GetMemberName());
+        signalTable.Find(message->GetInterface(), message->GetMemberName());
 
     /*
      * Quick exit if there are no handlers for this signal
@@ -987,7 +1046,9 @@ QStatus _LocalEndpoint::HandleSignal(Message& message)
     list<SignalTable::Entry> callList;
     const InterfaceDescription::Member* signal = range.first->second.member;
     do {
-        callList.push_back(range.first->second);
+        if (range.first->second.rule.IsMatch(message)) {
+            callList.push_back(range.first->second);
+        }
     } while (++range.first != range.second);
     /*
      * We have our callback list so we can unlock the signal table.
@@ -1032,6 +1093,9 @@ QStatus _LocalEndpoint::HandleMethodReply(Message& message)
              */
             if ((message->GetType() == MESSAGE_METHOD_RET) || (GetUniqueName() != message->GetSender())) {
                 status = ER_BUS_MESSAGE_NOT_ENCRYPTED;
+            }
+            if ((message->GetType() == MESSAGE_ERROR)) {
+                message->UnmarshalArgs("*");
             }
         } else {
             QCC_DbgPrintf(("Matched reply for serial #%d", message->GetReplySerial()));
@@ -1103,8 +1167,34 @@ void _LocalEndpoint::OnBusConnected()
      */
     uint32_t zero = 0;
     if (dispatcher) {
-        dispatcher->AddAlarm(Alarm(zero, deferredCallbacks));
+        QStatus status = dispatcher->AddAlarm(Alarm(zero, deferredCallbacks));
+        if (ER_OK != status) {
+            QCC_DbgHLPrintf(("OnBusConnected failure to add Alarm: %s", QCC_StatusText(status)));
+        }
     }
+}
+
+void _LocalEndpoint::OnBusDisconnected() {
+    /*
+     * Call ObjectUnegistered for any unregistered bus objects
+     */
+    objectsLock.Lock(MUTEX_CONTEXT);
+    unordered_map<const char*, BusObject*, Hash, PathEq>::iterator iter = localObjects.begin();
+    while (iter != localObjects.end()) {
+        if (iter->second->isRegistered) {
+            BusObject* bo = iter->second;
+            bo->isRegistered = false;
+            bo->InUseIncrement();
+            objectsLock.Unlock(MUTEX_CONTEXT);
+            bo->ObjectUnregistered();
+            objectsLock.Lock(MUTEX_CONTEXT);
+            bo->InUseDecrement();
+            iter = localObjects.begin();
+        } else {
+            ++iter;
+        }
+    }
+    objectsLock.Unlock(MUTEX_CONTEXT);
 }
 
 const ProxyBusObject& _LocalEndpoint::GetAllJoynDebugObj()

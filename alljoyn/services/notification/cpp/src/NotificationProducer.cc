@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -58,7 +58,7 @@ NotificationProducer::NotificationProducer(ajn::BusAttachment* bus, QStatus& sta
         m_InterfaceDescription->Activate();
     }
 
-    status = AddInterface(*m_InterfaceDescription);
+    status = AddInterface(*m_InterfaceDescription, ANNOUNCED);
     if (status != ER_OK) {
         QCC_LogError(status, ("AddInterface failed."));
         return;

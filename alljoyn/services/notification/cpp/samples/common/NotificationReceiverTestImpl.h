@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -20,7 +20,13 @@
 #include <vector>
 #include <alljoyn/notification/NotificationReceiver.h>
 #include <alljoyn/notification/Notification.h>
+#ifdef _WIN32
+#include <Windows.h>
+#define pthread_mutex_t CRITICAL_SECTION
+#define pthread_cond_t CONDITION_VARIABLE
+#else
 #include <pthread.h>
+#endif
 
 
 /**
@@ -92,11 +98,13 @@ class NotificationReceiverTestImpl : public ajn::services::NotificationReceiver 
      * locks for the condition according to 'pthread_cond_t' declaration.
      */
     pthread_mutex_t m_Lock;
+
     /**
      * thread condition
      * Blocking the notification receiving thread in case m_WaitForExternalNotificationAction is true, until SetNotificationAction() will be called.
      */
     pthread_cond_t m_Condition;
+
     /**
      * Wait to external notification action
      * If true - external thread will need to call to SetNotificationAction() to unblock the thread that received the notification.

@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -95,19 +95,19 @@ class SocketStream : public Stream {
 
     /**
      * Pull bytes from the socket.
-     * The source is exhausted when ER_NONE is returned.
+     * The source is exhausted when ER_EOF is returned.
      *
      * @param buf          Buffer to store pulled bytes
      * @param reqBytes     Number of bytes requested to be pulled from source.
      * @param actualBytes  [OUT] Actual number of bytes retrieved from source.
      * @param timeout      Timeout in milliseconds.
-     * @return   OI_OK if successful. ER_NONE if source is exhausted. Otherwise an error.
+     * @return   ER_OK if successful. ER_EOF if source is exhausted. Otherwise an error.
      */
     QStatus PullBytes(void* buf, size_t reqBytes, size_t& actualBytes, uint32_t timeout = Event::WAIT_FOREVER);
 
     /**
      * Pull bytes and any accompanying file/socket descriptors from the stream.
-     * The source is exhausted when ER_NONE is returned.
+     * The source is exhausted when ER_EOF is returned.
      *
      * @param buf          Buffer to store pulled bytes
      * @param reqBytes     Number of bytes requested to be pulled from source.
@@ -115,7 +115,7 @@ class SocketStream : public Stream {
      * @param fdList       Array to receive file descriptors.
      * @param numFds       [IN,OUT] On IN the size of fdList on OUT number of files descriptors pulled.
      * @param timeout      Timeout in milliseconds.
-     * @return   OI_OK if successful. ER_NONE if source is exhausted. Otherwise an error.
+     * @return   ER_OK if successful. ER_EOF if source is exhausted. Otherwise an error.
      */
     QStatus PullBytesAndFds(void* buf, size_t reqBytes, size_t& actualBytes, SocketFd* fdList, size_t& numFds, uint32_t timeout = Event::WAIT_FOREVER);
 
@@ -139,7 +139,7 @@ class SocketStream : public Stream {
      * @param numFds    Number of files descriptors, must be at least 1.
      * @param pid       Process id required on some platforms.
      *
-     * @return  OI_OK or an error.
+     * @return  ER_OK or an error.
      */
     QStatus PushBytesAndFds(const void* buf, size_t numBytes, size_t& numSent, SocketFd* fdList, size_t numFds, uint32_t pid = -1);
 
@@ -183,6 +183,13 @@ class SocketStream : public Stream {
      * @param sendTimeout    Send timeout in ms or WAIT_FOREVER for infinite
      */
     void SetSendTimeout(uint32_t sendTimeout) { this->sendTimeout = sendTimeout; }
+
+    /**
+     * Set TCP based socket to use or not use Nagle algorithm (TCP_NODELAY)
+     *
+     * @param useNagle  Set to true to Nagle algorithm. Set to false to disable Nagle.
+     */
+    QStatus SetNagle(bool reuse);
 
   private:
 

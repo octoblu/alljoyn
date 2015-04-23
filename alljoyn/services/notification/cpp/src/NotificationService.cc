@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -52,6 +52,74 @@ uint16_t NotificationService::getVersion()
     return NOTIFICATION_SERVICE_VERSION;
 }
 
+NotificationSender* NotificationService::initSend(BusAttachment* bus, AboutData* store)
+{
+    QCC_DbgTrace(("NotificationService::initSend"));
+
+    if (!bus) {
+        QCC_DbgHLPrintf(("BusAttachment cannot be NULL"));
+        return NULL;
+    }
+
+    if (!store) {
+        QCC_DbgHLPrintf(("PropertyStore cannot be NULL"));
+        return NULL;
+    }
+
+    Transport* transport = Transport::getInstance();
+    if (transport->startSenderTransport(bus) != ER_OK) {
+        return NULL;
+    }
+
+    MsgArg configArgs;
+    MsgArg* configEntries;
+    size_t configNum = 0;
+    QStatus status;
+
+    if ((status = store->GetAboutData(&configArgs))) {
+        QCC_LogError(status, ("Error reading all in configuration data"));
+        return NULL;
+    }
+
+    if ((status = configArgs.Get(AJPARAM_ARR_DICT_STR_VAR.c_str(), &configNum, &configEntries))) {
+        QCC_LogError(status, ("Error reading in configuration data"));
+        return NULL;
+    }
+
+    MsgArg appIdArg;
+    for (size_t i = 0; i < configNum; i++) {
+        char* keyChar;
+        String key;
+        MsgArg* variant;
+
+        status = configEntries[i].Get(AJPARAM_DICT_STR_VAR.c_str(), &keyChar, &variant);
+        if (status != ER_OK) {
+            QCC_LogError(status, ("Error reading in configuration data"));
+            return NULL;
+        }
+
+        key = keyChar;
+
+        if (key.compare("AppId") == 0) {
+            appIdArg = *variant;
+        }
+    }
+
+    if (status != ER_OK) {
+        QCC_LogError(status, ("Something went wrong unmarshalling the propertystore."));
+        return NULL;
+    }
+
+    if (appIdArg.typeId != ALLJOYN_BYTE_ARRAY) {
+        QCC_DbgHLPrintf(("ApplicationId argument is not correct type."));
+        return NULL;
+    }
+
+    transport->getNotificationProducerReceiver()->SetAppIdArg(appIdArg);
+
+    return new NotificationSender(store);
+}
+
 NotificationSender* NotificationService::initSend(BusAttachment* bus, PropertyStore* store)
 {
     QCC_DbgTrace(("NotificationService::initSend"));
@@ -73,15 +141,17 @@ NotificationSender* NotificationService::initSend(BusAttachment* bus, PropertySt
 
     MsgArg configArgs[1];
     MsgArg* configEntries;
-    size_t configNum;
+    size_t configNum = 0;
     QStatus status;
 
     if ((status = store->ReadAll(0, PropertyStore::READ, configArgs[0]))) {
         QCC_LogError(status, ("Error reading all in configuration data"));
+        return NULL;
     }
 
     if ((status = configArgs[0].Get(AJPARAM_ARR_DICT_STR_VAR.c_str(), &configNum, &configEntries))) {
         QCC_LogError(status, ("Error reading in configuration data"));
+        return NULL;
     }
 
     MsgArg appIdArg;
@@ -93,6 +163,7 @@ NotificationSender* NotificationService::initSend(BusAttachment* bus, PropertySt
         status = configEntries[i].Get(AJPARAM_DICT_STR_VAR.c_str(), &keyChar, &variant);
         if (status != ER_OK) {
             QCC_LogError(status, ("Error reading in configuration data"));
+            return NULL;
         }
 
         key = keyChar;

@@ -6,7 +6,7 @@
 /******************************************************************************
  *
  *
- * Copyright (c) 2010-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2010-2011,2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -26,13 +26,13 @@
 #include <qcc/platform.h>
 
 #include <stdio.h>
-#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_GROUP_WINRT)
+#if !defined(QCC_OS_GROUP_WINDOWS)
 #include <syslog.h>
 #endif
 
 #include <qcc/Mutex.h>
 
-#if defined(QCC_OS_GROUP_WINDOWS) || defined(QCC_OS_GROUP_WINRT)
+#if defined(QCC_OS_GROUP_WINDOWS)
 // Define the same log levels as used by UNIX syslog facility.
 #define LOG_EMERG       0       /**< system is unusable */
 #define LOG_ALERT       1       /**< action must be taken immediately */
@@ -42,15 +42,16 @@
 #define LOG_NOTICE      5       /**< normal but significant condition */
 #define LOG_INFO        6       /**< informational */
 #define LOG_DEBUG       7       /**< debug-level messages */
+#endif
 
-#define LOGGERSETTING_DEFAULT_SYSLOG false
-#define LOGGERSETTING_DEFAULT_FILE stdout
-
-#else
-
+#if defined(QCC_OS_ANDROID)
+#define LOGGERSETTING_DEFAULT_NAME "alljoyn"
 #define LOGGERSETTING_DEFAULT_SYSLOG true
 #define LOGGERSETTING_DEFAULT_FILE NULL
-
+#else
+#define LOGGERSETTING_DEFAULT_NAME NULL
+#define LOGGERSETTING_DEFAULT_SYSLOG false
+#define LOGGERSETTING_DEFAULT_FILE stderr
 #endif
 
 namespace qcc {
@@ -71,6 +72,7 @@ void Log(int priority, const char* format, ...);
  * calling qcc::Log() so that the log output will go somewhere useful.
  */
 class LoggerSetting {
+    friend class LoggerInit;
   public:
     /**
      * Enable or disable delivery to syslog.  This only affects POSIX systems
@@ -132,29 +134,15 @@ class LoggerSetting {
 
     /**
      * Convenience function for getting access to the instantiated
-     * LoggerSetting object.
-     *
-     * @return  Pointer to most recently instantiated LoggerSetting object.
-     */
-    static LoggerSetting* GetLoggerSetting() {
-        if (!singleton) {
-            singleton = new LoggerSetting();
-        }
-        return singleton;
-    }
-
-    /**
-     * Convenience function for getting access to the instantiated
      * LoggerSetting object and setting its attributes.  This is normally used
      * when initializing the logging facility.
      *
      * @return  Pointer to most recently instantiated LoggerSetting object.
      */
-    static LoggerSetting* GetLoggerSetting(const char* name, int level = LOG_WARNING,
+    static LoggerSetting* GetLoggerSetting(const char* name = LOGGERSETTING_DEFAULT_NAME,
+                                           int level = LOG_DEBUG,
                                            bool useSyslog = LOGGERSETTING_DEFAULT_SYSLOG,
                                            FILE* file = LOGGERSETTING_DEFAULT_FILE);
-
-
 
   private:
     static LoggerSetting* singleton;    ///< Static pointer to most recent instance.
@@ -163,12 +151,6 @@ class LoggerSetting {
     bool useSyslog;                     ///< Flag controlling use of syslog.
     FILE* file;                         ///< File stream pointer.
     qcc::Mutex lock;                    ///< Synchronization mutex.
-
-    /**
-     * Default constructor.  Using this prevents the use of syslog since the
-     * process name does not get set.
-     */
-    LoggerSetting();
 
     /**
      * Constructor for initializing useful values..
@@ -190,5 +172,15 @@ class LoggerSetting {
      */
     friend void qcc::Log(int priority, const char* format, ...);
 };
+static class LoggerInit {
+  public:
+    LoggerInit();
+    ~LoggerInit();
+    static void Cleanup();
+
+  private:
+    static bool cleanedup;
+
+} loggerInit;
 }
 #endif

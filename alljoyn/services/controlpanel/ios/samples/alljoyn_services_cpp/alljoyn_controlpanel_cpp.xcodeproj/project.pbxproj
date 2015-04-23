@@ -1,0 +1,659 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		19DCFB5F18A79D6C009EC74D /* ErrorWidget.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A23680F189A274C00FC88E8 /* ErrorWidget.h */; };
+		19DCFB6018A79D6C009EC74D /* Action.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A5236F818799E3100940ED4 /* Action.h */; };
+		19DCFB6118A79D6C009EC74D /* ActionWithDialog.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A5236F918799E3100940ED4 /* ActionWithDialog.h */; };
+		19DCFB6218A79D6C009EC74D /* ConstraintList.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A5236FA18799E3100940ED4 /* ConstraintList.h */; };
+		19DCFB6318A79D6C009EC74D /* ConstraintRange.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A5236FB18799E3100940ED4 /* ConstraintRange.h */; };
+		19DCFB6418A79D6C009EC74D /* Container.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A5236FC18799E3100940ED4 /* Container.h */; };
+		19DCFB6518A79D6C009EC74D /* ControlPanel.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A5236FD18799E3100940ED4 /* ControlPanel.h */; };
+		19DCFB6618A79D6C009EC74D /* ControlPanelBusListener.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A5236FE18799E3100940ED4 /* ControlPanelBusListener.h */; };
+		19DCFB6718A79D6C009EC74D /* ControlPanelControllee.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A5236FF18799E3100940ED4 /* ControlPanelControllee.h */; };
+		19DCFB6818A79D6C009EC74D /* ControlPanelControlleeUnit.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370018799E3100940ED4 /* ControlPanelControlleeUnit.h */; };
+		19DCFB6918A79D6C009EC74D /* ControlPanelController.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370118799E3100940ED4 /* ControlPanelController.h */; };
+		19DCFB6A18A79D6C009EC74D /* ControlPanelControllerUnit.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370218799E3100940ED4 /* ControlPanelControllerUnit.h */; };
+		19DCFB6B18A79D6C009EC74D /* ControlPanelDevice.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370318799E3100940ED4 /* ControlPanelDevice.h */; };
+		19DCFB6C18A79D6C009EC74D /* ControlPanelEnums.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370418799E3100940ED4 /* ControlPanelEnums.h */; };
+		19DCFB6D18A79D6C009EC74D /* ControlPanelListener.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370518799E3100940ED4 /* ControlPanelListener.h */; };
+		19DCFB6E18A79D6C009EC74D /* ControlPanelService.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370618799E3100940ED4 /* ControlPanelService.h */; };
+		19DCFB6F18A79D6C009EC74D /* ControlPanelSessionHandler.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370718799E3100940ED4 /* ControlPanelSessionHandler.h */; };
+		19DCFB7018A79D6C009EC74D /* CPSDate.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370818799E3100940ED4 /* CPSDate.h */; };
+		19DCFB7118A79D6C009EC74D /* CPSTime.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370918799E3100940ED4 /* CPSTime.h */; };
+		19DCFB7218A79D6C009EC74D /* Dialog.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370A18799E3100940ED4 /* Dialog.h */; };
+		19DCFB7318A79D6C009EC74D /* HttpControl.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370B18799E3100940ED4 /* HttpControl.h */; };
+		19DCFB7418A79D6C009EC74D /* Label.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370C18799E3100940ED4 /* Label.h */; };
+		19DCFB7518A79D6C009EC74D /* LanguageSet.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370D18799E3100940ED4 /* LanguageSet.h */; };
+		19DCFB7618A79D6C009EC74D /* LanguageSets.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370E18799E3100940ED4 /* LanguageSets.h */; };
+		19DCFB7718A79D6C009EC74D /* NotificationAction.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52370F18799E3100940ED4 /* NotificationAction.h */; };
+		19DCFB7818A79D6C009EC74D /* Property.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52371018799E3100940ED4 /* Property.h */; };
+		19DCFB7918A79D6C009EC74D /* RootWidget.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52371118799E3100940ED4 /* RootWidget.h */; };
+		19DCFB7A18A79D6C009EC74D /* Widget.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9A52371218799E3100940ED4 /* Widget.h */; };
+		9A236812189A276700FC88E8 /* WidgetProxyBusObjectListener.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A236811189A276700FC88E8 /* WidgetProxyBusObjectListener.cc */; };
+		9A236814189A277000FC88E8 /* ErrorWidget.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A236813189A277000FC88E8 /* ErrorWidget.cc */; };
+		9A5238E718799E3200940ED4 /* ActionBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52373718799E3100940ED4 /* ActionBusObject.cc */; };
+		9A5238E818799E3200940ED4 /* ContainerBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52373918799E3100940ED4 /* ContainerBusObject.cc */; };
+		9A5238E918799E3200940ED4 /* ControlPanelBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52373B18799E3100940ED4 /* ControlPanelBusObject.cc */; };
+		9A5238EA18799E3200940ED4 /* DialogBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52373D18799E3100940ED4 /* DialogBusObject.cc */; };
+		9A5238EB18799E3200940ED4 /* HttpControlBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52373F18799E3100940ED4 /* HttpControlBusObject.cc */; };
+		9A5238EC18799E3200940ED4 /* IntrospectionNode.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374118799E3100940ED4 /* IntrospectionNode.cc */; };
+		9A5238ED18799E3200940ED4 /* LabelBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374318799E3100940ED4 /* LabelBusObject.cc */; };
+		9A5238EE18799E3200940ED4 /* NotificationActionBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374518799E3100940ED4 /* NotificationActionBusObject.cc */; };
+		9A5238EF18799E3200940ED4 /* PropertyBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374718799E3100940ED4 /* PropertyBusObject.cc */; };
+		9A5238F018799E3200940ED4 /* WidgetBusObject.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374918799E3100940ED4 /* WidgetBusObject.cc */; };
+		9A5238F118799E3200940ED4 /* ControlPanel.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374B18799E3100940ED4 /* ControlPanel.cc */; };
+		9A5238F218799E3200940ED4 /* ControlPanelBusListener.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374C18799E3100940ED4 /* ControlPanelBusListener.cc */; };
+		9A5238F318799E3200940ED4 /* ControlPanelControllee.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374E18799E3100940ED4 /* ControlPanelControllee.cc */; };
+		9A5238F418799E3200940ED4 /* ControlPanelControlleeUnit.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52374F18799E3100940ED4 /* ControlPanelControlleeUnit.cc */; };
+		9A5238F518799E3200940ED4 /* ControlPanelController.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375018799E3100940ED4 /* ControlPanelController.cc */; };
+		9A5238F618799E3200940ED4 /* ControlPanelControllerUnit.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375118799E3100940ED4 /* ControlPanelControllerUnit.cc */; };
+		9A5238F718799E3200940ED4 /* ControlPanelDevice.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375218799E3100940ED4 /* ControlPanelDevice.cc */; };
+		9A5238F818799E3200940ED4 /* ControlPanelService.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375318799E3100940ED4 /* ControlPanelService.cc */; };
+		9A5238F918799E3200940ED4 /* ControlPanelSessionHandler.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375418799E3100940ED4 /* ControlPanelSessionHandler.cc */; };
+		9A5238FA18799E3200940ED4 /* LanguageSet.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375518799E3100940ED4 /* LanguageSet.cc */; };
+		9A5238FB18799E3200940ED4 /* LanguageSets.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375618799E3100940ED4 /* LanguageSets.cc */; };
+		9A5238FC18799E3200940ED4 /* NotificationAction.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375718799E3100940ED4 /* NotificationAction.cc */; };
+		9A5238FD18799E3200940ED4 /* Action.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375A18799E3100940ED4 /* Action.cc */; };
+		9A5238FE18799E3200940ED4 /* ActionWithDialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375B18799E3100940ED4 /* ActionWithDialog.cc */; };
+		9A5238FF18799E3200940ED4 /* ConstraintList.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375C18799E3100940ED4 /* ConstraintList.cc */; };
+		9A52390018799E3200940ED4 /* ConstraintRange.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375D18799E3100940ED4 /* ConstraintRange.cc */; };
+		9A52390118799E3200940ED4 /* Container.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375E18799E3100940ED4 /* Container.cc */; };
+		9A52390218799E3200940ED4 /* CPSDate.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52375F18799E3100940ED4 /* CPSDate.cc */; };
+		9A52390318799E3200940ED4 /* CPSTime.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52376018799E3100940ED4 /* CPSTime.cc */; };
+		9A52390418799E3200940ED4 /* Dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52376118799E3100940ED4 /* Dialog.cc */; };
+		9A52390518799E3200940ED4 /* HttpControl.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52376218799E3100940ED4 /* HttpControl.cc */; };
+		9A52390618799E3200940ED4 /* Label.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52376318799E3100940ED4 /* Label.cc */; };
+		9A52390718799E3200940ED4 /* Property.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52376418799E3100940ED4 /* Property.cc */; };
+		9A52390818799E3200940ED4 /* RootWidget.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52376518799E3100940ED4 /* RootWidget.cc */; };
+		9A52390918799E3200940ED4 /* Widget.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9A52376618799E3100940ED4 /* Widget.cc */; };
+		9AB9CDD618547B37004660C5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AB9CDD518547B37004660C5 /* Foundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9AB9CDD018547B37004660C5 /* Copy Files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = inc/alljoyn/controlpanel;
+			dstSubfolderSpec = 16;
+			files = (
+				19DCFB5F18A79D6C009EC74D /* ErrorWidget.h in Copy Files */,
+				19DCFB6018A79D6C009EC74D /* Action.h in Copy Files */,
+				19DCFB6118A79D6C009EC74D /* ActionWithDialog.h in Copy Files */,
+				19DCFB6218A79D6C009EC74D /* ConstraintList.h in Copy Files */,
+				19DCFB6318A79D6C009EC74D /* ConstraintRange.h in Copy Files */,
+				19DCFB6418A79D6C009EC74D /* Container.h in Copy Files */,
+				19DCFB6518A79D6C009EC74D /* ControlPanel.h in Copy Files */,
+				19DCFB6618A79D6C009EC74D /* ControlPanelBusListener.h in Copy Files */,
+				19DCFB6718A79D6C009EC74D /* ControlPanelControllee.h in Copy Files */,
+				19DCFB6818A79D6C009EC74D /* ControlPanelControlleeUnit.h in Copy Files */,
+				19DCFB6918A79D6C009EC74D /* ControlPanelController.h in Copy Files */,
+				19DCFB6A18A79D6C009EC74D /* ControlPanelControllerUnit.h in Copy Files */,
+				19DCFB6B18A79D6C009EC74D /* ControlPanelDevice.h in Copy Files */,
+				19DCFB6C18A79D6C009EC74D /* ControlPanelEnums.h in Copy Files */,
+				19DCFB6D18A79D6C009EC74D /* ControlPanelListener.h in Copy Files */,
+				19DCFB6E18A79D6C009EC74D /* ControlPanelService.h in Copy Files */,
+				19DCFB6F18A79D6C009EC74D /* ControlPanelSessionHandler.h in Copy Files */,
+				19DCFB7018A79D6C009EC74D /* CPSDate.h in Copy Files */,
+				19DCFB7118A79D6C009EC74D /* CPSTime.h in Copy Files */,
+				19DCFB7218A79D6C009EC74D /* Dialog.h in Copy Files */,
+				19DCFB7318A79D6C009EC74D /* HttpControl.h in Copy Files */,
+				19DCFB7418A79D6C009EC74D /* Label.h in Copy Files */,
+				19DCFB7518A79D6C009EC74D /* LanguageSet.h in Copy Files */,
+				19DCFB7618A79D6C009EC74D /* LanguageSets.h in Copy Files */,
+				19DCFB7718A79D6C009EC74D /* NotificationAction.h in Copy Files */,
+				19DCFB7818A79D6C009EC74D /* Property.h in Copy Files */,
+				19DCFB7918A79D6C009EC74D /* RootWidget.h in Copy Files */,
+				19DCFB7A18A79D6C009EC74D /* Widget.h in Copy Files */,
+			);
+			name = "Copy Files";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		9A23680F189A274C00FC88E8 /* ErrorWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorWidget.h; sourceTree = "<group>"; };
+		9A236810189A276700FC88E8 /* WidgetProxyBusObjectListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetProxyBusObjectListener.h; sourceTree = "<group>"; };
+		9A236811189A276700FC88E8 /* WidgetProxyBusObjectListener.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WidgetProxyBusObjectListener.cc; sourceTree = "<group>"; };
+		9A236813189A277000FC88E8 /* ErrorWidget.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ErrorWidget.cc; sourceTree = "<group>"; };
+		9A5236F818799E3100940ED4 /* Action.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Action.h; sourceTree = "<group>"; };
+		9A5236F918799E3100940ED4 /* ActionWithDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionWithDialog.h; sourceTree = "<group>"; };
+		9A5236FA18799E3100940ED4 /* ConstraintList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConstraintList.h; sourceTree = "<group>"; };
+		9A5236FB18799E3100940ED4 /* ConstraintRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConstraintRange.h; sourceTree = "<group>"; };
+		9A5236FC18799E3100940ED4 /* Container.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Container.h; sourceTree = "<group>"; };
+		9A5236FD18799E3100940ED4 /* ControlPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanel.h; sourceTree = "<group>"; };
+		9A5236FE18799E3100940ED4 /* ControlPanelBusListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelBusListener.h; sourceTree = "<group>"; };
+		9A5236FF18799E3100940ED4 /* ControlPanelControllee.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelControllee.h; sourceTree = "<group>"; };
+		9A52370018799E3100940ED4 /* ControlPanelControlleeUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelControlleeUnit.h; sourceTree = "<group>"; };
+		9A52370118799E3100940ED4 /* ControlPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelController.h; sourceTree = "<group>"; };
+		9A52370218799E3100940ED4 /* ControlPanelControllerUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelControllerUnit.h; sourceTree = "<group>"; };
+		9A52370318799E3100940ED4 /* ControlPanelDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelDevice.h; sourceTree = "<group>"; };
+		9A52370418799E3100940ED4 /* ControlPanelEnums.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelEnums.h; sourceTree = "<group>"; };
+		9A52370518799E3100940ED4 /* ControlPanelListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelListener.h; sourceTree = "<group>"; };
+		9A52370618799E3100940ED4 /* ControlPanelService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelService.h; sourceTree = "<group>"; };
+		9A52370718799E3100940ED4 /* ControlPanelSessionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelSessionHandler.h; sourceTree = "<group>"; };
+		9A52370818799E3100940ED4 /* CPSDate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPSDate.h; sourceTree = "<group>"; };
+		9A52370918799E3100940ED4 /* CPSTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPSTime.h; sourceTree = "<group>"; };
+		9A52370A18799E3100940ED4 /* Dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dialog.h; sourceTree = "<group>"; };
+		9A52370B18799E3100940ED4 /* HttpControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HttpControl.h; sourceTree = "<group>"; };
+		9A52370C18799E3100940ED4 /* Label.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Label.h; sourceTree = "<group>"; };
+		9A52370D18799E3100940ED4 /* LanguageSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LanguageSet.h; sourceTree = "<group>"; };
+		9A52370E18799E3100940ED4 /* LanguageSets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LanguageSets.h; sourceTree = "<group>"; };
+		9A52370F18799E3100940ED4 /* NotificationAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificationAction.h; sourceTree = "<group>"; };
+		9A52371018799E3100940ED4 /* Property.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Property.h; sourceTree = "<group>"; };
+		9A52371118799E3100940ED4 /* RootWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootWidget.h; sourceTree = "<group>"; };
+		9A52371218799E3100940ED4 /* Widget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Widget.h; sourceTree = "<group>"; };
+		9A52373718799E3100940ED4 /* ActionBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ActionBusObject.cc; sourceTree = "<group>"; };
+		9A52373818799E3100940ED4 /* ActionBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionBusObject.h; sourceTree = "<group>"; };
+		9A52373918799E3100940ED4 /* ContainerBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ContainerBusObject.cc; sourceTree = "<group>"; };
+		9A52373A18799E3100940ED4 /* ContainerBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContainerBusObject.h; sourceTree = "<group>"; };
+		9A52373B18799E3100940ED4 /* ControlPanelBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelBusObject.cc; sourceTree = "<group>"; };
+		9A52373C18799E3100940ED4 /* ControlPanelBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelBusObject.h; sourceTree = "<group>"; };
+		9A52373D18799E3100940ED4 /* DialogBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DialogBusObject.cc; sourceTree = "<group>"; };
+		9A52373E18799E3100940ED4 /* DialogBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DialogBusObject.h; sourceTree = "<group>"; };
+		9A52373F18799E3100940ED4 /* HttpControlBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HttpControlBusObject.cc; sourceTree = "<group>"; };
+		9A52374018799E3100940ED4 /* HttpControlBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HttpControlBusObject.h; sourceTree = "<group>"; };
+		9A52374118799E3100940ED4 /* IntrospectionNode.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IntrospectionNode.cc; sourceTree = "<group>"; };
+		9A52374218799E3100940ED4 /* IntrospectionNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntrospectionNode.h; sourceTree = "<group>"; };
+		9A52374318799E3100940ED4 /* LabelBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LabelBusObject.cc; sourceTree = "<group>"; };
+		9A52374418799E3100940ED4 /* LabelBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LabelBusObject.h; sourceTree = "<group>"; };
+		9A52374518799E3100940ED4 /* NotificationActionBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NotificationActionBusObject.cc; sourceTree = "<group>"; };
+		9A52374618799E3100940ED4 /* NotificationActionBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificationActionBusObject.h; sourceTree = "<group>"; };
+		9A52374718799E3100940ED4 /* PropertyBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PropertyBusObject.cc; sourceTree = "<group>"; };
+		9A52374818799E3100940ED4 /* PropertyBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PropertyBusObject.h; sourceTree = "<group>"; };
+		9A52374918799E3100940ED4 /* WidgetBusObject.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WidgetBusObject.cc; sourceTree = "<group>"; };
+		9A52374A18799E3100940ED4 /* WidgetBusObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetBusObject.h; sourceTree = "<group>"; };
+		9A52374B18799E3100940ED4 /* ControlPanel.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanel.cc; sourceTree = "<group>"; };
+		9A52374C18799E3100940ED4 /* ControlPanelBusListener.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelBusListener.cc; sourceTree = "<group>"; };
+		9A52374D18799E3100940ED4 /* ControlPanelConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanelConstants.h; sourceTree = "<group>"; };
+		9A52374E18799E3100940ED4 /* ControlPanelControllee.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelControllee.cc; sourceTree = "<group>"; };
+		9A52374F18799E3100940ED4 /* ControlPanelControlleeUnit.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelControlleeUnit.cc; sourceTree = "<group>"; };
+		9A52375018799E3100940ED4 /* ControlPanelController.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelController.cc; sourceTree = "<group>"; };
+		9A52375118799E3100940ED4 /* ControlPanelControllerUnit.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelControllerUnit.cc; sourceTree = "<group>"; };
+		9A52375218799E3100940ED4 /* ControlPanelDevice.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelDevice.cc; sourceTree = "<group>"; };
+		9A52375318799E3100940ED4 /* ControlPanelService.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelService.cc; sourceTree = "<group>"; };
+		9A52375418799E3100940ED4 /* ControlPanelSessionHandler.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPanelSessionHandler.cc; sourceTree = "<group>"; };
+		9A52375518799E3100940ED4 /* LanguageSet.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LanguageSet.cc; sourceTree = "<group>"; };
+		9A52375618799E3100940ED4 /* LanguageSets.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LanguageSets.cc; sourceTree = "<group>"; };
+		9A52375718799E3100940ED4 /* NotificationAction.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NotificationAction.cc; sourceTree = "<group>"; };
+		9A52375A18799E3100940ED4 /* Action.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Action.cc; sourceTree = "<group>"; };
+		9A52375B18799E3100940ED4 /* ActionWithDialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ActionWithDialog.cc; sourceTree = "<group>"; };
+		9A52375C18799E3100940ED4 /* ConstraintList.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConstraintList.cc; sourceTree = "<group>"; };
+		9A52375D18799E3100940ED4 /* ConstraintRange.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConstraintRange.cc; sourceTree = "<group>"; };
+		9A52375E18799E3100940ED4 /* Container.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Container.cc; sourceTree = "<group>"; };
+		9A52375F18799E3100940ED4 /* CPSDate.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CPSDate.cc; sourceTree = "<group>"; };
+		9A52376018799E3100940ED4 /* CPSTime.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CPSTime.cc; sourceTree = "<group>"; };
+		9A52376118799E3100940ED4 /* Dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dialog.cc; sourceTree = "<group>"; };
+		9A52376218799E3100940ED4 /* HttpControl.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HttpControl.cc; sourceTree = "<group>"; };
+		9A52376318799E3100940ED4 /* Label.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Label.cc; sourceTree = "<group>"; };
+		9A52376418799E3100940ED4 /* Property.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Property.cc; sourceTree = "<group>"; };
+		9A52376518799E3100940ED4 /* RootWidget.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RootWidget.cc; sourceTree = "<group>"; };
+		9A52376618799E3100940ED4 /* Widget.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Widget.cc; sourceTree = "<group>"; };
+		9AB9CDD218547B37004660C5 /* liballjoyn_controlpanel_cpp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liballjoyn_controlpanel_cpp.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AB9CDD518547B37004660C5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		9AB9CDD918547B37004660C5 /* alljoyn_controlpanel_cpp-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "alljoyn_controlpanel_cpp-Prefix.pch"; sourceTree = "<group>"; };
+		9AB9CDE318547B37004660C5 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		9AB9CDE618547B37004660C5 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9AB9CDCF18547B37004660C5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9AB9CDD618547B37004660C5 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9A5236EE18799E3100940ED4 /* controlpanel */ = {
+			isa = PBXGroup;
+			children = (
+				9A5236F018799E3100940ED4 /* cpp */,
+			);
+			name = controlpanel;
+			path = ../../../..;
+			sourceTree = "<group>";
+		};
+		9A5236F018799E3100940ED4 /* cpp */ = {
+			isa = PBXGroup;
+			children = (
+				9A5236F518799E3100940ED4 /* inc */,
+				9A52373518799E3100940ED4 /* src */,
+			);
+			path = cpp;
+			sourceTree = "<group>";
+		};
+		9A5236F518799E3100940ED4 /* inc */ = {
+			isa = PBXGroup;
+			children = (
+				9A5236F618799E3100940ED4 /* alljoyn */,
+			);
+			path = inc;
+			sourceTree = "<group>";
+		};
+		9A5236F618799E3100940ED4 /* alljoyn */ = {
+			isa = PBXGroup;
+			children = (
+				9A5236F718799E3100940ED4 /* controlpanel */,
+			);
+			path = alljoyn;
+			sourceTree = "<group>";
+		};
+		9A5236F718799E3100940ED4 /* controlpanel */ = {
+			isa = PBXGroup;
+			children = (
+				9A23680F189A274C00FC88E8 /* ErrorWidget.h */,
+				9A5236F818799E3100940ED4 /* Action.h */,
+				9A5236F918799E3100940ED4 /* ActionWithDialog.h */,
+				9A5236FA18799E3100940ED4 /* ConstraintList.h */,
+				9A5236FB18799E3100940ED4 /* ConstraintRange.h */,
+				9A5236FC18799E3100940ED4 /* Container.h */,
+				9A5236FD18799E3100940ED4 /* ControlPanel.h */,
+				9A5236FE18799E3100940ED4 /* ControlPanelBusListener.h */,
+				9A5236FF18799E3100940ED4 /* ControlPanelControllee.h */,
+				9A52370018799E3100940ED4 /* ControlPanelControlleeUnit.h */,
+				9A52370118799E3100940ED4 /* ControlPanelController.h */,
+				9A52370218799E3100940ED4 /* ControlPanelControllerUnit.h */,
+				9A52370318799E3100940ED4 /* ControlPanelDevice.h */,
+				9A52370418799E3100940ED4 /* ControlPanelEnums.h */,
+				9A52370518799E3100940ED4 /* ControlPanelListener.h */,
+				9A52370618799E3100940ED4 /* ControlPanelService.h */,
+				9A52370718799E3100940ED4 /* ControlPanelSessionHandler.h */,
+				9A52370818799E3100940ED4 /* CPSDate.h */,
+				9A52370918799E3100940ED4 /* CPSTime.h */,
+				9A52370A18799E3100940ED4 /* Dialog.h */,
+				9A52370B18799E3100940ED4 /* HttpControl.h */,
+				9A52370C18799E3100940ED4 /* Label.h */,
+				9A52370D18799E3100940ED4 /* LanguageSet.h */,
+				9A52370E18799E3100940ED4 /* LanguageSets.h */,
+				9A52370F18799E3100940ED4 /* NotificationAction.h */,
+				9A52371018799E3100940ED4 /* Property.h */,
+				9A52371118799E3100940ED4 /* RootWidget.h */,
+				9A52371218799E3100940ED4 /* Widget.h */,
+			);
+			path = controlpanel;
+			sourceTree = "<group>";
+		};
+		9A52373518799E3100940ED4 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				9A52373618799E3100940ED4 /* BusObjects */,
+				9A52374B18799E3100940ED4 /* ControlPanel.cc */,
+				9A52374C18799E3100940ED4 /* ControlPanelBusListener.cc */,
+				9A52374D18799E3100940ED4 /* ControlPanelConstants.h */,
+				9A52374E18799E3100940ED4 /* ControlPanelControllee.cc */,
+				9A52374F18799E3100940ED4 /* ControlPanelControlleeUnit.cc */,
+				9A52375018799E3100940ED4 /* ControlPanelController.cc */,
+				9A52375118799E3100940ED4 /* ControlPanelControllerUnit.cc */,
+				9A52375218799E3100940ED4 /* ControlPanelDevice.cc */,
+				9A52375318799E3100940ED4 /* ControlPanelService.cc */,
+				9A52375418799E3100940ED4 /* ControlPanelSessionHandler.cc */,
+				9A52375518799E3100940ED4 /* LanguageSet.cc */,
+				9A52375618799E3100940ED4 /* LanguageSets.cc */,
+				9A52375718799E3100940ED4 /* NotificationAction.cc */,
+				9A52375918799E3100940ED4 /* Widgets */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		9A52373618799E3100940ED4 /* BusObjects */ = {
+			isa = PBXGroup;
+			children = (
+				9A236810189A276700FC88E8 /* WidgetProxyBusObjectListener.h */,
+				9A236811189A276700FC88E8 /* WidgetProxyBusObjectListener.cc */,
+				9A52373718799E3100940ED4 /* ActionBusObject.cc */,
+				9A52373818799E3100940ED4 /* ActionBusObject.h */,
+				9A52373918799E3100940ED4 /* ContainerBusObject.cc */,
+				9A52373A18799E3100940ED4 /* ContainerBusObject.h */,
+				9A52373B18799E3100940ED4 /* ControlPanelBusObject.cc */,
+				9A52373C18799E3100940ED4 /* ControlPanelBusObject.h */,
+				9A52373D18799E3100940ED4 /* DialogBusObject.cc */,
+				9A52373E18799E3100940ED4 /* DialogBusObject.h */,
+				9A52373F18799E3100940ED4 /* HttpControlBusObject.cc */,
+				9A52374018799E3100940ED4 /* HttpControlBusObject.h */,
+				9A52374118799E3100940ED4 /* IntrospectionNode.cc */,
+				9A52374218799E3100940ED4 /* IntrospectionNode.h */,
+				9A52374318799E3100940ED4 /* LabelBusObject.cc */,
+				9A52374418799E3100940ED4 /* LabelBusObject.h */,
+				9A52374518799E3100940ED4 /* NotificationActionBusObject.cc */,
+				9A52374618799E3100940ED4 /* NotificationActionBusObject.h */,
+				9A52374718799E3100940ED4 /* PropertyBusObject.cc */,
+				9A52374818799E3100940ED4 /* PropertyBusObject.h */,
+				9A52374918799E3100940ED4 /* WidgetBusObject.cc */,
+				9A52374A18799E3100940ED4 /* WidgetBusObject.h */,
+			);
+			path = BusObjects;
+			sourceTree = "<group>";
+		};
+		9A52375918799E3100940ED4 /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				9A236813189A277000FC88E8 /* ErrorWidget.cc */,
+				9A52375A18799E3100940ED4 /* Action.cc */,
+				9A52375B18799E3100940ED4 /* ActionWithDialog.cc */,
+				9A52375C18799E3100940ED4 /* ConstraintList.cc */,
+				9A52375D18799E3100940ED4 /* ConstraintRange.cc */,
+				9A52375E18799E3100940ED4 /* Container.cc */,
+				9A52375F18799E3100940ED4 /* CPSDate.cc */,
+				9A52376018799E3100940ED4 /* CPSTime.cc */,
+				9A52376118799E3100940ED4 /* Dialog.cc */,
+				9A52376218799E3100940ED4 /* HttpControl.cc */,
+				9A52376318799E3100940ED4 /* Label.cc */,
+				9A52376418799E3100940ED4 /* Property.cc */,
+				9A52376518799E3100940ED4 /* RootWidget.cc */,
+				9A52376618799E3100940ED4 /* Widget.cc */,
+			);
+			path = Widgets;
+			sourceTree = "<group>";
+		};
+		9AB9CDC918547B37004660C5 = {
+			isa = PBXGroup;
+			children = (
+				9AB9CDD718547B37004660C5 /* alljoyn_services_cpp */,
+				9AB9CDD418547B37004660C5 /* Frameworks */,
+				9AB9CDD318547B37004660C5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9AB9CDD318547B37004660C5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9AB9CDD218547B37004660C5 /* liballjoyn_controlpanel_cpp.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9AB9CDD418547B37004660C5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9AB9CDD518547B37004660C5 /* Foundation.framework */,
+				9AB9CDE318547B37004660C5 /* XCTest.framework */,
+				9AB9CDE618547B37004660C5 /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9AB9CDD718547B37004660C5 /* alljoyn_services_cpp */ = {
+			isa = PBXGroup;
+			children = (
+				9A5236EE18799E3100940ED4 /* controlpanel */,
+				9AB9CDD818547B37004660C5 /* Supporting Files */,
+			);
+			path = alljoyn_services_cpp;
+			sourceTree = "<group>";
+		};
+		9AB9CDD818547B37004660C5 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				9AB9CDD918547B37004660C5 /* alljoyn_controlpanel_cpp-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9AB9CDD118547B37004660C5 /* alljoyn_controlpanel_cpp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9AB9CDF518547B37004660C5 /* Build configuration list for PBXNativeTarget "alljoyn_controlpanel_cpp" */;
+			buildPhases = (
+				9AB9CDCE18547B37004660C5 /* Sources */,
+				9AB9CDCF18547B37004660C5 /* Frameworks */,
+				9AB9CDD018547B37004660C5 /* Copy Files */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = alljoyn_controlpanel_cpp;
+			productName = alljoyn_services_cpp;
+			productReference = 9AB9CDD218547B37004660C5 /* liballjoyn_controlpanel_cpp.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9AB9CDCA18547B37004660C5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = AllJoyn;
+			};
+			buildConfigurationList = 9AB9CDCD18547B37004660C5 /* Build configuration list for PBXProject "alljoyn_controlpanel_cpp" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 9AB9CDC918547B37004660C5;
+			productRefGroup = 9AB9CDD318547B37004660C5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9AB9CDD118547B37004660C5 /* alljoyn_controlpanel_cpp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9AB9CDCE18547B37004660C5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9A5238FA18799E3200940ED4 /* LanguageSet.cc in Sources */,
+				9A5238EA18799E3200940ED4 /* DialogBusObject.cc in Sources */,
+				9A52390518799E3200940ED4 /* HttpControl.cc in Sources */,
+				9A5238EC18799E3200940ED4 /* IntrospectionNode.cc in Sources */,
+				9A5238ED18799E3200940ED4 /* LabelBusObject.cc in Sources */,
+				9A5238EF18799E3200940ED4 /* PropertyBusObject.cc in Sources */,
+				9A52390818799E3200940ED4 /* RootWidget.cc in Sources */,
+				9A5238FC18799E3200940ED4 /* NotificationAction.cc in Sources */,
+				9A52390618799E3200940ED4 /* Label.cc in Sources */,
+				9A52390118799E3200940ED4 /* Container.cc in Sources */,
+				9A52390718799E3200940ED4 /* Property.cc in Sources */,
+				9A5238FF18799E3200940ED4 /* ConstraintList.cc in Sources */,
+				9A52390318799E3200940ED4 /* CPSTime.cc in Sources */,
+				9A5238F418799E3200940ED4 /* ControlPanelControlleeUnit.cc in Sources */,
+				9A5238F918799E3200940ED4 /* ControlPanelSessionHandler.cc in Sources */,
+				9A52390918799E3200940ED4 /* Widget.cc in Sources */,
+				9A5238FD18799E3200940ED4 /* Action.cc in Sources */,
+				9A52390018799E3200940ED4 /* ConstraintRange.cc in Sources */,
+				9A5238F718799E3200940ED4 /* ControlPanelDevice.cc in Sources */,
+				9A5238F818799E3200940ED4 /* ControlPanelService.cc in Sources */,
+				9A52390218799E3200940ED4 /* CPSDate.cc in Sources */,
+				9A5238F518799E3200940ED4 /* ControlPanelController.cc in Sources */,
+				9A5238F218799E3200940ED4 /* ControlPanelBusListener.cc in Sources */,
+				9A5238E918799E3200940ED4 /* ControlPanelBusObject.cc in Sources */,
+				9A5238FE18799E3200940ED4 /* ActionWithDialog.cc in Sources */,
+				9A52390418799E3200940ED4 /* Dialog.cc in Sources */,
+				9A5238EE18799E3200940ED4 /* NotificationActionBusObject.cc in Sources */,
+				9A236812189A276700FC88E8 /* WidgetProxyBusObjectListener.cc in Sources */,
+				9A5238FB18799E3200940ED4 /* LanguageSets.cc in Sources */,
+				9A5238E718799E3200940ED4 /* ActionBusObject.cc in Sources */,
+				9A5238F118799E3200940ED4 /* ControlPanel.cc in Sources */,
+				9A5238F018799E3200940ED4 /* WidgetBusObject.cc in Sources */,
+				9A5238E818799E3200940ED4 /* ContainerBusObject.cc in Sources */,
+				9A5238F318799E3200940ED4 /* ControlPanelControllee.cc in Sources */,
+				9A5238EB18799E3200940ED4 /* HttpControlBusObject.cc in Sources */,
+				9A5238F618799E3200940ED4 /* ControlPanelControllerUnit.cc in Sources */,
+				9A236814189A277000FC88E8 /* ErrorWidget.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9AB9CDF318547B37004660C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				VALID_ARCHS = "armv7 armv7s i386";
+			};
+			name = Debug;
+		};
+		9AB9CDF418547B37004660C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "armv7 armv7s i386";
+			};
+			name = Release;
+		};
+		9AB9CDF618547B37004660C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES;
+				DSTROOT = /tmp/alljoyn_services_cpp.dst;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_services_cpp/alljoyn_controlpanel_cpp-Prefix.pch";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(ALLJOYN_SDK_ROOT)/build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc/\"",
+					"$(inherited)",
+					"\"$(ALLJOYN_SDK_ROOT)/services/about/cpp/inc\"",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/controlpanel/cpp/inc\"",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/services_common/cpp/inc\"",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/lib\"";
+				OTHER_CFLAGS = (
+					"-DQCC_OS_GROUP_POSIX",
+					"-DQCC_OS_DARWIN",
+					"-DUSE_SAMPLE_LOGGER",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = alljoyn_controlpanel_cpp;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		9AB9CDF718547B37004660C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES;
+				DSTROOT = /tmp/alljoyn_services_cpp.dst;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_services_cpp/alljoyn_controlpanel_cpp-Prefix.pch";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(ALLJOYN_SDK_ROOT)/build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc/\"",
+					"$(inherited)",
+					"\"$(ALLJOYN_SDK_ROOT)/services/about/cpp/inc\"",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/controlpanel/cpp/inc\"",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/services_common/cpp/inc\"",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../../../../build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/lib\"";
+				OTHER_CFLAGS = (
+					"-DQCC_OS_GROUP_POSIX",
+					"-DQCC_OS_DARWIN",
+					"-DUSE_SAMPLE_LOGGER",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = alljoyn_controlpanel_cpp;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9AB9CDCD18547B37004660C5 /* Build configuration list for PBXProject "alljoyn_controlpanel_cpp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AB9CDF318547B37004660C5 /* Debug */,
+				9AB9CDF418547B37004660C5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9AB9CDF518547B37004660C5 /* Build configuration list for PBXNativeTarget "alljoyn_controlpanel_cpp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AB9CDF618547B37004660C5 /* Debug */,
+				9AB9CDF718547B37004660C5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9AB9CDCA18547B37004660C5 /* Project object */;
+}

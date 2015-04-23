@@ -95,6 +95,9 @@ static map<SessionId, SessionInfo> s_sessionMap;
 static Mutex s_lock;
 static bool s_chatEcho = true;
 
+static String s_name;
+static bool s_found = false;
+
 /*
  * get a line of input from the the file pointer (most likely stdin).
  * This will capture the the num-1 characters or till a newline character is
@@ -197,6 +200,10 @@ class MyBusListener : public BusListener, public SessionPortListener, public Ses
         s_lock.Lock(MUTEX_CONTEXT);
         s_discoverSet.insert(DiscoverInfo(name, transport));
         s_lock.Unlock(MUTEX_CONTEXT);
+
+        if (strcmp(name, s_name.c_str()) == 0) {
+            s_found = true;
+        }
     }
 
     void NameOwnerChanged(const char* busName, const char* previousOwner, const char* newOwner)
@@ -218,7 +225,7 @@ class MyBusListener : public BusListener, public SessionPortListener, public Ses
         s_lock.Lock(MUTEX_CONTEXT);
         map<SessionPort, SessionPortInfo>::iterator it = s_sessionPortMap.find(sessionPort);
         if (it != s_sessionPortMap.end()) {
-            printf("Accepting join request on %u from %s\n", sessionPort, joiner);
+            printf("Accepting join request on %u from %s (multipoint=%d)\n", sessionPort, joiner, opts.isMultipoint);
             ret = true;
         } else {
             printf("Rejecting join attempt to unregistered port %u from %s\n", sessionPort, joiner);
@@ -232,7 +239,7 @@ class MyBusListener : public BusListener, public SessionPortListener, public Ses
         s_lock.Lock(MUTEX_CONTEXT);
         map<SessionPort, SessionPortInfo>::iterator it = s_sessionPortMap.find(sessionPort);
         if (it != s_sessionPortMap.end()) {
-            s_bus->SetSessionListener(id, this);
+            s_bus->SetHostedSessionListener(id, this);
             map<SessionId, SessionInfo>::iterator sit = s_sessionMap.find(id);
             if (sit == s_sessionMap.end()) {
                 SessionInfo sessionInfo(id, it->second);
@@ -320,7 +327,7 @@ class AutoChatThread : public Thread, public ThreadListener {
 
 static void usage()
 {
-    printf("Usage: sessions [-h]\n");
+    printf("Usage: sessions [command-file]\n");
     exit(1);
 }
 
@@ -452,8 +459,19 @@ static void DoCancelAdvertise(String name, TransportMask transports)
     }
 }
 
+static void DoWait(String name)
+{
+    while (s_found == false) {
+        qcc::Sleep(250);
+        printf(".");
+    }
+    printf("\n");
+}
+
 static void DoFind(String name)
 {
+    s_name = name;
+    s_found = false;
     QStatus status = s_bus->FindAdvertisedName(name.c_str());
     if (status != ER_OK) {
         printf("BusAttachment::FindAdvertisedName(%s) failed with %s\n", name.c_str(), QCC_StatusText(status));
@@ -595,6 +613,41 @@ static void DoLeave(SessionId id)
         printf("Invalid session id %u specified in LeaveSession\n", id);
     }
 }
+
+static void DoLeaveHosted(SessionId id)
+{
+    /* Validate session id */
+    map<SessionId, SessionInfo>::const_iterator it = s_sessionMap.find(id);
+    if (it != s_sessionMap.end()) {
+        QStatus status = s_bus->LeaveHostedSession(id);
+        if (status != ER_OK) {
+            printf("SessionLost(%u) failed with %s\n", id, QCC_StatusText(status));
+        }
+        s_lock.Lock(MUTEX_CONTEXT);
+        s_sessionMap.erase(id);
+        s_lock.Unlock(MUTEX_CONTEXT);
+    } else {
+        printf("Invalid session id %u specified in LeaveSession\n", id);
+    }
+}
+
+static void DoLeaveJoined(SessionId id)
+{
+    /* Validate session id */
+    map<SessionId, SessionInfo>::const_iterator it = s_sessionMap.find(id);
+    if (it != s_sessionMap.end()) {
+        QStatus status = s_bus->LeaveJoinedSession(id);
+        if (status != ER_OK) {
+            printf("SessionLost(%u) failed with %s\n", id, QCC_StatusText(status));
+        }
+        s_lock.Lock(MUTEX_CONTEXT);
+        s_sessionMap.erase(id);
+        s_lock.Unlock(MUTEX_CONTEXT);
+    } else {
+        printf("Invalid session id %u specified in LeaveSession\n", id);
+    }
+}
+
 static void DoRemoveMember(SessionId id, String memberName)
 {
     /* Validate session id */
@@ -710,13 +763,8 @@ int main(int argc, char** argv)
     QStatus status = ER_OK;
 
     /* Parse command line args */
-    for (int i = 1; i < argc; ++i) {
-        if (0 == ::strcmp("-h", argv[i])) {
-            usage();
-        } else {
-            printf("Unknown argument \"%s\"\n", argv[i]);
-            usage();
-        }
+    if (argc > 2) {
+        usage();
     }
 
     /* Create message bus */
@@ -766,11 +814,40 @@ int main(int argc, char** argv)
         }
     }
 
-    /* Parse commands from stdin */
-    printf("ready\n");
+    /*
+     * If argc is two, argv[1] is a file name from which we will interpret setup
+     * commands until EOF.  If no file, or when the file is parsed, start
+     * reading and parsing commands from stdin.
+     */
     const int bufSize = 1024;
     char buf[bufSize];
-    while ((ER_OK == status) && (get_line(buf, bufSize, stdin))) {
+
+    FILE* fp;
+
+    if (argc == 2) {
+        fp = fopen(argv[1], "r");
+        if (fp == NULL) {
+            printf("unable to open \"%s\"\n", argv[1]);
+            fp = stdin;
+        } else {
+            printf("reading commands from \"%s\"\n", argv[1]);
+        }
+    } else {
+        fp = stdin;
+    }
+
+    while (ER_OK == status) {
+        if (get_line(buf, bufSize, fp) == NULL) {
+            if (fp == stdin) {
+                break;
+            } else {
+                fclose(fp);
+                fp = stdin;
+                printf("ready\n");
+                continue;
+            }
+        }
+
         String line(buf);
         String cmd = NextTok(line);
         if (cmd == "debug") {
@@ -957,6 +1034,20 @@ int main(int argc, char** argv)
                 continue;
             }
             DoLeave(id);
+        } else if (cmd == "leavehosted") {
+            SessionId id = NextTokAsSessionId(line);
+            if (id == 0) {
+                printf("Usage: leavehosted <sessionId>\n");
+                continue;
+            }
+            DoLeaveHosted(id);
+        } else if (cmd == "leavejoiner") {
+            SessionId id = NextTokAsSessionId(line);
+            if (id == 0) {
+                printf("Usage: leavejoiner <sessionId>\n");
+                continue;
+            }
+            DoLeaveJoined(id);
         } else if (cmd == "removemember") {
             SessionId id = NextTokAsSessionId(line);
             String name = NextTok(line);
@@ -999,6 +1090,14 @@ int main(int argc, char** argv)
                 continue;
             }
             sessionTestObj.SendChatSignal(id, chatMsg.c_str(), flags);
+        } else if (cmd == "anychat") {
+            uint8_t flags = 0;
+            String chatMsg = Trim(line);
+            if (chatMsg.empty()) {
+                printf("Usage: anychat <msg>\n");
+                continue;
+            }
+            sessionTestObj.SendChatSignal(ajn::SESSION_ID_ALL_HOSTED, chatMsg.c_str(), flags);
         } else if (cmd == "autochat") {
             SessionId id = NextTokAsSessionId(line);
             uint32_t count = StringToU32(NextTok(line), 0, 0);
@@ -1056,6 +1155,9 @@ int main(int argc, char** argv)
                 continue;
             }
             sessionTestObj.SetTtl(ttl);
+        } else if (cmd == "wait") {
+            String name = NextTok(line);
+            DoWait(name);
         } else if (cmd == "ping") {
             String name = NextTok(line);
             uint32_t timeout = StringToU32(NextTok(line), 0, 30000);
@@ -1081,9 +1183,12 @@ int main(int argc, char** argv)
             printf("asyncjoin <name> <port> [isMultipoint] [traffic] [proximity] [transports] - Join a session asynchronously\n");
             printf("removemember <sessionId> <memberName>                         - Remove a session member\n");
             printf("leave <sessionId>                                             - Leave a session\n");
+            printf("leavehosted <sessionId>                                       - Leave a session as host\n");
+            printf("leavejoiner <sessionId>                                       - Leave a session as joiner\n");
             printf("chat <sessionId> <msg>                                        - Send a message over a given session\n");
             printf("cchat <sessionId> <msg>                                       - Send a message over a given session with compression\n");
             printf("schat <msg>                                                   - Send a sessionless message\n");
+            printf("anychat <msg>                                                 - Send a message on all hosted sessions\n");
             printf("cancelsessionless <serialNum>                                 - Cancel a sessionless message\n");
             printf("autochat <sessionId> [count] [delay] [minSize] [maxSize]      - Send periodic messages of various sizes\n");
             printf("timeout <sessionId> <linkTimeout>                             - Set link timeout for a session\n");
@@ -1092,6 +1197,7 @@ int main(int argc, char** argv)
             printf("addmatch <rule>                                               - Add a DBUS rule\n");
             printf("removematch <rule>                                            - Remove a DBUS rule\n");
             printf("sendttl <ttl>                                                 - Set ttl (in ms) for all chat messages (0 = infinite)\n");
+            printf("wait <name>                                                   - Wait until <name> is found\n");
             printf("ping <name> [timeout]                                         - Ping a name\n");
             printf("asyncping <name> [timeout]                                    - Ping a name asynchronously\n");
             printf("exit                                                          - Exit this program\n");

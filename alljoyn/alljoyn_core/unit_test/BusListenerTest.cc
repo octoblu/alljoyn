@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2012, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2012, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -23,16 +23,12 @@
 
 using namespace ajn;
 
-/*constants*/
-static const char* OBJECT_NAME = "org.alljoyn.test.BusListenerTest";
-
 /*flags*/
 static bool listener_registered_flag = false;
 static bool listener_unregistered_flag = false;
 static bool found_advertised_name_flag = false;
 static bool lost_advertised_name_flag = false;
 static bool name_owner_changed_flag = false;
-static bool property_changed_flag = false;
 static bool bus_stopping_flag = false;
 static bool bus_disconnected_flag = false;
 
@@ -53,9 +49,6 @@ class TestBusListener : public BusListener {
     virtual void NameOwnerChanged(const char* busName, const char* previousOwner, const char* newOwner) {
         name_owner_changed_flag = true;
     }
-    virtual void PropertyChanged(const char* propName, const MsgArg* propValue) {
-        property_changed_flag = true;
-    }
     virtual void BusStopping() {
         bus_stopping_flag = true;
     }
@@ -70,6 +63,7 @@ class BusListenerTest : public testing::Test {
     }
 
     virtual void SetUp() {
+        objectName = genUniqueName(bus);
         resetFlags();
     }
 
@@ -83,7 +77,6 @@ class BusListenerTest : public testing::Test {
         found_advertised_name_flag = false;
         lost_advertised_name_flag = false;
         name_owner_changed_flag = false;
-        property_changed_flag = false;
         bus_stopping_flag = false;
         bus_disconnected_flag = false;
     }
@@ -91,7 +84,7 @@ class BusListenerTest : public testing::Test {
     QStatus status;
     TestBusListener buslistener;
     BusAttachment bus;
-
+    qcc::String objectName;
 };
 
 TEST_F(BusListenerTest, listener_registered_unregistered) {
@@ -227,10 +220,10 @@ TEST_F(BusListenerTest, found_lost_advertised_name) {
 
     SessionOpts opts(SessionOpts::TRAFFIC_MESSAGES, false, SessionOpts::PROXIMITY_ANY, TRANSPORT_ANY);
 
-    status = bus.FindAdvertisedName(OBJECT_NAME);
+    status = bus.FindAdvertisedName(objectName.c_str());
     EXPECT_EQ(ER_OK, status) << "  Actual Status: " << QCC_StatusText(status);
 
-    status = bus.AdvertiseName(OBJECT_NAME, opts.transports);
+    status = bus.AdvertiseName(objectName.c_str(), opts.transports);
     EXPECT_EQ(ER_OK, status) << "  Actual Status: " << QCC_StatusText(status);
 
     for (size_t i = 0; i < 200; ++i) {
@@ -241,7 +234,7 @@ TEST_F(BusListenerTest, found_lost_advertised_name) {
     }
     EXPECT_TRUE(found_advertised_name_flag);
 
-    status = bus.CancelAdvertiseName(OBJECT_NAME, opts.transports);
+    status = bus.CancelAdvertiseName(objectName.c_str(), opts.transports);
     EXPECT_EQ(ER_OK, status) << "  Actual Status: " << QCC_StatusText(status);
     for (size_t i = 0; i < 200; ++i) {
         if (lost_advertised_name_flag) {
@@ -296,7 +289,7 @@ TEST_F(BusListenerTest, name_owner_changed) {
     }
     EXPECT_TRUE(listener_registered_flag);
 
-    bus.RequestName(OBJECT_NAME, 0);
+    bus.RequestName(objectName.c_str(), 0);
     for (size_t i = 0; i < 200; ++i) {
         if (name_owner_changed_flag) {
             break;

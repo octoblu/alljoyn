@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2012, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2012,2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -95,34 +95,6 @@ class _VirtualEndpoint : public _BusEndpoint {
     const qcc::String& GetUniqueName() const { return m_uniqueName; }
 
     /**
-     * Return the user id of the endpoint.
-     *
-     * @return  User ID number.
-     */
-    uint32_t GetUserId() const { return 0; };
-
-    /**
-     * Return the group id of the endpoint.
-     *
-     * @return  Group ID number.
-     */
-    uint32_t GetGroupId() const { return 0; }
-
-    /**
-     * Return the process id of the endpoint.
-     *
-     * @return  Process ID number.
-     */
-    uint32_t GetProcessId() const { return 0; }
-
-    /**
-     * Indicates if the endpoint supports reporting UNIX style user, group, and process IDs.
-     *
-     * @return  'true' if UNIX IDs supported, 'false' if not supported.
-     */
-    bool SupportsUnixIDs() const { return false; }
-
-    /**
      * Get the BusToBus endpoint associated with this virtual endpoint.
      *
      * @param sessionId   Id of session between src and dest.
@@ -131,6 +103,13 @@ class _VirtualEndpoint : public _BusEndpoint {
      *         (endpoint->IsValid() == false) if there is no such endpoint.
      */
     RemoteEndpoint GetBusToBusEndpoint(SessionId sessionId = 0, int* b2bCount = NULL) const;
+
+    /**
+     * Gets the BusToBus endpoints associated with this virtual endpoint.
+     *
+     * @return The set of BusToBus endpoints that can route for this virtual endpoint.
+     */
+    std::multimap<SessionId, RemoteEndpoint> GetBusToBusEndpoints() const;
 
     /**
      * Add an alternate bus-to-bus endpoint that can route for this endpoint.
@@ -228,6 +207,13 @@ class _VirtualEndpoint : public _BusEndpoint {
      * @return true iff the endpoint is in the process of being stopped.
      */
     bool IsStopping(void) { return m_epState == EP_STOPPING; }
+
+    /**
+     * Returns the remote GUID short string of the virtual endpoint
+     *
+     * @return remote short string of Virtual endpoint's guid.
+     */
+    qcc::String GetRemoteGUIDShortString();
   private:
 
     const qcc::String m_uniqueName;                             /**< The unique name for this endpoint */

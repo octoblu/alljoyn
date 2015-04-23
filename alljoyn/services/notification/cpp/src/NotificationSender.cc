@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -29,8 +29,14 @@ using namespace services;
 using namespace nsConsts;
 using namespace qcc;
 
+NotificationSender::NotificationSender(AboutData* aboutdata) :
+    m_aboutdata(aboutdata), m_PropertyStore(NULL)
+{
+
+}
+
 NotificationSender::NotificationSender(PropertyStore* propertyStore) :
-    m_PropertyStore(propertyStore)
+    m_aboutdata(NULL), m_PropertyStore(propertyStore)
 {
 
 }
@@ -55,12 +61,24 @@ QStatus NotificationSender::send(Notification const& notification, uint16_t ttl)
 
     ajn::BusAttachment* pBus = Transport::getInstance()->getBusAttachment();
     String originalSender = pBus ? pBus->GetUniqueName() : "";
-    return PayloadAdapter::sendPayload(m_PropertyStore,
-                                       notification.getMessageType(), notification.getText(),
-                                       notification.getCustomAttributes(), ttl, notification.getRichIconUrl(),
-                                       notification.getRichAudioUrl(), notification.getRichIconObjectPath(),
-                                       notification.getRichAudioObjectPath(), notification.getControlPanelServiceObjectPath(),
-                                       originalSender.c_str());
+    if (m_aboutdata) {
+        return PayloadAdapter::sendPayload(m_aboutdata,
+                                           notification.getMessageType(), notification.getText(),
+                                           notification.getCustomAttributes(), ttl, notification.getRichIconUrl(),
+                                           notification.getRichAudioUrl(), notification.getRichIconObjectPath(),
+                                           notification.getRichAudioObjectPath(), notification.getControlPanelServiceObjectPath(),
+                                           originalSender.c_str());
+    }
+
+    if (m_PropertyStore) {
+        return PayloadAdapter::sendPayload(m_PropertyStore,
+                                           notification.getMessageType(), notification.getText(),
+                                           notification.getCustomAttributes(), ttl, notification.getRichIconUrl(),
+                                           notification.getRichAudioUrl(), notification.getRichIconObjectPath(),
+                                           notification.getRichAudioObjectPath(), notification.getControlPanelServiceObjectPath(),
+                                           originalSender.c_str());
+    }
+    return ER_FAIL;
 }
 
 QStatus NotificationSender::deleteLastMsg(NotificationMessageType messageType)

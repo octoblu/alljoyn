@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,9 @@
 #include <iostream>
 #include <algorithm>
 #include <sstream>
+#ifdef _WIN32
+#include <process.h>
+#endif
 
 using namespace ajn;
 using namespace services;
@@ -30,21 +33,31 @@ NotificationReceiverTestImpl::NotificationReceiverTestImpl(bool waitForExternalN
     m_NotificationAction(ACTION_NOTHING), m_WaitForExternalNotificationAction(waitForExternalNotificationAction) {
 
     if (m_WaitForExternalNotificationAction) {
+#ifdef _WIN32
+        InitializeCriticalSection(&m_Lock);
+        InitializeConditionVariable(&m_Condition);
+#else
         pthread_mutex_init(&m_Lock, NULL);
         pthread_cond_init(&m_Condition, NULL);
+#endif
     }
 }
 
 NotificationReceiverTestImpl::~NotificationReceiverTestImpl() {
 
     if (m_WaitForExternalNotificationAction) {
-
+#ifdef _WIN32
+        EnterCriticalSection(&m_Lock);
+        WakeConditionVariable(&m_Condition);
+        LeaveCriticalSection(&m_Lock);
+        DeleteCriticalSection(&m_Lock);
+#else
         pthread_mutex_lock(&m_Lock);
         pthread_cond_signal(&m_Condition);
         pthread_mutex_unlock(&m_Lock);
-
         pthread_cond_destroy(&m_Condition);
         pthread_mutex_destroy(&m_Lock);
+#endif
     }
 }
 
@@ -117,11 +130,16 @@ void NotificationReceiverTestImpl::Receive(Notification const& notification) {
         Notification nonConstNotification(notification);
 
         if (m_WaitForExternalNotificationAction) {
+#ifdef _WIN32
+            EnterCriticalSection(&m_Lock);
+            SleepConditionVariableCS(&m_Condition, &m_Lock, INFINITE);
+#else
             pthread_mutex_lock(&m_Lock);
             pthread_cond_wait(&m_Condition, &m_Lock);
+#endif
         } else {
             std::cout << "Notification action (0-Nothing 1-Dismiss):" << std::endl;
-            int32_t notificationAction(NotificationAction::ACTION_NOTHING);
+            int32_t notificationAction(ACTION_NOTHING);
             int retScan = scanf("%d", &notificationAction);
             if (retScan != EOF) {
                 m_NotificationAction = static_cast<NotificationAction>(notificationAction);
@@ -145,7 +163,11 @@ void NotificationReceiverTestImpl::Receive(Notification const& notification) {
         }
         ;
         if (m_WaitForExternalNotificationAction) {
+#ifdef _WIN32
+            LeaveCriticalSection(&m_Lock);
+#else
             pthread_mutex_unlock(&m_Lock);
+#endif
         }
     }
     std::cout << "End handling notification!!!" << std::endl;
@@ -172,9 +194,16 @@ NotificationReceiverTestImpl::NotificationAction NotificationReceiverTestImpl::G
 void NotificationReceiverTestImpl::SetNotificationAction(NotificationReceiverTestImpl::NotificationAction notificationAction)
 {
     if (m_WaitForExternalNotificationAction) {
+#ifdef _WIN32
+        EnterCriticalSection(&m_Lock);
+        m_NotificationAction = notificationAction;
+        WakeConditionVariable(&m_Condition);
+        LeaveCriticalSection(&m_Lock);
+#else
         pthread_mutex_lock(&m_Lock);
         m_NotificationAction = notificationAction;
         pthread_cond_signal(&m_Condition);
         pthread_mutex_unlock(&m_Lock);
+#endif
     }
 }

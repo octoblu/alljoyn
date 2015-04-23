@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -20,8 +20,10 @@
 #include <vector>
 #include <map>
 #include <alljoyn/Status.h>
-#include <alljoyn/about/PropertyStore.h>
+#include <alljoyn/AboutData.h>
 #include <alljoyn/notification/NotificationEnums.h>
+
+#include <alljoyn/about/PropertyStore.h>
 
 namespace ajn {
 namespace services {
@@ -33,6 +35,13 @@ class Notification;
  */
 class NotificationSender {
   public:
+
+    /**
+     * Constructor for NotificationSenderImpl
+     * @param aboutdata - AboutData that includes entries
+     * for deviceId, deviceName, appId and appName
+     */
+    NotificationSender(ajn::AboutData* aboutdata);
 
     /**
      * Constructor for NotificationSenderImpl
@@ -65,9 +74,15 @@ class NotificationSender {
   private:
 
     /**
-     * Device Id that will be sent with the Notifications
+     * Pointer to AboutData implementing the storage.
+     */
+    ajn::AboutData* m_aboutdata;
+
+    /**
+     * Pointer to PropertyStore implementing the storage.
      */
     ajn::services::PropertyStore* m_PropertyStore;
+
 };
 } //namespace services
 } //namespace ajn

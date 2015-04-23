@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2010-2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2010-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,7 @@
 #include <qcc/platform.h>
 #include <qcc/atomic.h>
 #include <qcc/String.h>
+#include <qcc/Util.h>
 #include <assert.h>
 #include <limits>
 #include <new>
@@ -32,25 +33,17 @@
  */
 static const void* memmem(const void* haystack, size_t haystacklen, const void* needle, size_t needlelen)
 {
-    if (!haystack || !needle) {
-        return haystack;
-    } else {
-        const char* h = (const char*)haystack;
-        const char* n = (const char*)needle;
-        size_t l = needlelen;
-        const char* r = h;
-        while (l && (l <= haystacklen)) {
-            if (*n++ != *h++) {
-                r = h;
-                n = (const char*)needle;
-                l = needlelen;
-            } else {
-                --l;
+    if (haystack && needle) {
+        const char* pos = (const char*)haystack;
+        while (haystacklen >= needlelen) {
+            if (memcmp(pos, needle, needlelen) == 0) {
+                return pos;
             }
+            pos++;
             --haystacklen;
         }
-        return l ? NULL : r;
     }
+    return NULL;
 }
 #endif
 
@@ -61,11 +54,40 @@ namespace qcc {
 
 /* Global Data */
 
-static const String* emptyString = new String();
+uint64_t emptyStringDummy[RequiredArrayLength(sizeof(String), uint64_t)];
 
-const String& String::Empty = *emptyString;
+String& emptyString = (String &)emptyStringDummy;
+
+const String& String::Empty = (String &)emptyString;
 
 String::ManagedCtx String::nullContext = { 0 };
+
+int stringInitCounter = 0;
+bool StringInit::cleanedup = false;
+StringInit::StringInit()
+{
+    if (stringInitCounter++ == 0) {
+        //placement new
+        new (&emptyString)String();
+    }
+}
+
+StringInit::~StringInit()
+{
+    if (--stringInitCounter == 0 && !cleanedup) {
+        //placement delete
+        emptyString.~String();
+        cleanedup = true;
+    }
+}
+void StringInit::Cleanup()
+{
+    if (!cleanedup) {
+        //placement delete
+        emptyString.~String();
+        cleanedup = true;
+    }
+}
 
 String::String()
 {
@@ -128,6 +150,7 @@ String& String::assign(const char* str, size_t len)
         append(str, len);
     } else if (context->refCount == 1) {
         context->offset = 0;
+        context->c_str[0] = 0;
         append(str, len);
     } else {
         /* Decrement ref of current context */
@@ -584,7 +607,7 @@ void String::DecRef(ManagedCtx* ctx)
     if (ctx != &nullContext) {
         uint32_t refs = DecrementAndFetch(&ctx->refCount);
         if (0 == refs) {
-#if defined(QCC_OS_DARWIN)
+#if defined(QCC_OS_DARWIN) || defined(__clang__)
             ctx->~ManagedCtx();
 #else
             ctx->ManagedCtx::~ManagedCtx();

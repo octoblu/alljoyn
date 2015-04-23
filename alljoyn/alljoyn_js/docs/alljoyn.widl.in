@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2011-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
  * \file
  *
  * \name AllJoyn&trade; JavaScript API Reference Manual
- * \version 14.06.00
+ * \version 14.12.00b
  *
  * Type coercion between DBus and JavaScript types is done according to the following table.
  * <table>
@@ -682,10 +682,9 @@ interface BusAttachment {
      *
      * The debug level can be set for individual subsystems or for "ALL" subsystems.  Common
      * subsystems are "ALLJOYN" for core AllJoyn code, "ALLJOYN_OBJ" for the sessions management
-     * code, "ALLJOYN_BT" for the Bluetooth subsystem, "ALLJOYN_BTC" for the Bluetooth topology
-     * manager, and "ALLJOYN_NS" for the TCP name services.  Debug levels for specific
-     * subsystems override the setting for "ALL" subsystems.  For example if "ALL" is set to 7,
-     * but "ALLJOYN_OBJ" is set to 1, then detailed debug output will be generated for all
+     * code and "ALLJOYN_NS" for the TCP name services.  Debug levels for specific subsystems
+     * override the setting for "ALL" subsystems.  For example if "ALL" is set to 7, but
+     * "ALLJOYN_OBJ" is set to 1, then detailed debug output will be generated for all
      * subsystems except for "ALLJOYN_OBJ" which will only generate high level debug output.
      * "ALL" defaults to 0 which is off, or no debug output.
      *
@@ -1683,16 +1682,12 @@ dictionary SessionOpts {
     const unsigned short TRANSPORT_ANY = 0xFFFF;
     /** Local (same device) transport */
     const unsigned short TRANSPORT_LOCAL = 0x0001;
-    /** Bluetooth transport */
-    const unsigned short TRANSPORT_BLUETOOTH = 0x0002;
     /** Wireless local-area network transport */
     const unsigned short TRANSPORT_WLAN = 0x0004;
     /** Wireless wide-area network transport */
     const unsigned short TRANSPORT_WWAN = 0x0008;
     /** Wired local-area network transport */
     const unsigned short TRANSPORT_LAN = 0x0010;
-    /** Transport using WinRT Proximity Framework */
-    const unsigned short TRANSPORT_PROXIMITY = 0x0040;
     /**
      * \brief The allowed transports.
      */

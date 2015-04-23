@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -53,7 +53,7 @@ NotificationDismisser::NotificationDismisser(ajn::BusAttachment* bus, qcc::Strin
         m_InterfaceDescription->Activate();
     }
 
-    status = AddInterface(*m_InterfaceDescription);
+    status = AddInterface(*m_InterfaceDescription, ANNOUNCED);
     if (status != ER_OK) {
         QCC_LogError(status, ("Could not add interface."));
         return;
@@ -66,7 +66,6 @@ NotificationDismisser::NotificationDismisser(ajn::BusAttachment* bus, qcc::Strin
         QCC_LogError(status, ("Could not add interface."));
         return;
     }
-
 }
 
 NotificationDismisser::~NotificationDismisser()

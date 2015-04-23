@@ -4,7 +4,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2010-2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2010-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -73,9 +73,6 @@ extern int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 }
 #endif
 
-#if defined(QCC_OS_ANDROID)
-#define BLUETOOTH_UID 1002
-#endif
 #endif
 
 #define DAEMON_EXIT_OK            0
@@ -100,7 +97,7 @@ static volatile sig_atomic_t quit;
 #if defined(QCC_OS_ANDROID)
 static const char defaultConfig[] =
     "<busconfig>"
-    "  <limit name=\"auth_timeout\">5000</limit>"
+    "  <limit name=\"auth_timeout\">20000</limit>"
     "  <limit name=\"max_incomplete_connections\">16</limit>"
     "  <limit name=\"max_completed_connections\">32</limit>"
     "  <limit name=\"max_untrusted_clients\">0</limit>"
@@ -109,7 +106,7 @@ static const char defaultConfig[] =
 #else
 static const char defaultConfig[] =
     "<busconfig>"
-    "  <limit name=\"auth_timeout\">5000</limit>"
+    "  <limit name=\"auth_timeout\">20000</limit>"
     "  <limit name=\"max_incomplete_connections\">16</limit>"
     "  <limit name=\"max_completed_connections\">32</limit>"
     "  <limit name=\"max_untrusted_clients\">16</limit>"
@@ -124,14 +121,13 @@ static const char internalConfig[] =
 #if defined(QCC_OS_DARWIN)
     "  <listen>launchd:env=DBUS_LAUNCHD_SESSION_BUS_SOCKET</listen>"
 #endif
-    "  <listen>tcp:r4addr=0.0.0.0,r4port=9955</listen>"
-    "  <listen>udp:u4addr=0.0.0.0,u4port=9955</listen>"
-    "  <property name=\"ns_interfaces\">*</property>"
+    "  <listen>tcp:iface=*,port=9955</listen>"
+    "  <listen>udp:iface=*,port=9955</listen>"
     "</busconfig>";
 
 static const char versionPreamble[] =
     "AllJoyn Message Bus Daemon version: %s\n"
-    "Copyright (c) 2009-2014 AllSeen Alliance.\n"
+    "Copyright (c) 2009-2015 AllSeen Alliance.\n"
     "\n"
     "Build: %s\n";
 
@@ -174,7 +170,7 @@ class OptParse {
 #endif
         noSwitchUser(false),
         printAddressFd(-1), printPidFd(-1),
-        session(false), system(false), internal(false),
+        internal(false),
         configService(false),
         verbosity(LOG_WARNING) {
     }
@@ -247,8 +243,6 @@ class OptParse {
     bool noSwitchUser;
     int printAddressFd;
     int printPidFd;
-    bool session;
-    bool system;
     bool internal;
     bool configService;
     int verbosity;
@@ -312,12 +306,9 @@ void OptParse::PrintUsage() {
         "    --no-launchd\n"
         "        Disable the Launchd transport (override config file setting).\n\n"
 #endif
+#if defined(QCC_OS_LINUX)
         "    --no-switch-user\n"
-        "        Don't switch from root to "
-#if defined(QCC_OS_ANDROID)
-        "bluetooth.\n\n"
-#else
-        "the user specified in the config file.\n\n"
+        "        Don't switch from root to the user specified in the config file.\n\n"
 #endif
         "    --verbosity=LEVEL\n"
         "        Set the logging level to LEVEL.\n\n"
@@ -493,10 +484,9 @@ exit:
     return result;
 }
 
-int daemon(OptParse& opts, bool forked) {
+int daemon(OptParse& opts) {
     struct sigaction act, oldact;
     sigset_t sigmask, waitmask;
-    uint32_t pid(GetPid());
     ConfigDB* config = ConfigDB::GetConfigDB();
 
     // block all signals by default for all threads
@@ -620,38 +610,6 @@ int daemon(OptParse& opts, bool forked) {
                 strerror(errno));
         }
     }
-    fd = opts.GetPrintPidFd();
-    if ((fd >= 0) || !pidfn.empty()) {
-        String pidStr(U32ToString(pid));
-        pidStr += "\n";
-        if (fd > 0) {
-            int ret = write(fd, pidStr.c_str(), pidStr.size());
-            if (ret == -1) {
-                Log(LOG_ERR, "Failed to print pid: %s\n", strerror(errno));
-            }
-        }
-        if (!pidfn.empty()) {
-            FileSink pidfile(pidfn);
-            if (pidfile.IsValid()) {
-                size_t sent;
-                pidfile.PushBytes(pidStr.c_str(), pidStr.size(), sent);
-            }
-        }
-    }
-
-    if (forked) {
-        /*
-         * We forked and are running as a daemon, so close STDIN, STDOUT, and
-         * STDERR as appropriate.
-         */
-        close(STDIN_FILENO);
-        if (LoggerSetting::GetLoggerSetting()->GetFile() != stdout) {
-            close(STDOUT_FILENO);
-        }
-        if (LoggerSetting::GetLoggerSetting()->GetFile() != stderr) {
-            close(STDERR_FILENO);
-        }
-    }
 
     sigfillset(&waitmask);
     sigdelset(&waitmask, SIGHUP);
@@ -671,10 +629,6 @@ int daemon(OptParse& opts, bool forked) {
 
     Log(LOG_INFO, "Terminating.\n");
     ajBus.StopListen(listenSpecs.c_str());
-
-    if (!pidfn.empty()) {
-        unlink(pidfn.c_str());
-    }
 
     return DAEMON_EXIT_OK;
 }
@@ -701,7 +655,7 @@ int main(int argc, char** argv, char** env)
     environ = env;
 #endif
 
-    LoggerSetting* loggerSettings = LoggerSetting::GetLoggerSetting(argv[0]);
+    LoggerSetting* loggerSettings = LoggerSetting::GetLoggerSetting(argv[0], LOG_WARNING, true, NULL);
 
     OptParse opts(argc, argv);
     OptParse::ParseResultCode parseCode = opts.ParseResult();
@@ -749,71 +703,93 @@ int main(int argc, char** argv, char** env)
     loggerSettings->SetSyslog(config.GetSyslog());
     loggerSettings->SetFile((opts.GetFork() || (config.GetFork() && !opts.GetNoFork())) ? NULL : stderr);
 
-    Log(LOG_NOTICE, versionPreamble, GetVersion(), GetBuildInfo());
-
-#if !defined(ROUTER_LIB)
-    if (!opts.GetNoSwitchUser()) {
-#if defined(QCC_OS_LINUX) || defined(QCC_OS_ANDROID)
-        // Keep all capabilities before switching users
-        prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0);
-#endif
-
-#if defined(QCC_OS_ANDROID)
-        // Android uses hard coded UIDs.
-        setuid(BLUETOOTH_UID);
-#else
-        String user = config.GetUser();
-        if ((getuid() == 0) && !user.empty()) {
-            // drop root privileges if <user> is specified.
-            struct passwd* pwent;
-            setpwent();
-            while ((pwent = getpwent())) {
-                if (user.compare(pwent->pw_name) == 0) {
-                    if (setuid(pwent->pw_uid) == 0) {
-                        Log(LOG_INFO, "Dropping root privileges (running as %s)\n", pwent->pw_name);
-                    } else {
-                        Log(LOG_ERR, "Failed to drop root privileges - set userid failed: %s\n", user.c_str());
-                        endpwent();
-                        return DAEMON_EXIT_CONFIG_ERROR;
-                    }
-                    break;
-                }
-            }
-            endpwent();
-            if (!pwent) {
-                Log(LOG_ERR, "Failed to drop root privileges - userid does not exist: %s\n", user.c_str());
-                return DAEMON_EXIT_CONFIG_ERROR;
-            }
-        }
-#endif
-
-#if defined(QCC_OS_LINUX) || defined(QCC_OS_ANDROID)
-        // Set the capabilities we need.
-        struct __user_cap_header_struct header;
-        struct __user_cap_data_struct cap;
-        header.version = _LINUX_CAPABILITY_VERSION;
-        header.pid = 0;
-        cap.permitted = (1 << CAP_NET_RAW | 1 << CAP_NET_ADMIN | 1 << CAP_NET_BIND_SERVICE);
-        cap.effective = cap.permitted;
-        cap.inheritable = 0;
-        capset(&header, &cap);
-#endif
-    }
-#endif
-
-    Log(LOG_INFO, "Running with effective userid %d\n", geteuid());
-
-    bool forked = false;
     if (opts.GetFork() || (config.GetFork() && !opts.GetNoFork())) {
-        Log(LOG_DEBUG, "Forking into daemon mode...\n");
         pid_t pid = fork();
         if (pid == -1) {
             Log(LOG_ERR, "Failed to fork(): %s\n", strerror(errno));
             return DAEMON_EXIT_FORK_ERROR;
         } else if (pid > 0) {
+            String pidfn = config.GetPidfile();
+            int fd = opts.GetPrintPidFd();
+            String pidStr(U32ToString(pid));
+            pidStr += "\n";
+
+            if (fd > 0) {
+                int ret = write(fd, pidStr.c_str(), pidStr.size());
+                if (ret == -1) {
+                    Log(LOG_ERR, "Failed to print pid: %s\n", strerror(errno));
+                }
+            }
+
+            if (!pidfn.empty()) {
+                FileSink pidfile(pidfn);
+                size_t sent;
+                pidfile.PushBytes(pidStr.c_str(), pidStr.size(), sent);
+            }
+
             // Unneeded parent process, just exit.
             _exit(DAEMON_EXIT_OK);
         } else {
+
+            /*
+             * We forked and are running as a daemon, so close STDIN, STDOUT, and
+             * STDERR as appropriate.
+             */
+            LoggerSetting::GetLoggerSetting()->SetFile(NULL); // block logging to stdout/stderr
+            close(STDIN_FILENO);
+            close(STDOUT_FILENO);
+            close(STDERR_FILENO);
+
+
+#if !defined(ROUTER_LIB)
+            if (!opts.GetNoSwitchUser()) {
+#if defined(QCC_OS_LINUX)
+                // Keep all capabilities before switching users
+                prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0);
+#endif
+
+#if !defined(QCC_OS_ANDROID)
+                String user = config.GetUser();
+                if ((getuid() == 0) && !user.empty()) {
+                    // drop root privileges if <user> is specified.
+                    struct passwd* pwent;
+                    setpwent();
+                    while ((pwent = getpwent())) {
+                        if (user.compare(pwent->pw_name) == 0) {
+                            if (setuid(pwent->pw_uid) == 0) {
+                                Log(LOG_INFO, "Dropping root privileges (running as %s)\n", pwent->pw_name);
+                            } else {
+                                Log(LOG_ERR, "Failed to drop root privileges - set userid failed: %s\n", user.c_str());
+                                endpwent();
+                                return DAEMON_EXIT_CONFIG_ERROR;
+                            }
+                            break;
+                        }
+                    }
+                    endpwent();
+                    if (!pwent) {
+                        Log(LOG_ERR, "Failed to drop root privileges - userid does not exist: %s\n", user.c_str());
+                        return DAEMON_EXIT_CONFIG_ERROR;
+                    }
+                }
+#endif
+
+#if defined(QCC_OS_LINUX)
+                // Set the capabilities we need.
+                struct __user_cap_header_struct header;
+                struct __user_cap_data_struct cap;
+                header.version = _LINUX_CAPABILITY_VERSION;
+                header.pid = 0;
+                cap.permitted = (1 << CAP_NET_RAW | 1 << CAP_NET_ADMIN | 1 << CAP_NET_BIND_SERVICE);
+                cap.effective = cap.permitted;
+                cap.inheritable = 0;
+                capset(&header, &cap);
+#endif
+            }
+#endif
+
+            Log(LOG_INFO, "Running with effective userid %d\n", geteuid());
+
             // create new session ID
             pid_t sid = setsid();
             if (sid < 0) {
@@ -824,11 +800,12 @@ int main(int argc, char** argv, char** env)
                 Log(LOG_ERR, "Failed to change directory: %s\n", strerror(errno));
                 return DAEMON_EXIT_CHDIR_ERROR;
             }
-            forked = true;
         }
     }
 
-    int ret = daemon(opts, forked);
+    Log(LOG_NOTICE, versionPreamble, GetVersion(), GetBuildInfo());
+
+    int ret = daemon(opts);
 
     return ret;
 }

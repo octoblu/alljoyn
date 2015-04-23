@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,9 @@
 #include <alljoyn/MsgArg.h>
 #include <alljoyn/notification/LogModule.h>
 #include <qcc/StringUtil.h>
+#ifdef _WIN32
+#include <process.h>
+#endif
 
 using namespace ajn;
 using namespace services;
@@ -40,6 +43,23 @@ NotificationDismisserReceiver::NotificationDismisserReceiver(BusAttachment* bus,
         return;
     }
 
+#ifdef _WIN32
+    InitializeCriticalSection(&m_Lock);
+    InitializeConditionVariable(&m_QueueChanged);
+
+    status =  bus->RegisterSignalHandler(this,
+                                         static_cast<MessageReceiver::SignalHandler>(&NotificationDismisserReceiver::Signal),
+                                         m_SignalMethod,
+                                         NULL);
+
+    if (status != ER_OK) {
+        QCC_LogError(status, ("Could not register the SignalHandler"));
+    } else {
+        QCC_DbgPrintf(("Registered the SignalHandler successfully"));
+    }
+
+    m_handle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 256 * 1024, (unsigned int (__stdcall*)(void*))ReceiverThreadWrapper, this, 0, NULL));
+#else
     pthread_mutex_init(&m_Lock, NULL);
     pthread_cond_init(&m_QueueChanged, NULL);
 
@@ -55,21 +75,45 @@ NotificationDismisserReceiver::NotificationDismisserReceiver(BusAttachment* bus,
     }
 
     pthread_create(&m_ReceiverThread, NULL, ReceiverThreadWrapper, this);
+#endif
 }
 
 
 void NotificationDismisserReceiver::Signal(const InterfaceDescription::Member* member, const char* srcPath, Message& msg)
 {
     QCC_DbgPrintf(("Received dismisser signal."));
-
+#ifdef _WIN32
+    EnterCriticalSection(&m_Lock);
+    m_MessageQueue.push(msg);
+    WakeConditionVariable(&m_QueueChanged);
+    LeaveCriticalSection(&m_Lock);
+#else
     pthread_mutex_lock(&m_Lock);
     m_MessageQueue.push(msg);
     pthread_cond_signal(&m_QueueChanged);
     pthread_mutex_unlock(&m_Lock);
+#endif
 }
 
 void NotificationDismisserReceiver::unregisterHandler(BusAttachment* bus)
 {
+#ifdef _WIN32
+    EnterCriticalSection(&m_Lock);
+    while (!m_MessageQueue.empty()) {
+        m_MessageQueue.pop();
+    }
+    m_IsStopping = true;
+    WakeConditionVariable(&m_QueueChanged);
+    LeaveCriticalSection(&m_Lock);
+    WaitForSingleObject(m_handle, INFINITE);
+    CloseHandle(m_handle);
+
+    bus->UnregisterSignalHandler(this,
+                                 static_cast<MessageReceiver::SignalHandler>(&NotificationDismisserReceiver::Signal),
+                                 m_SignalMethod,
+                                 NULL);
+    DeleteCriticalSection(&m_Lock);
+#else
     pthread_mutex_lock(&m_Lock);
     while (!m_MessageQueue.empty()) {
         m_MessageQueue.pop();
@@ -86,6 +130,7 @@ void NotificationDismisserReceiver::unregisterHandler(BusAttachment* bus)
 
     pthread_cond_destroy(&m_QueueChanged);
     pthread_mutex_destroy(&m_Lock);
+#endif
 }
 
 void* NotificationDismisserReceiver::ReceiverThreadWrapper(void* context)
@@ -100,6 +145,32 @@ void* NotificationDismisserReceiver::ReceiverThreadWrapper(void* context)
 
 void NotificationDismisserReceiver::ReceiverThread()
 {
+#ifdef _WIN32
+    EnterCriticalSection(&m_Lock);
+    while (!m_IsStopping) {
+        while (!m_MessageQueue.empty()) {
+            Message message = m_MessageQueue.front();
+            m_MessageQueue.pop();
+            LeaveCriticalSection(&m_Lock);
+            QCC_DbgPrintf(("ReceiverThread() - got a dismiss message."));
+            int32_t msgId;
+            qcc::String appId;
+            QStatus status = UnmarshalMessage(message, msgId, appId);
+            if (status == ER_OK) {
+                Transport::getInstance()->getNotificationReceiver()->Dismiss(msgId, appId);
+            }
+            EnterCriticalSection(&m_Lock);
+        }
+
+        // it's possible m_IsStopping changed while executing OnTask() (which is done unlocked)
+        //  therefore we have to check it again here, otherwise we potentially deadlock here
+        if (!m_IsStopping) {
+            //pthread_testcancel(); //for win only?
+            SleepConditionVariableCS(&m_QueueChanged, &m_Lock, INFINITE);
+        }
+    }
+    LeaveCriticalSection(&m_Lock);
+#else
     pthread_mutex_lock(&m_Lock);
     while (!m_IsStopping) {
         while (!m_MessageQueue.empty()) {
@@ -115,13 +186,15 @@ void NotificationDismisserReceiver::ReceiverThread()
             }
             pthread_mutex_lock(&m_Lock);
         }
-        /* it's possible m_IsStopping changed while executing OnTask() (which is done unlocked)
-         * therefore we have to check it again here, otherwise we potentially deadlock here */
+
+        // it's possible m_IsStopping changed while executing OnTask() (which is done unlocked)
+        //  therefore we have to check it again here, otherwise we potentially deadlock here
         if (!m_IsStopping) {
             pthread_cond_wait(&m_QueueChanged, &m_Lock);
         }
     }
     pthread_mutex_unlock(&m_Lock);
+#endif
 }
 
 QStatus NotificationDismisserReceiver::UnmarshalMessage(Message& in_message, int32_t& msgId, qcc::String& appId)

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2014-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 #include <fstream>
 
 static const char versionPreamble[] = "AboutService version: %s\n"
-                                      "Copyright (c) 2014 AllSeenAlliance.\n";
+                                      "Copyright (c) 2014-2015 AllSeen Alliance.\n";
 
 using namespace ajn;
 
@@ -83,7 +83,7 @@ bool OptParser::IsAllHex(const char* data) {
 
 OptParser::ParseResultCode OptParser::ParseResult() {
     ParseResultCode result = PR_OK;
-    int i;
+    int i = 0;
 
     if (argc == 1) {
         internal = true;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 #include <qcc/Debug.h>
 #include <alljoyn/BusAttachment.h>
 #include <alljoyn/notification/NotificationSender.h>
+#include <alljoyn/AboutData.h>
 #include <alljoyn/about/PropertyStore.h>
 
 namespace ajn {
@@ -35,13 +36,13 @@ class NotificationService {
   public:
 
     /**
-     * Get Instance of NotificationServiceImpl - singleton implementation
+     * Get Instance of NotificationService - singleton implementation
      * @return instance
      */
     static NotificationService* getInstance();
 
     /**
-     * Destructor for NotificationServiceImpl
+     * Destructor for NotificationService
      */
     ~NotificationService();
 
@@ -53,8 +54,17 @@ class NotificationService {
      * @return NotificationSender instance
      */
 
-    NotificationSender* initSend(ajn::BusAttachment* bus, ajn::services::PropertyStore* store);
+    NotificationSender* initSend(ajn::BusAttachment* bus, ajn::AboutData* store);
 
+    /**
+     *  Initialize Producer side via Transport. Create and
+     *  return NotificationSender.
+     * @param bus
+     * @param store
+     * @return NotificationSender instance
+     */
+
+    NotificationSender* initSend(ajn::BusAttachment* bus, ajn::services::PropertyStore* store);
 
     /**
      * Initialize Consumer side via Transport.

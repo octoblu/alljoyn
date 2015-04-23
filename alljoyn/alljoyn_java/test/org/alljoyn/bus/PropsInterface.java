@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011, 2013 AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2013-2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -24,13 +24,15 @@ import org.alljoyn.bus.annotation.BusProperty;
 /**
  * PropsInterface is an example of an interface that is published onto
  * alljoyn by org.alljoyn.bus.samples.props.Service and is subscribed
- * to by org.alljoyn.bus.samples.props.Client.  The interface
- * contains two read/write properties: 'StringProp' and 'IntProp'.
+ * to by org.alljoyn.bus.samples.props.Client.  The interface contains
+ * two read/write properties: 'StringProp' and 'IntProp'.  The 'IntProp'
+ * also notifies everyone of changes to its value via the
+ * org.freedesktop.DBus.Properties.PropertiesChanged signal.
  */
 @BusInterface
 public interface PropsInterface {
-    @BusMethod
-    public String Ping(String str) throws BusException;
+    @BusMethod(name="Ping")
+    public String ping(String str) throws BusException;
     /**
      * Get the property named 'StringProp'.
      *
@@ -52,15 +54,16 @@ public interface PropsInterface {
      *
      * @return The property value.
      */
-    @BusProperty
+    @BusProperty(annotation=BusProperty.ANNOTATE_EMIT_CHANGED_SIGNAL)
     public int getIntProp() throws BusException;
 
     /**
-     * Set the property named 'IntProp' to the value.
+     * Set the property named 'IntProp' to the value.  Setting this property
+     * will cause a change notification signal to be sent.
      *
      * @param value The new value of 'IntProp'.
      */
-    @BusProperty
+    @BusProperty(annotation=BusProperty.ANNOTATE_EMIT_CHANGED_SIGNAL)
     public void setIntProp(int value) throws BusException;
 }
 

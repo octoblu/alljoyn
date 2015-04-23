@@ -4,7 +4,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2010-2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2010-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -45,10 +45,6 @@
 #include "TCPTransport.h"
 #include "UDPTransport.h"
 #include "DaemonTransport.h"
-//disable bluetooth on windows.
-#if !defined(QCC_OS_GROUP_WINDOWS)
-#include "BTTransport.h"
-#endif
 
 #include "Bus.h"
 #include "BusController.h"
@@ -73,7 +69,7 @@ using namespace std;
 
 static const char defaultConfig[] =
     "<busconfig>"
-    "  <limit name=\"auth_timeout\">5000</limit>"
+    "  <limit name=\"auth_timeout\">20000</limit>"
     "  <limit name=\"max_incomplete_connections\">16</limit>"
     "  <limit name=\"max_completed_connections\">64</limit>"
     "  <limit name=\"max_untrusted_clients\">48</limit>"
@@ -83,11 +79,10 @@ static const char defaultConfig[] =
 static const char internalConfig[] =
     "<busconfig>"
     "  <type>alljoyn</type>"
-    "  <listen>tcp:r4addr=0.0.0.0,r4port=9956</listen>"
-    "  <listen>udp:u4addr=0.0.0.0,u4port=9955</listen>"
+    "  <listen>tcp:iface=*,port=9956</listen>"
+    "  <listen>udp:iface=*,u4port=9955</listen>"
     "  <listen>localhost:port=9955</listen>"
     "  <listen>localhost:port=9956</listen>"
-    "  <property name=\"ns_interfaces\">*</property>"
     "</busconfig>";
 
 static volatile sig_atomic_t g_interrupt = false;
@@ -111,7 +106,6 @@ class OptParse {
         argc(argc),
         argv(argv),
         useInternalConfig(true),
-        noBT(false),
         printAddress(false),
         verbosity(LOG_WARNING)
     { configFile.clear(); }
@@ -122,7 +116,6 @@ class OptParse {
     bool UseInternalConfig() const { return useInternalConfig; }
     bool PrintAddress() const { return printAddress; }
     int GetVerbosity() const { return verbosity; }
-    bool GetNoBT() const { return noBT; }
 
   private:
     int argc;
@@ -130,7 +123,6 @@ class OptParse {
 
     qcc::String configFile;
     bool useInternalConfig;
-    bool noBT;
     bool printAddress;
     int verbosity;
 
@@ -145,8 +137,6 @@ void OptParse::PrintUsage()
            "        Use the specified configuration file.\n\n"
            "    --print-address\n"
            "        Print the socket address to STDOUT\n\n"
-           "    --no-bt\n"
-           "        Disable the Bluetooth transport (override config file setting).\n\n"
            "    --verbosity=LEVEL\n"
            "        Set the logging level to LEVEL.\n"
            "	LEVEL can take one of the following values\n"
@@ -174,7 +164,7 @@ OptParse::ParseResultCode OptParse::ParseResult()
 
         if (arg.compare("--version") == 0) {
             printf("AllJoyn Message Bus Daemon version: %s\n"
-                   "Copyright (c) 2009-2013 AllSeen Alliance.\n"
+                   "Copyright (c) 2009-2015 AllSeen Alliance.\n"
                    "\n"
                    "\n"
                    "Build: %s\n", ajn::GetVersion(), GetBuildInfo());
@@ -201,8 +191,6 @@ OptParse::ParseResultCode OptParse::ParseResult()
             useInternalConfig = false;
         } else if (arg.compare("--print-address") == 0) {
             printAddress = true;
-        } else if (arg.compare("--no-bt") == 0) {
-            noBT = true;
         } else if (arg.substr(0, sizeof("--verbosity") - 1).compare("--verbosity") == 0) {
             verbosity = StringToI32(arg.substr(sizeof("--verbosity")));
         } else if ((arg.compare("--help") == 0) || (arg.compare("-h") == 0)) {
@@ -259,8 +247,6 @@ int daemon(OptParse& opts)
             // No special processing needed for UDP.
         } else if (addrStr.compare(0, sizeof("localhost:") - 1, "localhost:") == 0) {
             // No special processing needed for localhost.
-        } else if (addrStr.compare("bluetooth:") == 0) {
-            skip = opts.GetNoBT();
         } else {
             Log(LOG_ERR, "Unsupported listen address: %s (ignoring)\n", it->c_str());
             continue;
@@ -293,11 +279,6 @@ int daemon(OptParse& opts)
     cntr.Add(new TransportFactory<DaemonTransport>(DaemonTransport::TransportName, false));
     cntr.Add(new TransportFactory<TCPTransport>(TCPTransport::TransportName, false));
     cntr.Add(new TransportFactory<UDPTransport>(UDPTransport::TransportName, false));
-#if !defined(QCC_OS_GROUP_WINDOWS)
-    if (!opts.GetNoBT()) {
-        cntr.Add(new TransportFactory<BTTransport>("bluetooth", false));
-    }
-#endif
     Bus ajBus("alljoyn-daemon", cntr, listenSpecs.c_str());
     /*
      * Check we have at least one authentication mechanism registered.
@@ -340,7 +321,7 @@ int daemon(OptParse& opts)
 
 DAEMONLIBRARY_API int LoadDaemon(int argc, char** argv)
 {
-    LoggerSetting* loggerSettings(LoggerSetting::GetLoggerSetting(argv[0]));
+    LoggerSetting* loggerSettings(LoggerSetting::GetLoggerSetting(argv[0], LOG_WARNING));
     loggerSettings->SetSyslog(false);
     if (g_isManaged) {
         FILE* pFile = _fsopen(g_logFilePathName, "a+", _SH_DENYNO);

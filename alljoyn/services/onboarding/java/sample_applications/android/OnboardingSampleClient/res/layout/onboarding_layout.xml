@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  Copyright AllSeen Alliance. All rights reserved.
+
+     Permission to use, copy, modify, and/or distribute this software for any
+     purpose with or without fee is hereby granted, provided that the above
+     copyright notice and this permission notice appear in all copies.
+
+     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+     WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+     ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+     WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/about_config_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
+    android:paddingTop="10sp"
+    android:layout_marginLeft="5dp"
+    >
+
+    <include
+        android:id="@+id/onboarding_current_network"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/current_network_layout"/>
+    
+    <!-- Onboarding version -->
+    <TextView
+        android:id="@+id/onboarding_version_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/onboarding_current_network"
+        android:text="@string/version"        
+        android:textSize="20sp"
+        />
+    
+    <TextView
+        android:id="@+id/onboarding_version_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_toRightOf="@id/onboarding_version_label"       
+        android:layout_alignBaseline="@id/onboarding_version_label"
+        android:textSize="20sp"
+        />
+    
+    <!-- Last Error Code -->
+    <TextView 
+        android:id="@+id/last_error_code_label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/onboarding_version_label"
+		android:textSize="20sp"
+		android:text="@string/last_error_code"/>
+    <TextView 
+        android:id="@+id/last_error_code_value"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"		
+		android:layout_toRightOf="@id/last_error_code_label"
+		android:layout_alignBaseline="@id/last_error_code_label"
+		android:textSize="20sp"/>
+    
+    <!-- Last Error Massage -->
+    <TextView 
+        android:id="@+id/last_error_msg_label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/last_error_code_label"
+		android:textSize="20sp"
+		android:text="@string/last_error_msg"/>
+    <TextView 
+        android:id="@+id/last_error_msg_value"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"		
+		android:layout_toRightOf="@id/last_error_msg_label"
+		android:layout_alignBaseline="@id/last_error_msg_label"
+		android:textSize="20sp"/>
+   
+    <!-- State -->
+    <TextView 
+        android:id="@+id/state_label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/last_error_msg_label"
+		android:textSize="20sp"
+		android:text="@string/state"/>
+    <TextView 
+        android:id="@+id/state_value"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"		
+		android:layout_toRightOf="@id/state_label"
+		android:layout_alignBaseline="@id/state_label"
+		android:textSize="20sp"/>
+   
+    <!-- Get scan info data -->
+    <RelativeLayout
+        android:id="@+id/getScanInfoBox"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/state_label"
+		
+        >
+	    <TextView 
+	        android:id="@+id/scan_info_data_label"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="20sp"
+			android:text="@string/scan_info_data"/>
+		 <Spinner 
+	        android:id="@+id/scan_info_data_value"
+			android:layout_width="120sp"
+			android:layout_height="wrap_content"		
+			android:layout_toRightOf="@id/scan_info_data_label"
+			android:spinnerMode="dropdown"
+			android:textSize="20sp"/>
+    </RelativeLayout>
+    
+    
+    <!-- Get scan info age -->
+    <TextView 
+        android:id="@+id/scan_info_age_label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/getScanInfoBox"
+		android:textSize="20sp"
+		android:text="@string/scan_info_age"/>
+    <TextView 
+        android:id="@+id/scan_info_age_value"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"		
+		android:layout_toRightOf="@id/scan_info_age_label"
+		android:layout_alignBaseline="@id/scan_info_age_label"
+		android:textSize="20sp"/>
+    
+  
+    <!-- Network Name -->
+    <EditText 
+        android:id="@+id/network_name"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"		
+		android:layout_below="@id/scan_info_age_label"
+		android:hint="@string/networkHint"
+		android:inputType="text"
+		android:textSize="20sp"
+		android:layout_marginLeft="15dp"
+		android:layout_marginRight="20dp"
+		/>
+    
+    <!-- Network Password -->
+    <EditText 
+        android:id="@+id/network_password"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/network_name"
+		android:hint="@string/passwordHint"
+		android:inputType="textPassword"
+		android:textSize="20sp"
+		android:layout_marginLeft="15dp"
+		android:layout_marginRight="20dp"
+        />
+    
+    <!-- Auth Type -->
+    <RelativeLayout 
+        android:id="@+id/auth_type_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/network_password"
+        >
+	    <TextView
+	        android:id="@+id/auth_type_label"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/auth_type"
+			android:textSize="20sp"
+			/>
+	    <Spinner 
+	        android:id="@+id/auth_type"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_toRightOf="@id/auth_type_label"
+			android:layout_alignBaseline="@id/auth_type_label"
+			android:hint="@string/auth_type"
+			android:textSize="20sp"
+	        />
+    </RelativeLayout>
+    
+    <!-- Buttons -->
+    <RelativeLayout 
+        android:id="@+id/buttons"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/auth_type_layout"
+        android:gravity="center">
+	    <Button
+	        android:id="@+id/configure_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/configure"/>
+	    <Button
+	        android:id="@+id/connect_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_toRightOf="@+id/configure_button"
+	        android:text="@string/connect"/>
+    </RelativeLayout>
+    
+</RelativeLayout>
+

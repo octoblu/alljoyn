@@ -7,7 +7,7 @@
 /******************************************************************************
  *
  *
- * Copyright (c) 2009-2011,2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -57,10 +57,10 @@ class Event {
     static const uint32_t WAIT_FOREVER = static_cast<uint32_t>(-1);
 
     /** Singleton always set Event */
-    static Event alwaysSet;
+    static Event& alwaysSet;
 
     /** Singleton never set Event */
-    static Event neverSet;
+    static Event& neverSet;
 
     /** Indicate how to select on file descriptor */
     typedef enum {
@@ -105,14 +105,21 @@ class Event {
     Event(Event& event, EventType eventType, bool genPurpose);
 
     /**
-     * Constructor used by Windows specific I/O sources/sinks
-     * (This constructor should only be used within Windows platform specific code.)
+     * Constructor used by I/O sources/sinks
      *
      * @param fd          Socket descriptor associated with this event.
      * @param eventType   Type of event (IO_READ or IO_WRITE) associated with fd.
-     * @param genPurpose  true if event should act as both an I/O event and a gen purpose event.
      */
-    Event(int fd, EventType eventType, bool genPurpose);
+    Event(SocketFd fd, EventType eventType);
+
+    /**
+     * Constructor used by Windows specific named pipe I/O sources/sinks.
+     * (This constructor should only be used within Windows platform specific code.)
+     *
+     * @param pipeHandle  pipe handle associated with this event.
+     * @param eventType   Type of event (IO_READ or IO_WRITE) associated with pipe.
+     */
+    Event(HANDLE pipeHandle, EventType eventType);
 
     /** Destructor */
     ~Event();
@@ -173,6 +180,13 @@ class Event {
     QStatus SetEvent();
 
     /**
+     * Indicate whether the event is associated with a socket.
+     *
+     * @return  true if the event is for sockets, otherwise false.
+     */
+    bool IsSocket() const { return isSocket; }
+
+    /**
      * Reset the event to the non-signaled state.
      * Threads that call wait() will block until the event state becomes signaled.
      * Calling ResetEvent() when the state of the event is non-signaled has no effect.
@@ -198,11 +212,11 @@ class Event {
 
     /**
      * Get the underlying file descriptor for I/O backed events.
-     * This returns -1 if there is no underlying file descriptor.
+     * This returns INVALID_SOCKET_FD if there is no underlying file descriptor.
      *
-     * @return  The underlying file descriptor or -1.
+     * @return  The underlying file descriptor or INVALID_SOCKET_FD.
      */
-    int GetFD() const { return ioFd; }
+    SocketFd GetFD() const { return ioFd; }
 
     /**
      * Get the underlying Windows' event handle.  Use of this function is not
@@ -234,10 +248,11 @@ class Event {
     EventType eventType;    /**< Type of event */
     uint32_t timestamp;     /**< time for next triggering of TIMED Event */
     uint32_t period;        /**< Number of milliseconds between periodic timed events */
-    qcc::SocketFd ioFd;     /**< Socket descriptor or -1 if not socket based IO */
+    SocketFd ioFd;          /**< Socket descriptor or INVALID_SOCKET_FD if not socket based IO */
     int32_t numThreads;     /**< Number of threads currently waiting on this event */
     bool networkIfaceEvent;
     HANDLE networkIfaceHandle;
+    bool isSocket;          /**< Is this event for socket or named pipe */
 
     /**
      * Protected copy constructor.
@@ -266,6 +281,11 @@ class Event {
      * Decrement the count of threads blocked on this event
      */
     void DecrementNumThreads() { DecrementAndFetch(&numThreads); }
+
+    /**
+     * Event polling method used to check whether the event has been set.
+     */
+    bool IsNetworkEventSet();
 
 };
 

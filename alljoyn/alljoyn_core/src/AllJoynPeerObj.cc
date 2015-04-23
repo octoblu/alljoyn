@@ -1362,6 +1362,11 @@ QStatus AllJoynPeerObj::AuthenticatePeerUsingKeyExchange(const uint32_t* request
     size_t idx = 0;
     for (size_t cnt = 0; cnt < requestingAuthCount; cnt++) {
         if ((requestingAuthList[cnt] & currentSuite) != currentSuite) {
+            assert(idx < smallerCount);
+            if (idx >= smallerCount) {
+                delete [] smallerSuites;
+                return ER_AUTH_FAIL;
+            }
             smallerSuites[idx++] = requestingAuthList[cnt];
         }
     }
@@ -1436,9 +1441,9 @@ void AllJoynPeerObj::AlarmTriggered(const Alarm& alarm, QStatus reason)
                         /*
                          * If the failed message was a method call push an error response.
                          */
-                        if (req->msg->GetType() == MESSAGE_METHOD_CALL) {
+                        if (msg->GetType() == MESSAGE_METHOD_CALL) {
                             Message reply(*bus);
-                            reply->ErrorMsg(status, req->msg->GetCallSerial());
+                            reply->ErrorMsg(status, msg->GetCallSerial());
                             bus->GetInternal().GetLocalEndpoint()->PushMessage(reply);
                         }
                     } else {
@@ -1706,6 +1711,8 @@ void AllJoynPeerObj::SetupPeerAuthentication(const qcc::String& authMechanisms, 
             count++;
         } else if (mech == "ALLJOYN_ECDHE_ECDSA") {
             count++;
+        } else if (mech == "GSSAPI") {
+            count++;
         }
     }
     supportedAuthSuitesCount = count;
@@ -1744,6 +1751,8 @@ void AllJoynPeerObj::SetupPeerAuthentication(const qcc::String& authMechanisms, 
             supportedAuthSuites[idx++] = AUTH_SUITE_ECDHE_PSK;
         } else if (mech == "ALLJOYN_ECDHE_ECDSA") {
             supportedAuthSuites[idx++] = AUTH_SUITE_ECDHE_ECDSA;
+        } else if (mech == "GSSAPI") {
+            supportedAuthSuites[idx++] = AUTH_SUITE_GSSAPI;
         }
     }
 }

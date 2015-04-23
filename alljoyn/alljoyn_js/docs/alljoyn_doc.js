@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2014, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2011-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,7 @@
  * @fileOverview
  *
  * AllJoyn&trade; JavaScript API Reference Manual
- * @version 14.06.00
+ * @version 14.12.00b
  * @description
  * Type coercion between DBus and JavaScript types is done according to the following table.
  * <table>
@@ -773,12 +773,11 @@ org.alljoyn.bus.BusAttachment = function() {
      *
      * The debug level can be set for individual subsystems or for "ALL" subsystems.  Common
      * subsystems are "ALLJOYN" for core AllJoyn code, "ALLJOYN_OBJ" for the sessions management
-     * code, "ALLJOYN_BT" for the Bluetooth subsystem, "ALLJOYN_BTC" for the Bluetooth topology
-     * manager, and "ALLJOYN_NS" for the TCP name services.  Debug levels for specific
-     * subsystems override the setting for "ALL" subsystems.  For example if "ALL" is set to 7,
-     * but "ALLJOYN_OBJ" is set to 1, then detailed debug output will be generated for all
-     * subsystems except for "ALLJOYN_OBJ" which will only generate high level debug output.
-     * "ALL" defaults to 0 which is off, or no debug output.
+     * code, and "ALLJOYN_NS" for the TCP name services.  Debug levels for specific subsystems
+     * override the setting for "ALL" subsystems.  For example if "ALL" is set to 7, but
+     * "ALLJOYN_OBJ" is set to 1, then detailed debug output will be generated for all subsystems
+     * except for "ALLJOYN_OBJ" which will only generate high level debug output.  "ALL" defaults
+     * to 0 which is off, or no debug output.
      *
      * The debug output levels are actually a bit field that controls what output is generated.
      * Those bit fields are described below:

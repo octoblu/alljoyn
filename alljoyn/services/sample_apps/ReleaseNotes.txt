@@ -1,0 +1,51 @@
+
+AllJoyn Sample Application for Services Version 14.12 Release Notes
+--------------------------------------------------------
+
+Platform Support
+----------------
+ 1) Linux Ubuntu (64 bit x86)
+ 2) OpenWRT (trunk)
+
+
+Features added in Version 14.12
+-------------------------------
+
+
+Issues Addressed in Version 14.12
+-------------------------------- 
+ASABASE-424 - ACServerSample segfaults, when ControlPanelController attempts to change a property
+ASABASE-379 - Error message in Config Service test app.
+ASABASE-339 - Update ServerSample to allow for some run-time configuration on linux
+ASABASE-337 - Update ServerSample to allow for some run-time configuration on linux
+ASABASE-336 - Enable run-time configuration of DeviceName for the ServerSample on linux
+ASABASE-328 - Update sample apps to new 14.12 core about rework
+ASABASE-326 - Update sample apps to new 14.12 core about rework
+ASABASE-320 - Update sample apps to showcase NGNS Presence detection API 
+ASABASE-316 - Update sample apps to showcase NGNS Presence detection API 
+ASABASE-292 - Incorrect error name returned while invoking an invalid method on a BusObject implementing Dialog interface
+
+The complete list of addressed issues can be found at:
+https://jira.allseenalliance.org/issues/?jql=project%20%3D%20ASABASE%20AND%20resolution%20%3D%20Fixed%20AND%20fixVersion%20%3D%20%2214.12%22%20AND%20component%20%3D%20%22Base%20Service%20Framework%20Sample%20Applications%22%20AND%20%22Language%20Binding%22%20in%20%28Unity%2C%20Javascript%2C%20Java%2C%20iOS%2C%20%22C%2B%2B%22%2C%20None%2C%20Client%29
+
+Known Issues
+------------
+Android, Windows and IOS support have not been verified for this release
+
+The complete list of known issues in 14.12 can be found at:
+https://jira.allseenalliance.org/issues/?jql=project%20%3D%20ASABASE%20AND%20component%20%3D%20%22Base%20Service%20Framework%20Sample%20Applications%22%20AND%20labels%20%3D%20%22Known_Issues_in_14.12%22%20AND%20%22Language%20Binding%22%20in%20%28Unity%2C%20Javascript%2C%20Java%2C%20iOS%2C%20%22C%2B%2B%22%2C%20None%2C%20Client%29
+
+Compatibility
+-------------
+Calling factory reset to ACServerSample and ServerSample will reset the apps settings. (like temperature)
+To reset the device to soft AP call factory reset to the onboarding app.
+
+14.12 based sample application for services is back compatible with the 14.06 AllJoyn Core and sample application for services
+New API functions have been added to accept AboutDataStore instead of PropertyStore as required by 14.12 AllJoyn Core About support
+
+Change history
+--------------
+
+14.12 - Bug fixes and updates needed to match new core 14.12
+14.06 - 2nd AllSeen Alliance release
+14.02 - 1st AllSeen Alliance release

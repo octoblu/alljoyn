@@ -7,7 +7,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014-2015 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -44,8 +44,6 @@
 #include <qcc/posix/util.h>
 #elif defined(QCC_OS_GROUP_WINDOWS)
 #include <qcc/windows/util.h>
-#elif defined(QCC_OS_GROUP_WINRT)
-#include <qcc/winrt/util.h>
 #else
 #error No OS GROUP defined.
 #endif
@@ -72,6 +70,14 @@
  * @pram b   The byte boundary to align it on (b must be a power of 2)
  */
 #define AlignPtr(p, b) ((p) + PadBytes(p, b))
+
+/**
+ * Return the number of array elements needed to store a number of bytes
+ *
+ * @param bytes  Required number of bytes in the array
+ * @param type   Type of the array elements
+ */
+#define RequiredArrayLength(bytes, type) (((bytes) + sizeof(type) - 1) / sizeof(type))
 
 
 namespace qcc {
@@ -107,8 +113,6 @@ typedef enum _OSType {
 
     /*Linux*/
     LINUX_OS,
-
-    WINRT_OS,
 
 } OSType;
 
@@ -265,5 +269,5 @@ void CRC16_Compute(const uint8_t* buffer, size_t bufLen, uint16_t*runningCrc);
  */
 QStatus ResolveHostName(qcc::String hostname, uint8_t addr[], size_t addrSize, size_t & addrLen, uint32_t timeoutMs);
 
-};
+}
 #endif

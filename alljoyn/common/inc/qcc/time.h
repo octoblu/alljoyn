@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -122,23 +122,39 @@ uint32_t GetTimestamp(void);
  */
 uint64_t GetTimestamp64(void);
 
-inline Timespec operator+(const Timespec& tsa, const Timespec& tsb)
+/**
+ * Return (non-absolute) timestamp in milliseconds since Epoch.
+ * @return  timestamp in milliseconds.
+ */
+uint64_t GetEpochTimestamp(void);
+
+/**
+ * Return a formatted string for current UTC date and time. Format conforms to RFC 1123
+ * e.g. "Tue, 30 Aug 2011 17:01:45 GMT"
+ *
+ * @return  The formatted date/time string.
+ */
+qcc::String UTCTime();
+
+}
+
+inline qcc::Timespec operator+(const qcc::Timespec& tsa, const qcc::Timespec& tsb)
 {
-    Timespec ret;
+    qcc::Timespec ret;
     ret.seconds = tsa.seconds + tsb.seconds + (tsa.mseconds + tsb.mseconds) / 1000;
     ret.mseconds = (tsa.mseconds + tsb.mseconds) % 1000;
     return ret;
 }
 
-inline Timespec operator+(const Timespec& ts, uint32_t ms)
+inline qcc::Timespec operator+(const qcc::Timespec& ts, uint32_t ms)
 {
-    Timespec ret;
+    qcc::Timespec ret;
     ret.seconds = ts.seconds + (ts.mseconds + ms) / 1000;
     ret.mseconds = (uint16_t)((ts.mseconds + ms) % 1000);
     return ret;
 }
 
-inline int64_t operator-(const Timespec& ts1, const Timespec& ts2)
+inline int64_t operator-(const qcc::Timespec& ts1, const qcc::Timespec& ts2)
 {
     int64_t t1 = (int64_t) ts1.seconds;
     t1 *= 1000;
@@ -151,13 +167,5 @@ inline int64_t operator-(const Timespec& ts1, const Timespec& ts2)
     return t1 - t2;
 }
 
-/**
- * Return a formatted string for current UTC date and time. Format conforms to RFC 1123
- * e.g. "Tue, 30 Aug 2011 17:01:45 GMT"
- *
- * @return  The formatted date/time string.
- */
-qcc::String UTCTime();
 
-}
 #endif

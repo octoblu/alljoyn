@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -150,7 +150,7 @@ class DeferredCallback {
 template <typename R, typename T>
 class DeferredCallback_1 : public DeferredCallback {
   public:
-    typedef R (*DeferredCallback_1_Callback)(T arg1);
+    typedef R (AJ_CALL * DeferredCallback_1_Callback)(T arg1);
 
     DeferredCallback_1(DeferredCallback_1_Callback callback, T param1) : _callback(callback), _param1(param1)
     {
@@ -187,7 +187,7 @@ class DeferredCallback_1 : public DeferredCallback {
 template <typename T>
 class DeferredCallback_1<void, T> : public DeferredCallback {
   public:
-    typedef void (*DeferredCallback_1_Callback)(T arg1);
+    typedef void (AJ_CALL * DeferredCallback_1_Callback)(T arg1);
 
     DeferredCallback_1(DeferredCallback_1_Callback callback, T param1) : _callback(callback), _param1(param1)
     {
@@ -221,7 +221,7 @@ class DeferredCallback_1<void, T> : public DeferredCallback {
 template <typename R, typename T, typename U>
 class DeferredCallback_2 : public DeferredCallback {
   public:
-    typedef R (*DeferredCallback_2_Callback)(T arg1, U arg2);
+    typedef R (AJ_CALL * DeferredCallback_2_Callback)(T arg1, U arg2);
 
     DeferredCallback_2(DeferredCallback_2_Callback callback, T param1, U param2) : _callback(callback), _param1(param1), _param2(param2)
     {
@@ -259,7 +259,7 @@ class DeferredCallback_2 : public DeferredCallback {
 template <typename T, typename U>
 class DeferredCallback_2<void, T, U> : public DeferredCallback {
   public:
-    typedef void (*DeferredCallback_2_Callback)(T arg1, U arg2);
+    typedef void (AJ_CALL * DeferredCallback_2_Callback)(T arg1, U arg2);
 
     DeferredCallback_2(DeferredCallback_2_Callback callback, T param1, U param2) : _callback(callback), _param1(param1), _param2(param2)
     {
@@ -294,7 +294,7 @@ class DeferredCallback_2<void, T, U> : public DeferredCallback {
 template <typename R, typename T, typename U, typename V>
 class DeferredCallback_3 : public DeferredCallback {
   public:
-    typedef R (*DeferredCallback_3_Callback)(T arg1, U arg2, V arg3);
+    typedef R (AJ_CALL * DeferredCallback_3_Callback)(T arg1, U arg2, V arg3);
 
     DeferredCallback_3(DeferredCallback_3_Callback callback, T param1, U param2, V param3) :
         _callback(callback), _param1(param1), _param2(param2), _param3(param3)
@@ -334,7 +334,7 @@ class DeferredCallback_3 : public DeferredCallback {
 template <typename T, typename U, typename V>
 class DeferredCallback_3<void, T, U, V> : public DeferredCallback {
   public:
-    typedef void (*DeferredCallback_3_Callback)(T arg1, U arg2, V arg3);
+    typedef void (AJ_CALL * DeferredCallback_3_Callback)(T arg1, U arg2, V arg3);
 
     DeferredCallback_3(DeferredCallback_3_Callback callback, T param1, U param2, V param3) :
         _callback(callback), _param1(param1), _param2(param2), _param3(param3)
@@ -371,7 +371,7 @@ class DeferredCallback_3<void, T, U, V> : public DeferredCallback {
 template <typename R, typename T, typename U, typename V, typename W>
 class DeferredCallback_4 : public DeferredCallback {
   public:
-    typedef R (*DeferredCallback_4_Callback)(T arg1, U arg2, V arg3, W arg4);
+    typedef R (AJ_CALL * DeferredCallback_4_Callback)(T arg1, U arg2, V arg3, W arg4);
 
     DeferredCallback_4(DeferredCallback_4_Callback callback, T param1, U param2, V param3, W param4) :
         _callback(callback), _param1(param1), _param2(param2), _param3(param3), _param4(param4)
@@ -409,10 +409,11 @@ class DeferredCallback_4 : public DeferredCallback {
     R retVal;
 };
 
+
 template <typename T, typename U, typename V, typename W>
 class DeferredCallback_4<void, T, U, V, W> : public DeferredCallback {
   public:
-    typedef void (*DeferredCallback_4_Callback)(T arg1, U arg2, V arg3, W arg4);
+    typedef void (AJ_CALL * DeferredCallback_4_Callback)(T arg1, U arg2, V arg3, W arg4);
 
     DeferredCallback_4(DeferredCallback_4_Callback callback, T param1, U param2, V param3, W param4) :
         _callback(callback), _param1(param1), _param2(param2), _param3(param3), _param4(param4)
@@ -447,6 +448,86 @@ class DeferredCallback_4<void, T, U, V, W> : public DeferredCallback {
     V _param3;
     W _param4;
 };
+
+template <typename R, typename T, typename U, typename V, typename W, typename X, typename Y>
+class DeferredCallback_6 : public DeferredCallback {
+  public:
+    typedef R (AJ_CALL * DeferredCallback_6_Callback)(T arg1, U arg2, V arg3, W arg4, X arg5, Y arg6);
+
+    DeferredCallback_6(DeferredCallback_6_Callback callback, T param1, U param2, V param3, W param4, X param5, Y param6) :
+        _callback(callback), _param1(param1), _param2(param2), _param3(param3), _param4(param4), _param5(param5), _param6(param6) {
+    }
+
+    virtual void runCallbackNow() {
+        retVal = _callback(_param1, _param2, _param3, _param4, _param5, _param6);
+        executeNow = true;
+    }
+
+    virtual R Execute() {
+        ScopeFinishedMarker finisher(&finished);
+        if (!sMainThreadCallbacksOnly) {
+            runCallbackNow();
+        } else {
+            sCallbackListLock.Lock(MUTEX_CONTEXT);
+            sPendingCallbacks.push_back(this);
+            sCallbackListLock.Unlock(MUTEX_CONTEXT);
+            if (!IsMainThread()) {
+                Wait();
+            }
+        }
+        R ret = retVal;
+        return ret;
+    }
+
+  protected:
+    DeferredCallback_6_Callback _callback;
+    T _param1;
+    U _param2;
+    V _param3;
+    W _param4;
+    X _param5;
+    Y _param6;
+    R retVal;
+};
+
+template <typename T, typename U, typename V, typename W, typename X, typename Y>
+class DeferredCallback_6<void, T, U, V, W, X, Y> : public DeferredCallback {
+  public:
+    typedef void (AJ_CALL * DeferredCallback_6_Callback)(T arg1, U arg2, V arg3, W arg4, X arg5, Y arg6);
+
+    DeferredCallback_6(DeferredCallback_6_Callback callback, T param1, U param2, V param3, W param4, X param5, Y param6) :
+        _callback(callback), _param1(param1), _param2(param2), _param3(param3), _param4(param4), _param5(param5), _param6(param6) {
+    }
+
+    virtual void runCallbackNow() {
+        _callback(_param1, _param2, _param3, _param4, _param5, _param6);
+        executeNow = true;
+    }
+
+    virtual void Execute() {
+        ScopeFinishedMarker finisher(&finished);
+        if (!sMainThreadCallbacksOnly) {
+            runCallbackNow();
+        } else {
+            sCallbackListLock.Lock(MUTEX_CONTEXT);
+            sPendingCallbacks.push_back(this);
+            sCallbackListLock.Unlock(MUTEX_CONTEXT);
+            if (!IsMainThread()) {
+                Wait();
+            }
+        }
+    }
+
+  protected:
+    DeferredCallback_6_Callback _callback;
+    T _param1;
+    U _param2;
+    V _param3;
+    W _param4;
+    X _param5;
+    Y _param6;
+};
+
 }
 
 #endif

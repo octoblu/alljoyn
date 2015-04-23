@@ -44,6 +44,7 @@ namespace ajn {
 #define AUTH_KEYX_SRP_LOGON     0x00100000
 #define AUTH_KEYX_RSA           0x00200000
 #define AUTH_KEYX_ECDHE         0x00400000
+#define AUTH_KEYX_GSSAPI        0x00800000
 
 /*the key authentication suite is in the 16 LSB */
 
@@ -57,6 +58,8 @@ namespace ajn {
 #define AUTH_SUITE_ECDHE_NULL   (AUTH_KEYX_ECDHE | 0x0001)
 #define AUTH_SUITE_ECDHE_PSK    (AUTH_KEYX_ECDHE | 0x0002)
 #define AUTH_SUITE_ECDHE_ECDSA  (AUTH_KEYX_ECDHE | 0x0004)
+
+#define AUTH_SUITE_GSSAPI       AUTH_KEYX_GSSAPI
 
 #define AUTH_VERIFIER_LEN  Crypto_SHA256::DIGEST_SIZE
 
@@ -145,6 +148,16 @@ class KeyExchanger {
     Crypto_SHA256 hashUtil;
 
   private:
+    /**
+     * Assignment not allowed
+     */
+    KeyExchanger& operator=(const KeyExchanger& other);
+
+    /**
+     * Copy constructor not allowed
+     */
+    KeyExchanger(const KeyExchanger& other);
+
     bool initiator;
     int showDigestCounter;
 };
@@ -196,6 +209,18 @@ class KeyExchangerECDHE : public KeyExchanger {
     Crypto_ECC ecc;
     qcc::KeyBlob masterSecret;
 
+  private:
+
+    /**
+     * Assignment not allowed
+     */
+    KeyExchangerECDHE& operator=(const KeyExchangerECDHE& other);
+
+    /**
+     * Copy constructor not allowed
+     */
+    KeyExchangerECDHE(const KeyExchangerECDHE& other);
+
 };
 
 class KeyExchangerECDHE_NULL : public KeyExchangerECDHE {
@@ -215,6 +240,18 @@ class KeyExchangerECDHE_NULL : public KeyExchangerECDHE {
     QStatus KeyAuthentication(KeyExchangerCB& callback, const char* peerName, uint8_t* authorized);
 
     QStatus RequestCredentialsCB(const char* peerName);
+
+  private:
+    /**
+     * Assignment not allowed
+     */
+    KeyExchangerECDHE_NULL& operator=(const KeyExchangerECDHE_NULL& other);
+
+    /**
+     * Copy constructor not allowed
+     */
+    KeyExchangerECDHE_NULL(const KeyExchangerECDHE_NULL& other);
+
 };
 
 class KeyExchangerECDHE_PSK : public KeyExchangerECDHE {
@@ -244,6 +281,16 @@ class KeyExchangerECDHE_PSK : public KeyExchangerECDHE {
     QStatus RequestCredentialsCB(const char* peerName);
 
   private:
+    /**
+     * Assignment not allowed
+     */
+    KeyExchangerECDHE_PSK& operator=(const KeyExchangerECDHE_PSK& other);
+
+    /**
+     * Copy constructor not allowed
+     */
+    KeyExchangerECDHE_PSK(const KeyExchangerECDHE_PSK& other);
+
     qcc::String pskName;
     qcc::String pskValue;
 };
@@ -270,6 +317,17 @@ class KeyExchangerECDHE_ECDSA : public KeyExchangerECDHE {
     QStatus ValidateRemoteVerifierVariant(const char* peerName, MsgArg* variant, uint8_t* authorized);
 
   private:
+
+    /**
+     * Assignment not allowed
+     */
+    KeyExchangerECDHE_ECDSA& operator=(const KeyExchangerECDHE_ECDSA& other);
+
+    /**
+     * Copy constructor not allowed
+     */
+    KeyExchangerECDHE_ECDSA(const KeyExchangerECDHE_ECDSA& other);
+
     QStatus GenerateLocalVerifierCert(CertificateType0& cert);
     QStatus VerifyCredentialsCB(const char* peerName, CertificateECC * certs[], size_t numCerts);
     QStatus StoreDSAKeys(String& encodedPrivateKey, String& encodedCertChain);

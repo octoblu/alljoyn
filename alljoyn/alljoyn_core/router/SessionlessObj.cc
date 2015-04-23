@@ -4,7 +4,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2012,2014 AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2012,2014-2015 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -36,9 +36,6 @@
 
 using namespace std;
 using namespace qcc;
-
-/** Constants */
-#define MAX_JOINSESSION_RETRIES 50
 
 /**
  * Inside window calculation.
@@ -130,15 +127,13 @@ SessionlessObj::SessionlessObj(Bus& bus, BusController* busController) :
     sessionOpts(SessionOpts::TRAFFIC_MESSAGES, false, SessionOpts::PROXIMITY_ANY, TRANSPORT_ANY, SessionOpts::DAEMON_NAMES),
     sessionPort(SESSIONLESS_SESSION_PORT),
     advanceChangeId(false),
-    nextRulesId(0)
+    nextRulesId(0),
+    backoff(ConfigDB::GetConfigDB()->GetLimit("sls_backoff", 1500),
+            ConfigDB::GetConfigDB()->GetLimit("sls_backoff_linear", 4),
+            ConfigDB::GetConfigDB()->GetLimit("sls_backoff_exponential", 32),
+            ConfigDB::GetConfigDB()->GetLimit("sls_backoff_max", 15 * 60))
 {
-    /*
-     * Configurable for testing purposes only.  1500 msecs is chosen to minimize
-     * the probability of needing to do a retry.  This keeps the mean delay to
-     * 750 msecs and provides an optimal trade-off against the maximum number of
-     * connections allowed at the producer.
-     */
-    backoffDelayMs = ConfigDB::GetConfigDB()->GetLimit("sls_backoff", 1500);
+    sessionOpts.transports = ConfigDB::GetConfigDB()->GetLimit("sls_preferred_transports", TRANSPORT_ANY);
 }
 
 SessionlessObj::~SessionlessObj()
@@ -238,6 +233,16 @@ QStatus SessionlessObj::Init()
         QCC_LogError(status, ("Failed to register SessionLost signal handler"));
     }
 
+    /* Register signal handler for SessionLostWithReasonAndDisposition */
+    /* (If we werent in the daemon, we could just use SessionListener, but it doesnt work without the full BusAttachment implementation */
+    status = bus.RegisterSignalHandler(this,
+                                       static_cast<MessageReceiver::SignalHandler>(&SessionlessObj::SessionLostSignalHandler),
+                                       ajIntf->GetMember("SessionLostWithReasonAndDisposition"),
+                                       NULL);
+    if (status != ER_OK) {
+        QCC_LogError(status, ("Failed to register SessionLost signal handler"));
+    }
+
     /* Register a name table listener */
     if (status == ER_OK) {
         router.AddBusNameListener(this);
@@ -308,13 +313,15 @@ void SessionlessObj::AddRule(const qcc::String& epName, Rule& rule)
 
         uint32_t fromRulesId = nextRulesId;
         bool isNewRule = true;
+        uint32_t ruleId = nextRulesId;
         for (std::pair<RuleIterator, RuleIterator> range = rules.equal_range(epName); range.first != range.second; ++range.first) {
             if (range.first->second == rule) {
                 isNewRule = false;
+                ruleId = range.first->second.id;
                 break;
             }
         }
-        rules.insert(std::pair<String, TimestampedRule>(epName, TimestampedRule(rule, nextRulesId)));
+        rules.insert(std::pair<String, TimestampedRule>(epName, TimestampedRule(rule, ruleId)));
         if (isNewRule) {
             ++nextRulesId;
         }
@@ -326,28 +333,27 @@ void SessionlessObj::AddRule(const qcc::String& epName, Rule& rule)
         uint32_t toChangeId = curChangeId + 1;
         uint32_t toRulesId = nextRulesId;
 
+        FindAdvertisedNames();
+
         lock.Unlock();
         router.UnlockNameTable();
 
         /* Retrieve from our own cache */
         HandleRangeRequest(epName.c_str(), 0, fromChangeId, toChangeId, fromRulesId, toRulesId);
-
-        bus.EnableConcurrentCallbacks();
-        FindAdvertisedNames();
     }
 }
 
 void SessionlessObj::RemoveRule(const qcc::String& epName, Rule& rule)
 {
-    QCC_DbgTrace(("SessionlessObj::RemoveRule(%s, ...)", epName.c_str()));
-
     if (rule.sessionless == Rule::SESSIONLESS_TRUE) {
+        QCC_DbgPrintf(("RemoveRule(epName=%s,rule=%s)", epName.c_str(), rule.ToString().c_str()));
         router.LockNameTable();
         lock.Lock();
 
         std::pair<RuleIterator, RuleIterator> range = rules.equal_range(epName);
         while (range.first != range.second) {
             if (range.first->second == rule) {
+                RemoveImplicitRules(range.first);
                 rules.erase(range.first);
                 break;
             }
@@ -355,7 +361,6 @@ void SessionlessObj::RemoveRule(const qcc::String& epName, Rule& rule)
         }
 
         if (rules.empty()) {
-            bus.EnableConcurrentCallbacks();
             CancelFindAdvertisedNames();
         }
 
@@ -373,9 +378,16 @@ QStatus SessionlessObj::PushMessage(Message& msg)
         return ER_FAIL;
     }
 
-    /* Put the message in the local cache and kick the worker */
-    SessionlessMessageKey key(msg->GetSender(), msg->GetInterface(), msg->GetMemberName(), msg->GetObjectPath());
+    router.LockNameTable();
     lock.Lock();
+
+    /* Match the message against any existing implicit rules */
+    uint32_t fromRulesId = nextRulesId - (numeric_limits<uint32_t>::max() >> 1);
+    uint32_t toRulesId = nextRulesId;
+    SendMatchingThroughEndpoint(0, msg, fromRulesId, toRulesId, true);
+
+    /* Put the message in the local cache */
+    SessionlessMessageKey key(msg->GetSender(), msg->GetInterface(), msg->GetMemberName(), msg->GetObjectPath());
     advanceChangeId = true;
     SessionlessMessage val(curChangeId, msg);
     LocalCache::iterator it = localCache.find(key);
@@ -384,12 +396,29 @@ QStatus SessionlessObj::PushMessage(Message& msg)
     } else {
         it->second = val;
     }
+
     lock.Unlock();
+    router.UnlockNameTable();
+
+    /* Kick the worker */
     uint32_t zero = 0;
     SessionlessObj* slObj = this;
     QStatus status = timer.AddAlarm(Alarm(zero, slObj));
+    if (ER_OK != status) {
+        /*
+         * When daemon is closing the daemon will receive multiple error
+         * because the timer is exiting.  print a high level debug message
+         * not a log error since this is expected behaver and should not
+         * be presented to the user if they don't want to see it.
+         */
+        if (ER_TIMER_EXITING == status) {
+            QCC_DbgHLPrintf(("Timer::AddAlarm failed : %s", QCC_StatusText(status)));
+        } else {
+            QCC_LogError(status, ("Timer::AddAlarm failed"));
+        }
+    }
 
-    return status;
+    return ER_OK;
 }
 
 bool SessionlessObj::RouteSessionlessMessage(SessionId sid, Message& msg)
@@ -425,42 +454,64 @@ bool SessionlessObj::RouteSessionlessMessage(SessionId sid, Message& msg)
     return true;
 }
 
-void SessionlessObj::SendMatchingThroughEndpoint(SessionId sid, Message msg, uint32_t fromRulesId, uint32_t toRulesId)
+void SessionlessObj::SendMatchingThroughEndpoint(SessionId sid, Message msg, uint32_t fromRulesId, uint32_t toRulesId,
+                                                 bool onlySendIfImplicit)
 {
     uint32_t rulesRangeLen = toRulesId - fromRulesId;
     RuleIterator rit = rules.begin();
+    bool isAnnounce = (0 == strcmp(msg->GetInterface(), "org.alljoyn.About")) && (0 == strcmp(msg->GetMemberName(), "Announce"));
     while (rit != rules.end()) {
-        bool isMatch = false;
+        bool isExplicitMatch = false;
         String epName = rit->first;
         BusEndpoint ep = router.FindEndpoint(epName);
-        if (IN_WINDOW(uint32_t, fromRulesId, rulesRangeLen, rit->second.id) && ep->IsValid() && ep->AllowRemoteMessages()) {
-            if (rit->second.IsMatch(msg)) {
-                isMatch = true;
-            } else if (rit->second == legacyRule) {
-                /*
-                 * Legacy clients will add the "type='error',sessionless='t'"
-                 * rule.  In that case the expected behavior is that incoming
-                 * sessionless signals will route through the daemon router's
-                 * rule table.
-                 */
-                router.GetRuleTable().Lock();
-                for (ajn::RuleIterator drit = router.GetRuleTable().FindRulesForEndpoint(ep);
-                     !isMatch && (drit != router.GetRuleTable().End()) && (drit->first == ep);
-                     ++drit) {
-                    isMatch = drit->second.IsMatch(msg);
+        RuleIterator end = rules.upper_bound(epName);
+        for (; rit != end; ++rit) {
+            if (IN_WINDOW(uint32_t, fromRulesId, rulesRangeLen, rit->second.id) && ep->IsValid() && ep->AllowRemoteMessages()) {
+                if (rit->second.IsMatch(msg)) {
+                    isExplicitMatch = true;
+                    if (isAnnounce && !rit->second.implements.empty()) {
+                        /*
+                         * Add an implicit rule so that we will receive Announce
+                         * signals if the interface of interest is removed from the
+                         * Announce signal.
+                         */
+                        String ruleStr = String("sender='") + msg->GetSender() + "',interface='org.alljoyn.About',member='Announce'";
+                        Rule rule(ruleStr.c_str());
+                        AddImplicitRule(rule, rit);
+                    }
+                } else if (rit->second == legacyRule) {
+                    /*
+                     * Legacy clients will add the "type='error',sessionless='t'"
+                     * rule.  In that case the expected behavior is that incoming
+                     * sessionless signals will route through the daemon router's
+                     * rule table.
+                     */
+                    router.GetRuleTable().Lock();
+                    for (ajn::RuleIterator drit = router.GetRuleTable().FindRulesForEndpoint(ep);
+                         !isExplicitMatch && (drit != router.GetRuleTable().End()) && (drit->first == ep);
+                         ++drit) {
+                        isExplicitMatch = drit->second.IsMatch(msg);
+                    }
+                    router.GetRuleTable().Unlock();
                 }
-                router.GetRuleTable().Unlock();
             }
         }
-        if (isMatch) {
+
+        bool isImplicitMatch = false;
+        if (isAnnounce && !isExplicitMatch && ep->IsValid() && ep->AllowRemoteMessages()) {
+            /* The message did not match any rules for this endpoint.
+             * Check if it matches (only) an implicit rule. */
+            isImplicitMatch = IsOnlyImplicitMatch(epName, msg);
+        }
+
+        if ((onlySendIfImplicit && !isExplicitMatch && isImplicitMatch) ||
+            (!onlySendIfImplicit && (isExplicitMatch || isImplicitMatch))) {
             lock.Unlock();
             router.UnlockNameTable();
             SendThroughEndpoint(msg, ep, sid);
             router.LockNameTable();
             lock.Lock();
             rit = rules.upper_bound(epName);
-        } else {
-            ++rit;
         }
     }
 }
@@ -499,10 +550,15 @@ QStatus SessionlessObj::CancelMessage(const qcc::String& sender, uint32_t serial
 }
 
 void SessionlessObj::NameOwnerChanged(const String& name,
-                                      const String* oldOwner,
-                                      const String* newOwner)
+                                      const String* oldOwner, SessionOpts::NameTransferType oldOwnerNameTransfer,
+                                      const String* newOwner, SessionOpts::NameTransferType newOwnerNameTransfer)
 {
     QCC_DbgTrace(("SessionlessObj::NameOwnerChanged(%s, %s, %s)", name.c_str(), oldOwner ? oldOwner->c_str() : "(null)", newOwner ? newOwner->c_str() : "(null)"));
+
+    /* When newOwner and oldOwner are the same, only the name transfer changed. */
+    if (newOwner == oldOwner) {
+        return;
+    }
 
     /* Remove entries from rules for names exiting from the bus */
     if (oldOwner && !newOwner) {
@@ -510,6 +566,7 @@ void SessionlessObj::NameOwnerChanged(const String& name,
         lock.Lock();
         std::pair<RuleIterator, RuleIterator> range = rules.equal_range(name);
         if (range.first != rules.end()) {
+            RemoveImplicitRules(name);
             rules.erase(range.first, range.second);
         }
 
@@ -568,6 +625,11 @@ void SessionlessObj::FoundAdvertisedNameSignalHandler(const InterfaceDescription
 void SessionlessObj::FoundAdvertisedNameHandler(const char* name, TransportMask transport, const char* prefix, bool doInitialBackoff)
 {
     /* Examine found name to see if we need to connect to it */
+    if ((transport & sessionOpts.transports) == 0) {
+        QCC_DbgPrintf(("FoundAdvertisedName(name=%s,transport=0x%x,...): Transport not preferred", name, transport));
+        return;
+    }
+
     String guid, iface;
     uint32_t version, changeId;
     QStatus status = ParseAdvertisedName(name, &version, &guid, &iface, &changeId);
@@ -579,7 +641,7 @@ void SessionlessObj::FoundAdvertisedNameHandler(const char* name, TransportMask 
                    name, transport, guid.c_str(), version, iface.c_str(), changeId));
 
     /* Add/replace sessionless adv name for remote daemon */
-    busController->GetAllJoynObj().SetAdvNameAlias(guid, transport, name);
+    busController->GetAllJoynObj().AddAdvNameAlias(guid, transport, name);
 
     /* Join session if we need signals from this advertiser and we aren't already getting them */
     lock.Lock();
@@ -591,6 +653,7 @@ void SessionlessObj::FoundAdvertisedNameHandler(const char* name, TransportMask 
         cit->second.ifaces.insert(iface);
         if (IS_GREATER(uint32_t, changeId, cit->second.changeId)) {
             cit->second.changeId = changeId;
+            cit->second.retries = 0; /* Reset the backoff schedule when new signals are available. */
         }
         cit->second.transport = transport;
     }
@@ -655,7 +718,7 @@ void SessionlessObj::DoSessionLost(SessionId sid, SessionLostReason reason)
             /* An error occurred while getting the signals, so retry */
             if (ScheduleWork(cache) != ER_OK) {
                 /* Retries exhausted. Clear state and wait for new advertisment */
-                remoteCaches.erase(cit);
+                EraseRemoteCache(cit);
             }
         }
     }
@@ -811,7 +874,7 @@ void SessionlessObj::AlarmTriggered(const Alarm& alarm, QStatus reason)
             MDNSPacket response;
             response->SetDestination(ctx->ns4);
             MDNSAdvertiseRData advRData;
-            advRData.SetTransport(TRANSPORT_TCP | TRANSPORT_UDP);
+            advRData.SetTransport(sessionOpts.transports & TRANSPORT_IP);
             advRData.SetValue("name", ctx->name);
             String guid = bus.GetInternal().GetGlobalGUID().ToString();
             MDNSResourceRecord advertiseRecord("advertise." + guid + ".local.", MDNSResourceRecord::TXT, MDNSResourceRecord::INTERNET, 120, &advRData);
@@ -847,48 +910,59 @@ void SessionlessObj::AlarmTriggered(const Alarm& alarm, QStatus reason)
         GetTimeNow(&now);
         RemoteCaches::iterator cit = remoteCaches.begin();
         while (cit != remoteCaches.end()) {
+            String guid = cit->first;
             RemoteCache& cache = cit->second;
             WorkType pendingWork = PendingWork(cache);
             if ((cache.nextJoinTime <= now) && (cache.state == RemoteCache::IDLE) && pendingWork) {
-                if (cache.retries++ < MAX_JOINSESSION_RETRIES) {
-                    RemoteCacheSnapshot* ctx = new RemoteCacheSnapshot(cache);
-                    cache.state = RemoteCache::IN_PROGRESS;
-                    if (pendingWork == SessionlessObj::APPLY_NEW_RULES) {
-                        cache.fromChangeId = cache.receivedChangeId - (numeric_limits<uint32_t>::max() >> 1);
-                        cache.toChangeId = cache.receivedChangeId + 1;
-                        cache.fromRulesId = cache.appliedRulesId + 1;
-                        cache.toRulesId = nextRulesId;
-                    } else if (pendingWork == SessionlessObj::REQUEST_NEW_SIGNALS) {
-                        cache.fromChangeId = cache.receivedChangeId + 1;
-                        cache.toChangeId = cache.changeId + 1;
-                        cache.fromRulesId = cache.appliedRulesId - (numeric_limits<uint32_t>::max() >> 1);
-                        cache.toRulesId = nextRulesId;
-                    }
-                    SessionOpts opts = sessionOpts;
-                    opts.transports = cache.transport;
-                    status = bus.JoinSessionAsync(cache.name.c_str(), sessionPort, NULL, opts, this, reinterpret_cast<void*>(ctx));
+                RemoteCacheSnapshot* ctx = new RemoteCacheSnapshot(cache);
+                cache.state = RemoteCache::IN_PROGRESS;
+                if (pendingWork == SessionlessObj::APPLY_NEW_RULES) {
+                    cache.fromChangeId = cache.receivedChangeId - (numeric_limits<uint32_t>::max() >> 1);
+                    cache.toChangeId = cache.receivedChangeId + 1;
+                    cache.fromRulesId = cache.appliedRulesId + 1;
+                    cache.toRulesId = nextRulesId;
+                } else if (pendingWork == SessionlessObj::REQUEST_NEW_SIGNALS) {
+                    cache.fromChangeId = cache.receivedChangeId + 1;
+                    cache.toChangeId = cache.changeId + 1;
+                    cache.fromRulesId = cache.appliedRulesId - (numeric_limits<uint32_t>::max() >> 1);
+                    cache.toRulesId = nextRulesId;
+                }
+                String name = cache.name;
+                SessionOpts opts = sessionOpts;
+                opts.transports = cache.transport;
+                uint32_t retries = cache.retries;
+
+                /* Need to release locks around JoinSessionAsync to avoid deadlock, see ASACORE-1402 */
+                lock.Unlock();
+                router.UnlockNameTable();
+                status = bus.JoinSessionAsync(name.c_str(), sessionPort, NULL, opts, this, reinterpret_cast<void*>(ctx));
+                router.LockNameTable();
+                lock.Lock();
+
+                cit = remoteCaches.find(guid);
+                if (cit != remoteCaches.end()) {
+                    cache = cit->second;
                     if (status == ER_OK) {
                         QCC_DbgPrintf(("JoinSessionAsync(name=%s,...) pending", cache.name.c_str()));
+                        /* retries could be reset while unlocked, only increment if that hasn't happened */
+                        if (cache.retries == retries) {
+                            ++cache.retries;
+                        }
                     } else {
                         QCC_LogError(status, ("JoinSessionAsync to %s failed", cache.name.c_str()));
                         cache.state = RemoteCache::IDLE;
-                        delete ctx;
                         /* Retry with a random backoff */
                         ScheduleWork(cache, false);
                         if ((tilExpire == Timespec::Zero) || (cache.nextJoinTime < tilExpire)) {
                             tilExpire = cache.nextJoinTime;
                         }
                     }
-                    ++cit;
-                } else {
-                    QCC_LogError(ER_FAIL, ("Exhausted JoinSession retries to %s", cache.guid.c_str()));
-                    String guid = cache.guid;
-                    remoteCaches.erase(cit);
-                    cit = remoteCaches.upper_bound(guid);
                 }
-            } else {
-                ++cit;
+                if (status != ER_OK) {
+                    delete ctx;
+                }
             }
+            cit = remoteCaches.upper_bound(guid);
         }
 
         lock.Unlock();
@@ -934,9 +1008,10 @@ void SessionlessObj::JoinSessionCB(QStatus status, SessionId sid, const SessionO
             }
             if (!rangeCapable && (toId != cache.changeId + 1)) {
                 /* This session can't be used because the remote side doesn't support RequestRange */
-                bus.LeaveSession(sid);
+                status = bus.LeaveSession(sid);
+                QCC_LogError(status, ("Failed to leave session %u", sid));
                 DoSessionLost(sid, ALLJOYN_SESSIONLOST_REMOTE_END_LEFT_SESSION);
-                status = ER_NONE;
+                status = ER_FAIL;
             }
             if (matchCapable) {
                 uint32_t rulesRangeLen = cache.toRulesId - cache.fromRulesId;
@@ -945,15 +1020,23 @@ void SessionlessObj::JoinSessionCB(QStatus status, SessionId sid, const SessionO
                         matchRules.push_back(rit->second.ToString());
                     }
                 }
+                for (ImplicitRuleIterator irit = implicitRules.begin(); irit != implicitRules.end(); ++irit) {
+                    qcc::String sender = irit->sender;
+                    if (sender.substr(1, sender.find_last_of('.') - 1) == cache.guid) {
+                        matchRules.push_back(irit->ToString());
+                    }
+                }
             }
         } else {
+            QCC_LogError(status, ("JoinSessionAsync to %s failed", cache.name.c_str()));
+
             /* Clear in progress */
             cache.state = RemoteCache::IDLE;
             cache.sid = 0;
 
             if (ScheduleWork(cache) != ER_OK) {
                 /* Retries exhausted. Clear state and wait for new advertisment */
-                remoteCaches.erase(cit);
+                EraseRemoteCache(cit);
             }
         }
         lock.Unlock();
@@ -964,17 +1047,27 @@ void SessionlessObj::JoinSessionCB(QStatus status, SessionId sid, const SessionO
              * Send the request signal if join was successful.  Prefer
              * RequestRange since it may be possible to receive duplicates when
              * RequestSignals is used together with RequestRange.
+             *
+             * The request signal is sent to the owner of the cache's advertised
+             * name, not the advertised name.  The owner of the cache's name is
+             * the remote routing node, and will always be :GUID.1.  The reason
+             * to send to the owner and not the advertised name is that the
+             * advertised name can be cancelled/released after joining the
+             * session but before the request signal is sent if the remote
+             * router advertises a new change ID in that interval.
              */
+            String name = ":" + ctx->guid + ".1";
             if (matchCapable) {
-                status = RequestRangeMatch(ctx->name.c_str(), sid, fromId, toId, matchRules);
+                status = RequestRangeMatch(name.c_str(), sid, fromId, toId, matchRules);
             } else if (rangeCapable) {
-                status = RequestRange(ctx->name.c_str(), sid, fromId, toId);
+                status = RequestRange(name.c_str(), sid, fromId, toId);
             } else {
-                status = RequestSignals(ctx->name.c_str(), sid, fromId);
+                status = RequestSignals(name.c_str(), sid, fromId);
             }
             if (status != ER_OK) {
-                QCC_LogError(status, ("Failed to send Request to %s", ctx->name.c_str()));
-                bus.LeaveSession(sid);
+                QCC_LogError(status, ("Failed to send Request to %s", name.c_str()));
+                status = bus.LeaveSession(sid);
+                QCC_LogError(status, ("Failed to leave session %u", sid));
 
                 lock.Lock();
                 cit = remoteCaches.find(ctx->guid);
@@ -987,7 +1080,7 @@ void SessionlessObj::JoinSessionCB(QStatus status, SessionId sid, const SessionO
 
                     if (ScheduleWork(cache) != ER_OK) {
                         /* Retries exhausted. Clear state and wait for new advertisment */
-                        remoteCaches.erase(cit);
+                        EraseRemoteCache(cit);
                     }
                 }
                 lock.Unlock();
@@ -1148,7 +1241,7 @@ QStatus SessionlessObj::AdvertiseName(const qcc::String& name)
 {
     QStatus status = bus.RequestName(name.c_str(), DBUS_NAME_FLAG_DO_NOT_QUEUE);
     if (status == ER_OK) {
-        status = bus.AdvertiseName(name.c_str(), TRANSPORT_ANY & ~TRANSPORT_LOCAL);
+        status = bus.AdvertiseName(name.c_str(), sessionOpts.transports & ~TRANSPORT_LOCAL);
     }
     if (status == ER_OK) {
         QCC_DbgPrintf(("AdvertiseName(name=%s)", name.c_str()));
@@ -1160,7 +1253,7 @@ QStatus SessionlessObj::AdvertiseName(const qcc::String& name)
 
 void SessionlessObj::CancelAdvertisedName(const qcc::String& name)
 {
-    QStatus status = bus.CancelAdvertiseName(name.c_str(), TRANSPORT_ANY & ~TRANSPORT_LOCAL);
+    QStatus status = bus.CancelAdvertiseName(name.c_str(), sessionOpts.transports & ~TRANSPORT_LOCAL);
     if (status != ER_OK) {
         QCC_LogError(status, ("Failed to cancel advertisment for \"%s\"", name.c_str()));
     }
@@ -1174,6 +1267,7 @@ void SessionlessObj::CancelAdvertisedName(const qcc::String& name)
 
 void SessionlessObj::FindAdvertisedNames()
 {
+    set<String> names;
     for (RuleIterator rit = rules.begin(); rit != rules.end(); ++rit) {
         String name;
         if (rit->second.implements.empty()) {
@@ -1190,11 +1284,7 @@ void SessionlessObj::FindAdvertisedNames()
             continue;
         }
         if (findingNames.insert(name).second) {
-            QCC_DbgPrintf(("FindAdvertisement(%s)", name.c_str()));
-            QStatus status = FindAdvertisementByTransport(name.c_str(), TRANSPORT_ANY & ~TRANSPORT_LOCAL);
-            if (status != ER_OK) {
-                QCC_LogError(status, ("FindAdvertisementByTransport failed"));
-            }
+            names.insert(name);
         }
     }
     if (!findingNames.empty()) {
@@ -1204,28 +1294,47 @@ void SessionlessObj::FindAdvertisedNames()
          */
         String name = String("name='") + WildcardInterfaceName + ".sl.*'";
         if (findingNames.insert(name).second) {
-            QCC_DbgPrintf(("FindAdvertisement(%s)", name.c_str()));
-            QStatus status = FindAdvertisementByTransport(name.c_str(), TRANSPORT_ANY & ~TRANSPORT_LOCAL);
-            if (status != ER_OK) {
-                QCC_LogError(status, ("FindAdvertisementByTransport failed"));
-            }
+            names.insert(name);
         }
     }
+
+    lock.Unlock();
+    router.UnlockNameTable();
+    set<String>::iterator it = names.begin();
+    while (it != names.end()) {
+        String name = *it;
+        QCC_DbgPrintf(("FindAdvertisement(%s)", name.c_str()));
+        QStatus status = FindAdvertisementByTransport(name.c_str(), sessionOpts.transports & ~TRANSPORT_LOCAL);
+        if (status != ER_OK) {
+            QCC_LogError(status, ("FindAdvertisementByTransport failed for name %s :", name.c_str()));
+        }
+        it++;
+    }
+    router.LockNameTable();
+    lock.Lock();
 }
 
 void SessionlessObj::CancelFindAdvertisedNames()
 {
-    set<String>::iterator it = findingNames.begin();
-    while (it != findingNames.end()) {
+    set<String> names = findingNames;
+    findingNames.clear();
+
+    lock.Unlock();
+    router.UnlockNameTable();
+    set<String>::iterator it = names.begin();
+    while (it != names.end()) {
         String name = *it;
-        QStatus status = CancelFindAdvertisementByTransport(name.c_str(), TRANSPORT_ANY & ~TRANSPORT_LOCAL);
+        QStatus status = CancelFindAdvertisementByTransport(name.c_str(), sessionOpts.transports & ~TRANSPORT_LOCAL);
         if (status == ER_OK) {
             QCC_DbgPrintf(("CancelFindAdvertisement(%s)", name.c_str()));
         } else {
-            QCC_LogError(status, ("CancelFindAdvertisementByTransport failed"));
+            QCC_LogError(status, ("CancelFindAdvertisementByTransport failed for name %s :", name.c_str()));
         }
-        findingNames.erase(it++);
+        it++;
     }
+    router.LockNameTable();
+    lock.Lock();
+
 }
 
 SessionlessObj::RemoteCaches::iterator SessionlessObj::FindRemoteCache(SessionId sid)
@@ -1247,7 +1356,7 @@ void SessionlessObj::ScheduleWork(bool doInitialBackoff)
         String guid = cache.guid;
         if (PendingWork(cache) && ScheduleWork(cache, true, doInitialBackoff) != ER_OK) {
             /* Retries exhausted. Clear state and wait for new advertisment */
-            remoteCaches.erase(cit);
+            EraseRemoteCache(cit);
             cit = remoteCaches.upper_bound(guid);
         } else {
             ++cit;
@@ -1260,32 +1369,14 @@ QStatus SessionlessObj::ScheduleWork(RemoteCache& cache, bool addAlarm, bool doI
     if (cache.state != RemoteCache::IDLE) {
         return ER_OK;
     }
-    if (cache.retries >= MAX_JOINSESSION_RETRIES) {
+
+    QStatus status = GetNextJoinTime(backoff, doInitialBackoff,
+                                     cache.retries, cache.firstJoinTime, cache.nextJoinTime);
+    if (status != ER_OK) {
         QCC_LogError(ER_FAIL, ("Exhausted JoinSession retries to %s", cache.guid.c_str()));
         return ER_FAIL;
     }
 
-    /*
-     * Shorten the schedule if we're doing a retry.  The model is that the first
-     * try should succeed with a high probability.  Therefore only a small
-     * percentage of the consumers will attempt to retry, thus the interval can
-     * be shorter.  Go exponentially shorter down to 250 msecs.
-     */
-    if (cache.retries == 0) {
-        GetTimeNow(&cache.firstJoinTime);
-    }
-    qcc::Timespec startTime;
-    uint32_t delayMs = 1;
-    for (uint32_t i = 0; i <= cache.retries; ++i) {
-        if (i == 0) {
-            startTime = cache.firstJoinTime;
-            delayMs = doInitialBackoff ? backoffDelayMs : 1;
-        } else {
-            startTime += delayMs;
-            delayMs = (delayMs > 500) ? (delayMs >> 1) : delayMs;
-        }
-    }
-    cache.nextJoinTime = startTime + qcc::Rand32() % delayMs;
     if (addAlarm) {
         SessionlessObj* slObj = this;
         QStatus status = timer.AddAlarm(Alarm(cache.nextJoinTime, slObj));
@@ -1294,6 +1385,56 @@ QStatus SessionlessObj::ScheduleWork(RemoteCache& cache, bool addAlarm, bool doI
         }
     }
     return ER_OK;
+}
+
+/*
+ * The backoff schedule looks like this:
+ *
+ * Initial
+ * |    Linear
+ * |    |                    Exponential
+ * |    |                    |                 Constant
+ * |    |                    |                 |
+ * v    v                    v                 v
+ * | T || 1T | 2T | 3T | 4T || 8T | 16T | 32T || 32T | 32T ...
+ *
+ * The actual join time is randomly distributed over the retry interval above.
+ */
+QStatus SessionlessObj::GetNextJoinTime(const BackoffLimits& backoff, bool doInitialBackoff,
+                                        uint32_t retries, qcc::Timespec& firstJoinTime, qcc::Timespec& nextJoinTime)
+{
+    if (retries == 0) {
+        GetTimeNow(&firstJoinTime);
+    }
+
+    qcc::Timespec startTime;
+    uint32_t delayMs = 1;
+    for (uint32_t m = 0, i = 0; i <= retries; ++i) {
+        if (i == 0) {
+            /* Initial backoff */
+            startTime = firstJoinTime;
+            delayMs = doInitialBackoff ? backoff.periodMs : 1;
+        } else if (i <= backoff.linear) {
+            /* Linear backoff */
+            m = m + 1;
+            startTime += delayMs;
+            delayMs = m * backoff.periodMs;
+        } else if (m < backoff.exponential) {
+            /* Exponential backoff */
+            m = m << 1;
+            startTime += delayMs;
+            delayMs = m * backoff.periodMs;
+        } else {
+            /* Constant backoff */
+            startTime += delayMs;
+        }
+    }
+    nextJoinTime = (startTime + qcc::Rand32() % delayMs);
+    if ((nextJoinTime - firstJoinTime) < (backoff.maxSecs * 1000)) {
+        return ER_OK;
+    } else {
+        return ER_FAIL;
+    }
 }
 
 SessionlessObj::WorkType SessionlessObj::PendingWork(RemoteCache& cache)
@@ -1399,6 +1540,11 @@ bool SessionlessObj::ResponseHandler(TransportMask transport, MDNSPacket respons
     if (!response->GetAdditionalRecord("advertise.*", MDNSResourceRecord::TXT, &advRecord)) {
         return false;
     }
+
+    if (advRecord->GetRRttl() == 0) {
+        return false;
+    }
+
     MDNSAdvertiseRData* advRData = static_cast<MDNSAdvertiseRData*>(advRecord->GetRData());
     if (!advRData) {
         QCC_DbgPrintf(("Ignoring response with invalid advertisement info"));
@@ -1428,6 +1574,8 @@ bool SessionlessObj::ResponseHandler(TransportMask transport, MDNSPacket respons
      * Next step is to see if the response matches any of our rules.  If it
      * does, then report the name as found.
      */
+    router.LockNameTable();
+    lock.Lock();
     for (RuleIterator rit = rules.begin(); rit != rules.end(); ++rit) {
         Rule& rule = rit->second;
         if (rule.iface != "org.alljoyn.About") {
@@ -1442,9 +1590,9 @@ bool SessionlessObj::ResponseHandler(TransportMask transport, MDNSPacket respons
             } else if (field.first == "transport") {
                 transport = StringToU32(field.second, 16);
                 if (!name.empty()) {
-                    QCC_DbgPrintf(("Received %s implements response (name=%s)",
+                    QCC_DbgPrintf(("Received %s implements response (name=%s) ttl %d",
                                    (unsolicited ? "unsolicited" : "solicited"),
-                                   name.c_str()));
+                                   name.c_str(), advRecord->GetRRttl()));
                     FoundAdvertisedNameHandler(name.c_str(), transport, name.c_str(), unsolicited);
                 }
                 name.clear();
@@ -1452,12 +1600,14 @@ bool SessionlessObj::ResponseHandler(TransportMask transport, MDNSPacket respons
         }
 
         if (!name.empty()) {
-            QCC_DbgPrintf(("Received %s implements response (name=%s)",
+            QCC_DbgPrintf(("Received %s implements response (name=%s) ttl %d",
                            (unsolicited ? "unsolicited" : "solicited"),
-                           name.c_str()));
+                           name.c_str(), advRecord->GetRRttl()));
             FoundAdvertisedNameHandler(name.c_str(), transport, name.c_str(), unsolicited);
         }
     }
+    lock.Unlock();
+    router.UnlockNameTable();
 
     /* Always return false since we're just sniffing for org.alljoyn.About.sl. advertisements */
     return false;
@@ -1531,6 +1681,128 @@ QStatus SessionlessObj::CancelFindAdvertisementByTransport(const char* matching,
         QCC_LogError(status, ("%s.CancelFindAdvertisement returned ERROR_MESSAGE (error=%s)", org::alljoyn::Bus::InterfaceName, reply->GetErrorDescription().c_str()));
     }
     return status;
+}
+
+void SessionlessObj::EraseRemoteCache(RemoteCaches::iterator cit)
+{
+    RemoveImplicitRules(cit->second);
+    remoteCaches.erase(cit);
+}
+
+void SessionlessObj::AddImplicitRule(const Rule& rule, const RuleIterator& explicitRule) {
+    for (ImplicitRuleIterator irit = implicitRules.begin(); irit != implicitRules.end(); ++irit) {
+        if (*irit == rule) {
+            for (std::vector<RuleIterator>::iterator erit = irit->explicitRules.begin(); erit != irit->explicitRules.end(); ++erit) {
+                if (*erit == explicitRule) {
+                    return;
+                }
+            }
+            irit->explicitRules.push_back(explicitRule);
+            return;
+        }
+    }
+    implicitRules.push_back(ImplicitRule(rule, explicitRule));
+}
+
+void SessionlessObj::RemoveImplicitRules(const qcc::String& epName) {
+    QCC_DbgTrace(("SessionlessObj::RemoveImplicitRules(epName=%s)", epName.c_str()));
+    ImplicitRuleIterator irit = implicitRules.begin();
+    while (irit != implicitRules.end()) {
+        std::vector<RuleIterator>::iterator erit = irit->explicitRules.begin();
+        while (erit != irit->explicitRules.end()) {
+            if ((*erit)->first == epName) {
+                irit->explicitRules.erase(erit);
+                erit = irit->explicitRules.begin();
+            } else {
+                ++erit;
+            }
+        }
+        if (irit->explicitRules.empty()) {
+            implicitRules.erase(irit);
+            irit = implicitRules.begin();
+        } else {
+            ++irit;
+        }
+    }
+}
+
+void SessionlessObj::RemoveImplicitRules(const RuleIterator& explicitRule) {
+    QCC_DbgTrace(("SessionlessObj::RemoveImplicitRules(explicitrule=%s for endpoint %s)", explicitRule->second.ToString().c_str(), explicitRule->first.c_str()));
+    ImplicitRuleIterator irit = implicitRules.begin();
+    while (irit != implicitRules.end()) {
+        bool deleted = false;
+        for (std::vector<RuleIterator>::iterator erit = irit->explicitRules.begin(); erit != irit->explicitRules.end(); ++erit) {
+            if (*erit == explicitRule) {
+                irit->explicitRules.erase(erit);
+                if (irit->explicitRules.empty()) {
+                    implicitRules.erase(irit);
+                    deleted = true;
+                }
+                break;
+            }
+        }
+        if (deleted) {
+            irit = implicitRules.begin();
+        } else {
+            irit++;
+        }
+    }
+}
+
+void SessionlessObj::RemoveImplicitRules(const RemoteCache& cache) {
+    QCC_DbgTrace(("SessionlessObj::RemoveImplicitRules(remotecache=%s)", cache.guid.c_str()));
+    String guid = cache.guid;
+    ImplicitRuleIterator irit = implicitRules.begin();
+    while (irit != implicitRules.end()) {
+        String sender = irit->sender;
+        if (sender.substr(1, sender.find_last_of('.') - 1) == guid) {
+            implicitRules.erase(irit);
+            irit = implicitRules.begin();
+        } else {
+            irit++;
+        }
+    }
+}
+
+bool SessionlessObj::IsOnlyImplicitMatch(const qcc::String& epName, Message& msg)
+{
+    QCC_DbgTrace(("IsOnlyImplicitMatch(epName=%s, msg.sender=%s)", epName.c_str(), msg->GetSender()));
+
+    /* Find the implicit rule that matches the message sender, check all associated
+     * explicit rules that originate from epName. If none of those matches, the match is
+     * purely implicit, and the implicit match rule should be removed for this epName.
+     */
+    for (ImplicitRuleIterator irit = implicitRules.begin(); irit != implicitRules.end(); ++irit) {
+        if (irit->IsMatch(msg)) {
+            bool hasExplicitMatch = false;
+            std::pair<RuleIterator, RuleIterator> range = rules.equal_range(epName);
+            bool hasExplicitRules = (range.first != range.second);
+            for (; range.first != range.second; range.first++) {
+                if (range.first->second.IsMatch(msg)) {
+                    hasExplicitMatch = true;
+                    break;
+                }
+            }
+            if (hasExplicitRules && !hasExplicitMatch) {
+                /* remove all explicit rules related to epName */
+                vector<RuleIterator>::iterator erit = irit->explicitRules.begin();
+                while (erit != irit->explicitRules.end()) {
+                    if ((*erit)->first == epName) {
+                        irit->explicitRules.erase(erit);
+                        erit = irit->explicitRules.begin();
+                    } else {
+                        erit++;
+                    }
+                }
+                if (irit->explicitRules.empty()) {
+                    implicitRules.erase(irit);
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+    return false;
 }
 
 }

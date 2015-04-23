@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -150,6 +150,12 @@ class Transport {
      * @param unregister - should BusObject be Unregistered from Bus
      */
     void cleanupTransportSuperAgent(bool unregister = false);
+
+    /**
+     * Cleanup the SuperAgent bus listener. Also Unregisteres the BusListener depending on input param
+     * @param unregister - should BusListener be Unregistered from Bus
+     */
+    void cleanupSuperAgentBusListener(bool unregister = false);
 
     /**
      * Cleanup all Sender Transport objects. and Unregister the BusObject

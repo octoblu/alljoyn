@@ -57,10 +57,11 @@ namespace qcc {
 
 const SocketFd INVALID_SOCKET_FD = -1;
 const int MAX_LISTEN_CONNECTIONS = SOMAXCONN;
-const int CONNECT_TIMEOUT = 5;
 
 #if defined(QCC_OS_DARWIN)
+const int CONNECT_TIMEOUT = 5;
 #define MSG_NOSIGNAL 0
+
 static void DisableSigPipe(SocketFd socket)
 {
     int disableSigPipe = 1;
@@ -854,6 +855,58 @@ QStatus SetBlocking(SocketFd sockfd, bool blocking)
     } else {
         return ER_OK;
     }
+}
+
+QStatus SetSndBuf(SocketFd sockfd, size_t bufSize)
+{
+    QStatus status = ER_OK;
+    int arg = bufSize;
+    int r = setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (void*)&arg, sizeof(arg));
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Setting SO_SNDBUF failed: (%d) %s", errno, strerror(errno)));
+    }
+    return status;
+}
+
+QStatus GetSndBuf(SocketFd sockfd, size_t& bufSize)
+{
+    QStatus status = ER_OK;
+    int arg = 0;
+    socklen_t len = sizeof(arg);
+    int r = getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (void*)&arg, &len);
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Getting SO_SNDBUF failed: (%d) %s", errno, strerror(errno)));
+    }
+    bufSize = arg;
+    return status;
+}
+
+QStatus SetRcvBuf(SocketFd sockfd, size_t bufSize)
+{
+    QStatus status = ER_OK;
+    int arg = bufSize;
+    int r = setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (void*)&arg, sizeof(arg));
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Setting SO_RCVBUF failed: (%d) %s", errno, strerror(errno)));
+    }
+    return status;
+}
+
+QStatus GetRcvBuf(SocketFd sockfd, size_t& bufSize)
+{
+    QStatus status = ER_OK;
+    int arg = 0;
+    socklen_t len = sizeof(arg);
+    int r = getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (void*)&arg, &len);
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Getting SO_RCVBUF failed: (%d) %s", errno, strerror(errno)));
+    }
+    bufSize = arg;
+    return status;
 }
 
 QStatus SetLinger(SocketFd sockfd, bool onoff, uint32_t linger)

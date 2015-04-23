@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright AllSeen Alliance. All rights reserved.
+
+     Permission to use, copy, modify, and/or distribute this software for any
+     purpose with or without fee is hereby granted, provided that the above
+     copyright notice and this permission notice appear in all copies.
+
+     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+     WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+     ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+     WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/settings_general" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/settings_clock_key"
+            android:layout="@layout/list_item_setting"
+            android:selectable="true"
+            android:summary="@string/settings_clock_description"
+            android:title="@string/settings_clock_title" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/settings_autherity_key"
+            android:layout="@layout/list_item_setting"
+            android:selectable="true"
+            android:summary="@string/settings_autherity_description"
+            android:title="@string/settings_autherity_title" />
+
+        <Preference
+            android:enabled="true"
+            android:key="@string/settings_time_sync_key"
+            android:layout="@layout/list_item_setting"
+            android:selectable="true"
+            android:title="@string/settings_time_sync_title" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/settings_timers_title" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/settings_timers_factory_key"
+            android:layout="@layout/list_item_setting"
+            android:selectable="true"
+            android:title="@string/settings_timers_factory_title" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:enabled="true"
+            android:key="@string/settings_timers_timer1_key"
+            android:layout="@layout/list_item_setting"
+            android:selectable="true"
+            android:title="@string/settings_timers_timer1_title" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Alarms" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/settings_alarm_factory_key"
+            android:layout="@layout/list_item_setting"
+            android:selectable="true"
+            android:title="@string/settings_alarm_factory_title" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:enabled="true"
+            android:key="@string/settings_alarm_alarm1_key"
+            android:layout="@layout/list_item_setting"
+            android:selectable="true"
+            android:title="@string/settings_alarm_alarm1_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

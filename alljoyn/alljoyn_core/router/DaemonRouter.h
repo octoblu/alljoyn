@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2013, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -102,6 +102,13 @@ class DaemonRouter : public Router {
      */
     qcc::String GenerateUniqueName(void) { return nameTable.GenerateUniqueName(); }
 
+    /**
+     * Return whether this is a unique name of a locally connected endpoint.
+     *
+     * @param uniqueName   Unique name to check.
+     * @return  true if a locally connected endpoint has this unique name.
+     */
+    bool IsValidLocalUniqueName(qcc::String uniqueName) { return nameTable.IsValidLocalUniqueName(uniqueName); }
     /**
      * Add a well-known (alias) bus name.
      *
@@ -318,6 +325,16 @@ class DaemonRouter : public Router {
     }
 
     /**
+     * Update propagation info of names associated with a virtual endpoint.
+     *
+     * @param uniqueName  UniqueName of virtual endpoint whose propagation info is to be updated.
+     */
+    void UpdateVirtualAliases(const qcc::String& uniqueName)
+    {
+        nameTable.UpdateVirtualAliases(uniqueName);
+    }
+
+    /**
      * Add a session route.
      *
      * @param  id          Session Id.
@@ -332,16 +349,6 @@ class DaemonRouter : public Router {
                             RemoteEndpoint& destB2bEp, SessionOpts* optsHint = NULL);
 
     /**
-     * Remove a (single) session route.
-     *
-     * @param  id      Session Id.
-     * @param  srcEp   BusEndpoint of route source.
-     * @param  destEp  BusEndpoint of route destination.
-     * @return  ER_OK if successful.
-     */
-    QStatus RemoveSessionRoute(SessionId id, BusEndpoint& srcEp, BusEndpoint& destEp);
-
-    /**
      * Remove existing session routes.
      * This method removes routes that involve uniqueName as a source or as a destination for a particular session id.
      * When sessionId is 0, all routes that involved uniqueName are removed.
@@ -351,6 +358,14 @@ class DaemonRouter : public Router {
      */
     void RemoveSessionRoutes(const char* uniqueName, SessionId id);
 
+    /**
+     * Remove self-join related session-route.
+     *
+     * @param  uniqueName  Unique name.
+     * @param  id          Session id or 0 to indicate "all sessions".
+     *
+     */
+    void RemoveSelfJoinSessionRoute(const char* src, SessionId id);
     /**
      * Return the routing rule table.
      *
@@ -391,10 +406,51 @@ class DaemonRouter : public Router {
         bool operator==(const SessionCastEntry& other) const {
             return (id == other.id)  && (src == other.src) && (b2bEp == other.b2bEp) && (destEp == other.destEp);
         }
+
+        qcc::String ToString() const {
+            char idbuf[16];
+            char ptrbuf[16];
+            qcc::String str;
+            str.append("id: ");
+            snprintf(idbuf, sizeof(idbuf), "%u", id);
+            str.append(idbuf);
+
+            str.append(",src: ");
+            str.append(src);
+
+            str.append(", remote: ");
+            snprintf(ptrbuf, sizeof(ptrbuf), "%p", b2bEp.unwrap());
+            str.append(ptrbuf);
+            str.append("(");
+            str.append(b2bEp->GetUniqueName());
+            str.append(",");
+            str.append(b2bEp->GetRemoteName());
+            str.append(")");
+
+            str.append(", dest: ");
+            snprintf(ptrbuf, sizeof(ptrbuf), "%p", destEp.unwrap());
+            str.append(ptrbuf);
+            str.append(destEp->GetUniqueName());
+
+            return str;
+        }
     };
 
     std::set<SessionCastEntry> sessionCastSet; /**< Session multicast set */
     qcc::Mutex sessionCastSetLock;             /**< Lock that protects sessionCastSet */
+
+    /* Add a session ref to the virtualendpoint with the specified name
+     * @param  vepName: Name of virtual endpoint to which a ref needs to be added.
+     * @param  id: Id of the session
+     * @param  b2bEp: B2b endpoint of the session
+     */
+    QStatus AddSessionRef(qcc::String vepName, SessionId id, RemoteEndpoint b2bEp);
+
+    /* Remove a session ref to the virtualendpoint with the specified name
+     * @param  vepName: Name of virtual endpoint to which a ref needs to be decremented.
+     * @param  id: Id of the session
+     */
+    void RemoveSessionRef(qcc::String vepName, SessionId id);
 };
 
 }

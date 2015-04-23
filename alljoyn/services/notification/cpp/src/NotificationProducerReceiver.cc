@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +23,9 @@
 #include "NotificationDismisserSender.h"
 #include <alljoyn/notification/LogModule.h>
 #include <qcc/StringUtil.h>
+#ifdef _WIN32
+#include <process.h>
+#endif
 
 using namespace ajn;
 using namespace services;
@@ -47,9 +50,15 @@ NotificationProducerReceiver::NotificationProducerReceiver(ajn::BusAttachment* b
         return;
     }
 
+#ifdef _WIN32
+    InitializeCriticalSection(&m_Lock);
+    InitializeConditionVariable(&m_QueueChanged);
+    m_handle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 256 * 1024, (unsigned int (__stdcall*)(void*))ReceiverThreadWrapper, this, 0, NULL));
+#else
     pthread_mutex_init(&m_Lock, NULL);
     pthread_cond_init(&m_QueueChanged, NULL);
     pthread_create(&m_ReceiverThread, NULL, ReceiverThreadWrapper, this);
+#endif
 }
 
 NotificationProducerReceiver::~NotificationProducerReceiver()
@@ -61,6 +70,18 @@ NotificationProducerReceiver::~NotificationProducerReceiver()
 
 void NotificationProducerReceiver::unregisterHandler(BusAttachment* bus)
 {
+#ifdef _WIN32
+    EnterCriticalSection(&m_Lock);
+    while (!m_MessageQueue.empty()) {
+        m_MessageQueue.pop();
+    }
+    m_IsStopping = true;
+    WakeConditionVariable(&m_QueueChanged);
+    LeaveCriticalSection(&m_Lock);
+    WaitForSingleObject(m_handle, INFINITE);
+    CloseHandle(m_handle);
+    DeleteCriticalSection(&m_Lock);
+#else
     pthread_mutex_lock(&m_Lock);
     while (!m_MessageQueue.empty()) {
         m_MessageQueue.pop();
@@ -69,9 +90,9 @@ void NotificationProducerReceiver::unregisterHandler(BusAttachment* bus)
     pthread_cond_signal(&m_QueueChanged);
     pthread_mutex_unlock(&m_Lock);
     pthread_join(m_ReceiverThread, NULL);
-
     pthread_cond_destroy(&m_QueueChanged);
     pthread_mutex_destroy(&m_Lock);
+#endif
 }
 
 void* NotificationProducerReceiver::ReceiverThreadWrapper(void* context)
@@ -112,6 +133,16 @@ void NotificationProducerReceiver::HandleMethodCall(const ajn::InterfaceDescript
     QCC_DbgPrintf(("msgId:%d", msgId));
 
     MethodReply(msg, args, 0);
+#ifdef _WIN32
+    EnterCriticalSection(&m_Lock);
+    {
+        MsgQueueContent msgQueueContent(msgId);
+        m_MessageQueue.push(msgQueueContent);
+        QCC_DbgPrintf(("HandleMethodCall() - message pushed"));
+    }
+    WakeConditionVariable(&m_QueueChanged);
+    LeaveCriticalSection(&m_Lock);
+#else
     pthread_mutex_lock(&m_Lock);
     {
         MsgQueueContent msgQueueContent(msgId);
@@ -120,6 +151,7 @@ void NotificationProducerReceiver::HandleMethodCall(const ajn::InterfaceDescript
     }
     pthread_cond_signal(&m_QueueChanged);
     pthread_mutex_unlock(&m_Lock);
+#endif
 
 exit:
     if (status != ER_OK) {
@@ -130,6 +162,28 @@ exit:
 
 void NotificationProducerReceiver::Receiver()
 {
+#ifdef _WIN32
+    EnterCriticalSection(&m_Lock);
+    while (!m_IsStopping) {
+        while (!m_MessageQueue.empty()) {
+            MsgQueueContent message = m_MessageQueue.front();
+            m_MessageQueue.pop();
+            QCC_DbgPrintf(("NotificationProducerReceiver::ReceiverThread() - got a message."));
+            LeaveCriticalSection(&m_Lock);
+            Transport::getInstance()->deleteMsg(message.m_MsgId);
+            sendDismissSignal(message.m_MsgId);
+            EnterCriticalSection(&m_Lock);
+        }
+
+        // it's possible m_IsStopping changed while executing OnTask() (which is done unlocked)
+        //  therefore we have to check it again here, otherwise we potentially deadlock here
+        if (!m_IsStopping) {
+            //pthread_testcancel(); //for win only?
+            SleepConditionVariableCS(&m_QueueChanged, &m_Lock, INFINITE);
+        }
+    }
+    LeaveCriticalSection(&m_Lock);
+#else
     pthread_mutex_lock(&m_Lock);
     while (!m_IsStopping) {
         while (!m_MessageQueue.empty()) {
@@ -141,13 +195,15 @@ void NotificationProducerReceiver::Receiver()
             sendDismissSignal(message.m_MsgId);
             pthread_mutex_lock(&m_Lock);
         }
-        /* it's possible m_IsStopping changed while executing OnTask() (which is done unlocked)
-         * therefore we have to check it again here, otherwise we potentially deadlock here */
+
+        // it's possible m_IsStopping changed while executing OnTask() (which is done unlocked)
+        //  therefore we have to check it again here, otherwise we potentially deadlock here
         if (!m_IsStopping) {
             pthread_cond_wait(&m_QueueChanged, &m_Lock);
         }
     }
     pthread_mutex_unlock(&m_Lock);
+#endif
 }
 
 QStatus NotificationProducerReceiver::sendDismissSignal(int32_t msgId)

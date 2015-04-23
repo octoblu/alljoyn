@@ -6,7 +6,7 @@
  * Note: This file is generated during the make process.
  */
 /******************************************************************************
- * Copyright (c) 2009-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -22,13 +22,33 @@
  ******************************************************************************/ 
 #ifndef _STATUS_H
 #define _STATUS_H
+/**
+ * This @#define allows for setting of visibility support on relevant platforms
+ */
+#ifndef AJ_API
+#  if defined(QCC_OS_GROUP_POSIX)
+#    define AJ_API __attribute__((visibility("default")))
+#  else
+#    define AJ_API
+#  endif
+#endif
 
-#ifndef ALLJOYN_DLLExport /* Used for extern C functions. Add __declspec(dllexport) when using MSVC */
-#  if defined(_MSC_VER) /* MSVC compiler*/
-#    define ALLJOYN_DLLExport __declspec(dllexport)
-#  else /* compiler other than MSVC */
-#    define ALLJOYN_DLLExport
-#  endif /* Compiler type */
+/** This @#define allows for calling convention redefinition on relevant platforms */
+#ifndef AJ_CALL
+#  if defined(QCC_OS_GROUP_WINDOWS)
+#    define AJ_CALL __stdcall
+#  else
+#    define AJ_CALL
+#  endif
+#endif
+
+/** This @#define allows for calling convention redefinition on relevant platforms */
+#ifndef CDECL_CALL
+#  if defined(QCC_OS_GROUP_WINDOWS)
+#    define CDECL_CALL __cdecl
+#  else
+#    define CDECL_CALL
+#  endif
 #endif
 
 #ifdef __cplusplus
@@ -69,6 +89,8 @@ typedef enum {
     ER_CONN_REFUSED = 0x1B /**< Connection was refused because no one is listening */,
     ER_BAD_ARG_COUNT = 0x1C /**< Incorrect number of arguments given to function call */,
     ER_WARNING = 0x1D /**< Generic warning */,
+    ER_EOF = 0x1E /**< End of file */,
+    ER_DEADLOCK = 0x1F /**< Operation would cause deadlock */,
     ER_COMMON_ERRORS = 0x1000 /**< Error code block for the Common subsystem. */,
     ER_STOPPING_THREAD = 0x1001 /**< Operation interrupted by ERThread stop signal. */,
     ER_ALERTED_THREAD = 0x1002 /**< Operation interrupted by ERThread alert signal. */,
@@ -168,7 +190,6 @@ typedef enum {
     ER_BUS_REPLY_IS_ERROR_MESSAGE = 0x9032 /**< Response from a method call was an ERROR message */,
     ER_BUS_NOT_AUTHENTICATING = 0x9033 /**< Not in an authentication conversation */,
     ER_BUS_NO_LISTENER = 0x9034 /**< A listener is required to implement the requested function */,
-    ER_BUS_BT_TRANSPORT_ERROR = 0x9035 /**< The Bluetooth transport reported an error */,
     ER_BUS_NOT_ALLOWED = 0x9036 /**< The operation attempted is not allowed */,
     ER_BUS_WRITE_QUEUE_FULL = 0x9037 /**< Write failed because write queue is full */,
     ER_BUS_ENDPOINT_CLOSING = 0x9038 /**< Operation not permitted on endpoint in process of closing */,
@@ -221,7 +242,6 @@ typedef enum {
     ER_BUS_NO_SUCH_HANDLE = 0x906b /**< Handle is not in the handle table */,
     ER_BUS_HANDLES_NOT_ENABLED = 0x906c /**< Passing of handles is not enabled for this connection */,
     ER_BUS_HANDLES_MISMATCH = 0x906d /**< Message had more handles than expected */,
-    ER_BT_MAX_CONNECTIONS_USED = 0x906e /**< Maximum Bluetooth connections already in use */,
     ER_BUS_NO_SESSION = 0x906f /**< Session id is not valid */,
     ER_BUS_ELEMENT_NOT_FOUND = 0x9070 /**< Dictionary element was not found */,
     ER_BUS_NOT_A_DICTIONARY = 0x9071 /**< MsgArg was not an array of dictionary elements */,
@@ -246,9 +266,11 @@ typedef enum {
     ER_ALLJOYN_JOINSESSION_REPLY_FAILED = 0x9088 /**< JoinSession reply: Failed for unknown reason */,
     ER_ALLJOYN_LEAVESESSION_REPLY_NO_SESSION = 0x908a /**< LeaveSession reply: Session with given name does not exist */,
     ER_ALLJOYN_LEAVESESSION_REPLY_FAILED = 0x908b /**< LeaveSession reply: Failed for unspecified reason */,
+    ER_ALLJOYN_ADVERTISENAME_REPLY_TRANSPORT_NOT_AVAILABLE = 0x908c /**< AdvertiseName reply: The specified transport is unavailable for advertising */,
     ER_ALLJOYN_ADVERTISENAME_REPLY_ALREADY_ADVERTISING = 0x908d /**< AdvertiseName reply: This endpoint is already advertising this name */,
     ER_ALLJOYN_ADVERTISENAME_REPLY_FAILED = 0x908e /**< AdvertiseName reply: Advertise failed */,
     ER_ALLJOYN_CANCELADVERTISENAME_REPLY_FAILED = 0x9090 /**< CancelAdvertiseName reply: Advertise failed */,
+    ER_ALLJOYN_FINDADVERTISEDNAME_REPLY_TRANSPORT_NOT_AVAILABLE = 0x9091 /**< FindAdvertisedName reply: The specified transport is unavailable for discovery */,
     ER_ALLJOYN_FINDADVERTISEDNAME_REPLY_ALREADY_DISCOVERING = 0x9092 /**< FindAdvertisedName reply: This endpoint is already discovering this name */,
     ER_ALLJOYN_FINDADVERTISEDNAME_REPLY_FAILED = 0x9093 /**< FindAdvertisedName reply: Failed */,
     ER_ALLJOYN_CANCELFINDADVERTISEDNAME_REPLY_FAILED = 0x9095 /**< CancelFindAdvertisedName reply: Failed */,
@@ -265,7 +287,7 @@ typedef enum {
     ER_ALLJOYN_SETLINKTIMEOUT_REPLY_NOT_SUPPORTED = 0x90a0 /**< Local router does not support SetLinkTimeout */,
     ER_ALLJOYN_SETLINKTIMEOUT_REPLY_NO_DEST_SUPPORT = 0x90a1 /**< SetLinkTimeout not supported by destination */,
     ER_ALLJOYN_SETLINKTIMEOUT_REPLY_FAILED = 0x90a2 /**< SetLinkTimeout failed */,
-    ER_ALLJOYN_ACCESS_PERMISSION_WARNING = 0x90a3 /**< No permission to use Wifi/Bluetooth */,
+    ER_ALLJOYN_ACCESS_PERMISSION_WARNING = 0x90a3 /**< No permission to use Wifi */,
     ER_ALLJOYN_ACCESS_PERMISSION_ERROR = 0x90a4 /**< No permission to access peer service */,
     ER_BUS_DESTINATION_NOT_AUTHENTICATED = 0x90a5 /**< Cannot send a signal to a destination that is not authenticated */,
     ER_BUS_ENDPOINT_REDIRECTED = 0x90a6 /**< Endpoint was redirected to another address */,
@@ -329,7 +351,7 @@ typedef enum {
     ER_UDP_NO_NETWORK = 0x90fb /**< Not listening on network implied by IP address */,
     ER_UDP_UNEXPECTED_LENGTH = 0x90fc /**< Request for more bytes than are in the underlying datagram */,
     ER_UDP_UNEXPECTED_FLOW = 0x90fd /**< The data flow type of the endpoint has an unexpected value */,
-    ER_UDP_DISCONNECT = 0x90fe /**< Authentication aborted due to unexpected disconnect */,
+    ER_UDP_DISCONNECT = 0x90fe /**< Unexpected disconnect occurred */,
     ER_UDP_NOT_IMPLEMENTED = 0x90ff /**< Feature not implemented for the UDP transport */,
     ER_UDP_NO_LISTENER = 0x9100 /**< Discovery started with no listener to receive callbacks */,
     ER_UDP_STOPPING = 0x9101 /**< Attempt to use UDP when transport stopping */,
@@ -356,7 +378,25 @@ typedef enum {
     ER_ALLJOYN_PING_REPLY_UNKNOWN_NAME = 0x9116 /**< Name not found currently or part of any known session */,
     ER_ALLJOYN_PING_REPLY_FAILED = 0x9117 /**< Generic Ping call error */,
     ER_TCP_MAX_UNTRUSTED = 0x9118 /**< The maximum configured number of Thin Library connections has been reached */,
-    ER_ALLJOYN_PING_REPLY_IN_PROGRESS = 0x9119 /**< A ping request for same name is already in progress */
+    ER_ALLJOYN_PING_REPLY_IN_PROGRESS = 0x9119 /**< A ping request for same name is already in progress */,
+    ER_LANGUAGE_NOT_SUPPORTED = 0x911a /**< The language requested is not supported */,
+    ER_ABOUT_FIELD_ALREADY_SPECIFIED = 0x911b /**< A field using the same name is already specified. */,
+    ER_UDP_NOT_DISCONNECTED = 0x911c /**< A UDP stream was found to be connected during teardown */,
+    ER_UDP_ENDPOINT_NOT_STARTED = 0x911d /**< Attempt to send on a UDP endpoint that is not started */,
+    ER_UDP_ENDPOINT_REMOVED = 0x911e /**< Attempt to send on a UDP endpoint that has been removed */,
+    ER_ARDP_VERSION_NOT_SUPPORTED = 0x911f /**< Specified version of ARDP Protocol is not supported */,
+    ER_CONNECTION_LIMIT_EXCEEDED = 0x9120 /**< Connection rejected due to configured connection limits */,
+    ER_ARDP_WRITE_BLOCKED = 0x9121 /**< ARDP cannot write to UDP socket (queue is full) */,
+    ER_PERMISSION_DENIED = 0x9122 /**< Permission denied */,
+    ER_ABOUT_DEFAULT_LANGUAGE_NOT_SPECIFIED = 0x9123 /**< Default language must be specified before setting a localized field */,
+    ER_ABOUT_SESSIONPORT_NOT_BOUND = 0x9124 /**< Unable to announce session port that is not bound to the BusAttachment */,
+    ER_ABOUT_ABOUTDATA_MISSING_REQUIRED_FIELD = 0x9125 /**< The AboutData is missing a required field. */,
+    ER_ABOUT_INVALID_ABOUTDATA_LISTENER = 0x9126 /**< The AboutDataListener returns invalid data. Most likely cause: the announced data does not match with non-announced data. */,
+    ER_BUS_PING_GROUP_NOT_FOUND = 0x9127 /**< Ping group did not exist */,
+    ER_BUS_REMOVED_BY_BINDER_SELF = 0x9128 /**< The self-joined session member was removed by the binder */,
+    ER_INVALID_CONFIG = 0x9129 /**< Invalid configuration item or combination of items detected */,
+    ER_ABOUT_INVALID_ABOUTDATA_FIELD_VALUE = 0x912a /**< General error indicating the value given for an About Data field is invalid. */,
+    ER_ABOUT_INVALID_ABOUTDATA_FIELD_APPID_SIZE = 0x912b /**< Error indicating the AppId field is not a 128-bit bite array. */
 } QStatus;
 
 /**
@@ -368,7 +408,7 @@ typedef enum {
  *
  * @return  C string representation of the status code.
  */
-extern ALLJOYN_DLLExport const char* QCC_StatusText(QStatus status);
+extern AJ_API const char* AJ_CALL QCC_StatusText(QStatus status);
 
 #ifdef __cplusplus
 }   /* extern "C" */

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Copyright AllSeen Alliance. All rights reserved.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/about_config_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/scan_wifi"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="scan_wifi"
+            android:text="@string/scan_wifi" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/get_all_networks"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:contentDescription="get_all_networks"
+            android:text="@string/get_all_networks" />
+
+        <Button
+            android:id="@+id/get_candidate_target_networks"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.9"
+            android:contentDescription="get_candidate_target_networks"
+            android:text="@string/get_candidate_target_networks" />
+
+        <Button
+            android:id="@+id/get_onboardable_devices"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.9"
+            android:contentDescription="get_onboardable_devices"
+            android:text="@string/get_onboardable_devices" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/connect_to_network"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="connect_to_network"
+            android:text="@string/connect_to_network" />
+
+        <Button
+            android:id="@+id/get_current_network"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="get_current_network"
+            android:text="@string/get_current_network" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/run_onboarding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="run_onboarding"
+            android:text="@string/run_onboarding" />
+
+        <Button
+            android:id="@+id/run_offboarding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="run_offboarding"
+            android:text="@string/get_onboarded_devices" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/abort_onboarding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="abort_onboarding"
+        android:text="@string/abort_onboarding" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="10dp"
+        android:background="@android:color/darker_gray" />
+
+    <ListView
+        android:id="@+id/main_log_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="3dp"
+        android:padding="6dp"
+        android:stackFromBottom="true"
+        android:contentDescription="main_log_list"
+        android:transcriptMode="alwaysScroll" />
+
+</LinearLayout>

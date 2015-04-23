@@ -185,8 +185,8 @@ namespace ajn {
  *      0                   1                   2                   3
  *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *     |R U R U C G| M |     Count     |         TransportMask         |
- *     |4 4 6 6    |   |               |                               |
+ *     |U R U R C G| M |     Count     |         TransportMask         |
+ *     |6 6 4 4    |   |               |                               |
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *     |         R4 IPv4Address present if 'R4' bit is set             |
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -202,10 +202,10 @@ namespace ajn {
  *     |  R6 Port if 'R6' bit is set   |                               |
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               |
  *     |                                                               |
- *     |         R6 IPv6Address present if 'R6' bit is set             |
+ *     |         U6 IPv6Address present if 'U6' bit is set             |
  *     |                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *     |                               |                               |
- *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               |
+ *     |                               | U6 Port if 'U6' bit is set    |
+ *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *     |                                                               |
  *     ~       Daemon GUID StringData present if 'G' bit is set        ~
  *     |                                                               |
@@ -306,11 +306,12 @@ namespace ajn {
  *      0                   1                   2                   3
  *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *     |    Version    |    QCount     |    ACount     |     Timer     |
+ *     | SVer  | MVer  |    QCount     |    ACount     |     Timer     |
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  * @endverbatim
  *
- * @li @c Version The version of the protocol.
+ * @li @c SVer The version (0...15) of the sender's latest implemented protocol.
+ * @li @c MVer The version (0...15) of the actual message.
  * @li @c QCount The number of question messages that follow the header.
  * @li @c ACount The number of question messages that follow the question
  *     messages.
@@ -340,7 +341,7 @@ namespace ajn {
  *      0                   1                   2                   3
  *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *     | Version = 0   |  Q Count = 1  |  A Count = 1  | Timer = 255   |   (A)
+ *     |SVer= 1|MVer= 1|  Q Count = 1  |  A Count = 1  | Timer = 255   |   (A)
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *     |   WHO-HAS     |   Count = 1   |   Count = 13  |     'o'       |   (B) (C)
  *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               |
@@ -365,9 +366,9 @@ namespace ajn {
  * @endverbatim
  *
  * The notation (A) indicates the name service header.  This header tells
- * us that the version is one, there is one question and one answer
- * message following, and that the timeout value of any answer messages
- * present in this message is set to be 255 (infinite).
+ * us the Sender and message versions are one, there is one question and
+ * one answer message following, and that the timeout value of any answer
+ * messages present in this message is set to be 255 (infinite).
  *
  * The (B) section shows one question, which is a WHO-HAS message.  The
  * flags present in the WHO-HAS message are not shown here. What follows
@@ -614,8 +615,8 @@ class IsAt : public ProtocolElement {
      * It is up to higher levels to understand the contextual implications, if any,
      * of writing or reading down-version packets.
      *
-     * @param nsVersion The version  (0 .. 16) of the sender's latest implemented protocol.
-     * @param msgVersion The version  (0 .. 16) of the actual message.
+     * @param nsVersion The version  (0 .. 15) of the sender's latest implemented protocol.
+     * @param msgVersion The version  (0 .. 15) of the actual message.
      */
     void SetVersion(uint32_t nsVersion, uint32_t msgVersion) { m_version = nsVersion << 4 | msgVersion; }
 
@@ -623,8 +624,8 @@ class IsAt : public ProtocolElement {
      * @internal
      * @brief Get the wire protocol version that the object will use.
      *
-     * @param nsVersion Gets the version  (0 .. 16) of the sender's latest implemented protocol.
-     * @param msgVersion Gets the version  (0 .. 16) of the actual message.
+     * @param nsVersion Gets the version  (0 .. 15) of the sender's latest implemented protocol.
+     * @param msgVersion Gets the version  (0 .. 15) of the actual message.
      *
      * @see SetVersion()
      */
@@ -1348,8 +1349,8 @@ class WhoHas : public ProtocolElement {
      * It is up to higher levels to understand the contextual implications, if any,
      * of writing or reading down-version packets.
      *
-     * @param nsVersion The version  (0 .. 16) of the sender's latest implemented protocol.
-     * @param msgVersion The version  (0 .. 16) of the actual message.
+     * @param nsVersion The version  (0 .. 15) of the sender's latest implemented protocol.
+     * @param msgVersion The version  (0 .. 15) of the actual message.
      */
     void SetVersion(uint32_t nsVersion, uint32_t msgVersion) { m_version = nsVersion << 4 | msgVersion; }
 
@@ -1357,8 +1358,8 @@ class WhoHas : public ProtocolElement {
      * @internal
      * @brief Get the wire protocol version that the object will use.
      *
-     * @param nsVersion Gets the version  (0 .. 16) of the sender's latest implemented protocol.
-     * @param msgVersion Gets the version  (0 .. 16) of the actual message.
+     * @param nsVersion Gets the version  (0 .. 15) of the sender's latest implemented protocol.
+     * @param msgVersion Gets the version  (0 .. 15) of the actual message.
      *
      * @see SetVersion()
      */
@@ -1755,16 +1756,16 @@ class _Packet : public ProtocolElement {
      * It is up to higher levels to understand the contextual implications, if any,
      * of writing or reading down-version packets.
      *
-     * @param nsVersion The version  (0 .. 16) of the sender's latest implemented protocol.
-     * @param msgVersion The version  (0 .. 16) of the actual message.
+     * @param nsVersion The version  (0 .. 15) of the sender's latest implemented protocol.
+     * @param msgVersion The version  (0 .. 15) of the actual message.
      */
     void SetVersion(uint32_t nsVersion, uint32_t msgVersion) { m_version = nsVersion << 4 | msgVersion; }
     /**
      * @internal
      * @brief Get the wire protocol version that the object will use.
      *
-     * @param nsVersion Gets the version  (0 .. 16) of the sender's latest implemented protocol.
-     * @param msgVersion Gets the version  (0 .. 16) of the actual message.
+     * @param nsVersion Gets the version  (0 .. 15) of the sender's latest implemented protocol.
+     * @param msgVersion Gets the version  (0 .. 15) of the actual message.
      *
      * @see SetVersion()
      */
@@ -2242,23 +2243,17 @@ class MDNSTextRData : public MDNSRData {
      * @brief Add/Set a key value pair.
      * @param key	The key to set.
      * @param value	The value to set.
+     * @param shared	Is this a shared key for the entire record.
      */
-    void SetValue(qcc::String key, qcc::String value);
-
-    /**
-     * @internal
-     * @brief Add/Set a key value pair.
-     * @param key	The key to set.
-     * @param value	The value to set.
-     */
-    void SetValue(qcc::String key, uint16_t value);
+    void SetValue(qcc::String key, qcc::String value, bool shared = false);
 
     /**
      * @internal
      * @brief Add/Set a key pair.
      * @param key	The key to set.
+     * @param shared	Is this a shared key for the entire record.
      */
-    void SetValue(qcc::String key);
+    void SetValue(qcc::String key, bool shared = false);
 
     /**
      * @internal
@@ -2267,6 +2262,14 @@ class MDNSTextRData : public MDNSRData {
      * @return The value in the map corresponding to the key.
      */
     qcc::String GetValue(qcc::String key);
+
+    /**
+     * @internal
+     * @brief Is this key present in the map.
+     * @param key	The key to search.
+     * @return true if key is present in the map.
+     */
+    bool HasKey(qcc::String key);
 
     /**
      * @internal
@@ -2895,6 +2898,15 @@ class MDNSSearchRData : public MDNSTextRData {
      * @return The name at the desired index in this Search RData.
      */
     qcc::String GetNameAt(int index) { return MDNSTextRData::GetFieldAt("n", index); }
+
+    /**
+     * @internal
+     * @brief Get the send_match_only option specified in the Search RData.
+     *
+     * @return true if only matching names need to be sent.
+     *         false if all names need to be sent.
+     */
+    bool SendMatchOnly();
 
     /**
      * @internal
@@ -3975,6 +3987,8 @@ class _MDNSPacket : public _Packet {
     void RemoveAdditionalRecord(qcc::String str, MDNSResourceRecord::RRType type);
 
     void RemoveAnswer(qcc::String str, MDNSResourceRecord::RRType type);
+
+    void RemoveQuestion(qcc::String str);
 
     /**
      * @internal

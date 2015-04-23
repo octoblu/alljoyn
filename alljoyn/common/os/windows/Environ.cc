@@ -32,6 +32,7 @@
 #include <qcc/String.h>
 #include <qcc/StringUtil.h>
 #include <qcc/Logger.h>
+#include <qcc/CommonGlobals.h>
 
 #include <Status.h>
 
@@ -43,11 +44,7 @@ namespace qcc {
 
 Environ* Environ::GetAppEnviron(void)
 {
-    static Environ* env = NULL;      // Environment variable singleton.
-    if (env == NULL) {
-        env = new Environ();
-    }
-    return env;
+    return &commonGlobals.environSingleton;
 }
 
 qcc::String Environ::Find(const qcc::String& key, const char* defaultValue)
@@ -79,8 +76,8 @@ void Environ::Preload(const char* keyPrefix)
 {
     size_t prefixLen = strlen(keyPrefix);
     lock.Lock();
-    LPTCH env = GetEnvironmentStrings();
-    LPTSTR var = env ? reinterpret_cast<LPTSTR>(env) + 1 : NULL;
+    LPWCH env = GetEnvironmentStringsW();
+    LPWSTR var = env ? reinterpret_cast<LPWSTR>(env) + 1 : NULL;
     if (var == NULL) {
         Log(LOG_ERR, "Environ::Preload unable to read Environment Strings");
         lock.Unlock();
@@ -106,7 +103,7 @@ void Environ::Preload(const char* keyPrefix)
         var += len + 1;
     }
     if (env) {
-        FreeEnvironmentStrings(env);
+        FreeEnvironmentStringsW(env);
     }
     lock.Unlock();
 }
@@ -137,7 +134,7 @@ QStatus Environ::Parse(Source& source)
         }
     }
     lock.Unlock();
-    return (ER_NONE == status) ? ER_OK : status;
+    return (ER_EOF == status) ? ER_OK : status;
 }
 
 }   /* namespace */

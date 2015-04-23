@@ -7,7 +7,7 @@
 /******************************************************************************
  *
  *
- * Copyright (c) 2009-2012,2014 AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2012, 2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -32,6 +32,7 @@
 #include <stdarg.h>
 
 #include <qcc/Debug.h>
+#include <qcc/Logger.h>
 #include <qcc/Environ.h>
 #include <qcc/Mutex.h>
 #include <qcc/String.h>
@@ -53,7 +54,7 @@ class DebugControl;
 static qcc::Mutex* stdoutLock = NULL;
 static DebugControl* dbgControl = NULL;
 static int dbgControlCounter = 0;
-
+static bool dbgUseEpoch = false;
 
 int QCC_SyncPrintf(const char* fmt, ...)
 {
@@ -63,6 +64,7 @@ int QCC_SyncPrintf(const char* fmt, ...)
     va_start(ap, fmt);
     if (ER_OK == stdoutLock->Lock()) {
         ret = vprintf(fmt, ap);
+        fflush(stdout);
         stdoutLock->Unlock();
     }
     va_end(ap);
@@ -70,6 +72,19 @@ int QCC_SyncPrintf(const char* fmt, ...)
     return ret;
 }
 
+static void Output(DbgMsgType type, const char* module, const char* msg, void* context)
+{
+    const static int priorityMap[] = {
+        LOG_ERR,        // Local error messages
+        LOG_WARNING,    // Remote error messages
+        LOG_NOTICE,     // High level debug messages
+        LOG_INFO,       // Normal debug messages
+        LOG_DEBUG,      // API trace messages
+        LOG_DEBUG,      // Remote data messages
+        LOG_DEBUG       // Local data messages
+    };
+    Log(priorityMap[type], "%s", msg);
+}
 
 static void WriteMsg(DbgMsgType type, const char* module, const char* msg, void* context)
 {
@@ -86,7 +101,7 @@ static void WriteMsg(DbgMsgType type, const char* module, const char* msg, void*
 class DebugControl {
   public:
 
-    DebugControl(void) : cb(WriteMsg), context(stderr), allLevel(0), printThread(true)
+    DebugControl(void) : cb(Output), context(stderr), allLevel(0), printThread(true)
     {
         Init();
     }
@@ -130,6 +145,9 @@ class DebugControl {
 
         for (iter = env->Begin(); iter != env->End(); ++iter) {
             qcc::String var(iter->first);
+            if (var.compare("ER_DEBUG_EPOCH") == 0) {
+                dbgUseEpoch = true;
+            }
             if (var.compare("ER_DEBUG_THREADNAME") == 0) {
                 printThread = ((iter->second.compare("0") != 0) &&
                                (iter->second.compare("off") != 0) &&
@@ -247,22 +265,34 @@ static const char* Type2Str(DbgMsgType type)
 }
 
 
-static void GenPrefix(qcc::String& oss, DbgMsgType type, const char* module, const char* filename, int lineno, bool printThread)
+static void GenPrefix(qcc::String& oss, DbgMsgType type, const char* module, const char* filename, int lineno, bool printThread, bool useEpoch)
 {
-    uint32_t timestamp = GetTimestamp();
     static const size_t timeTypeWidth = 18;
     static const size_t moduleWidth = 12;
     static const size_t threadWidth = 18;
     static const size_t bonusWidth = 8;
     static const size_t fileLineWidth = 32;
     size_t colStop = timeTypeWidth;
+    qcc::String logTimeSecond;
+    qcc::String logTimeMS;
 
-    oss.reserve(timeTypeWidth + moduleWidth + threadWidth + fileLineWidth + oss.capacity());
+    if (useEpoch) {
+        colStop = 24;
+        uint64_t timestamp = GetEpochTimestamp();
+        logTimeSecond = U64ToString(timestamp / 1000, 10, 10, ' ');
+        logTimeMS = U64ToString(timestamp % 1000, 10, 3, '0');
+    } else {
+        uint32_t timestamp = GetTimestamp();
+        logTimeSecond = U32ToString((timestamp / 1000) % 10000, 10, 4, ' ');
+        logTimeMS = U32ToString(timestamp % 1000, 10, 3, '0');
+    }
+
+    oss.reserve(colStop + moduleWidth + threadWidth + fileLineWidth + oss.capacity());
 
     // Timestamp - col 0
-    oss.append(U32ToString((timestamp / 1000) % 10000, 10, 4, ' '));
+    oss.append(logTimeSecond);
     oss.push_back('.');
-    oss.append(U32ToString(timestamp % 1000, 10, 3, '0'));
+    oss.append(logTimeMS);
     oss.push_back(' ');
 
     // Output type - col 9
@@ -339,7 +369,7 @@ void DebugContext::Process(DbgMsgType type, const char* module, const char* file
 
     oss.reserve(sizeof(msg));
 
-    GenPrefix(oss, type, module, filename, lineno, dbgControl->PrintThread());
+    GenPrefix(oss, type, module, filename, lineno, dbgControl->PrintThread(), dbgUseEpoch);
 
     if (msg != NULL) {
         oss.append(msg);
@@ -356,7 +386,14 @@ void DebugContext::Vprintf(const char* fmt, va_list ap)
 
     if (ER_OK == stdoutLock->Lock()) {
         if (msgLen < sizeof(msg)) {
+
+// vsnprintf has been deprecated in the Windows API. Switching Windows to the _s version but
+// leaving other platforms with the standard version of the API until compatibility can be confirmed
+#if defined(QCC_OS_GROUP_WINDOWS)
+            mlen = _vsnprintf_s(msg + msgLen, sizeof(msg) - msgLen, _TRUNCATE, fmt, ap);
+#else
             mlen = vsnprintf(msg + msgLen, sizeof(msg) - msgLen, fmt, ap);
+#endif
 
             if (mlen > 0) {
                 msgLen += mlen;
@@ -439,7 +476,7 @@ void _QCC_DbgDumpHex(DbgMsgType type, const char* module, const char* filename, 
 
             oss.reserve(strlen(dataStr) + 8 + dataLen * 4 + (((dataLen + 15) / 16) * (40 + strlen(module))));
 
-            GenPrefix(oss, type, module, filename, lineno, dbgControl->PrintThread());
+            GenPrefix(oss, type, module, filename, lineno, dbgControl->PrintThread(), dbgUseEpoch);
 
             oss.append(dataStr);
             oss.push_back('[');
@@ -528,7 +565,7 @@ void QCC_UseOSLogging(bool useOSLog)
     void* context = stderr;
     QCC_DbgMsgCallback cb = QCC_GetOSLogger(useOSLog);
     if (!cb) {
-        cb = WriteMsg;
+        cb = Output;
     }
     QCC_RegisterOutputCallback(cb, context);
 }

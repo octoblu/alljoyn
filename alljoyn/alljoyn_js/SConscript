@@ -1,4 +1,4 @@
-# Copyright (c) 2010 - 2014, AllSeen Alliance. All rights reserved.
+# Copyright AllSeen Alliance. All rights reserved.
 #
 #    Permission to use, copy, modify, and/or distribute this software for any
 #    purpose with or without fee is hereby granted, provided that the above
@@ -29,6 +29,8 @@ jsenv = env.Clone()
 if jsenv['BR'] == 'on':
     # Build JS with bundled daemon support
     jsenv.Prepend(LIBS = [jsenv['brobj'], jsenv['ajrlib']])
+
+jsenv['OBJDIR_ALLJOYN_JS'] = env['OBJDIR'] + '/alljoyn_js'
 
 vars = Variables()
 vars.Add(PathVariable('CORDOVA_BASE', 'Base directory of Cordova (aka PhoneGap)', os.environ.get('CORDOVA_BASE')))
@@ -74,13 +76,13 @@ if jsenv['OS_CONF'] == 'windows':
 jsenv['JS_DISTDIR'] = jsenv['DISTDIR'] + '/js'
 
 # Add support for mulitiple build targets in the same workset
-jsenv.VariantDir('$OBJDIR/jni', 'jni', duplicate = 0)
+jsenv.VariantDir('$OBJDIR_ALLJOYN_JS/jni', 'jni', duplicate = 0)
 
 # AllJoyn JavaScript status codes
 JavaScriptStatus('jni/Status.xml', 'jni/BusErrorInterface.cc')
 
 # AllJoyn plugin library
-libs = jsenv.SConscript('$OBJDIR/jni/SConscript', exports = {'env': jsenv})
+libs = jsenv.SConscript('$OBJDIR_ALLJOYN_JS/jni/SConscript', exports = {'env': jsenv})
 if '' != jsenv.subst('$GECKO_BASE'):
     jsenv.Install('$JS_DISTDIR/lib', libs)
 else:
@@ -117,7 +119,7 @@ if 'WIDLPROC' in jsenv:
     print("* Documentation generated using widlproc has been DEPRECATED      *")
     print("* please switch to JsDoc3                                         *")
     print("*******************************************************************")
-    footer = '"<hr/><p class=\\"copyright\\"></p><small>AllJoyn&trade; JavaScript API Reference Manual Version 14.06.00 ' + time.strftime('%a %B %d %H:%M:%S %Z %Y') + '<br/>Copyright &copy; 2011-2014 AllSeen Alliance.<br/><p>AllJoyn is a trademark of Qualcomm Innovation Center, Inc. AllJoyn is used here with permission to identify unmodified materials originating in the AllJoyn project.<br/>The AllJoyn open source project is hosted by the AllSeen Alliance.</p><b>THIS DOCUMENT AND ALL INFORMATION CONTAIN HEREIN ARE PROVIDED ON AN \\"AS-IS\\" BASIS WITHOUT WARRANTY OF ANY KIND</b>.<br/><b>MAY CONTAIN U.S. AND INTERNATIONAL EXPORT CONTROLLED INFORMATION</b><br/></small>"'
+    footer = '"<hr/><p class=\\"copyright\\"></p><small>AllJoyn&trade; JavaScript API Reference Manual Version 14.12.00b ' + time.strftime('%a %B %d %H:%M:%S %Z %Y') + '<br/>Copyright AllSeen Alliance, Inc.<br/><p>AllSeen, AllSeen Alliance, and AllJoyn are trademarks of the AllSeen Alliance, Inc in the United States and other jurisdictions.<br/></p><b>THIS DOCUMENT AND ALL INFORMATION CONTAIN HEREIN ARE PROVIDED ON AN \\"AS-IS\\" BASIS WITHOUT WARRANTY OF ANY KIND</b>.<br/><b>MAY CONTAIN U.S. AND INTERNATIONAL EXPORT CONTROLLED INFORMATION</b><br/></small>"'
     Widl('docs/alljoyn.widl.in', 'jni/Status.xml', 'docs/alljoyn.widl')
     # The target directory 'docs/tmp' is never built this will cause the command to run every time WIDLPROC=foo is set
     Command('docs/tmp', 'docs/alljoyn.widl', [

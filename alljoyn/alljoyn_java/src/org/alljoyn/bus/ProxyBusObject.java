@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -16,18 +16,16 @@
 
 package org.alljoyn.bus;
 
-import org.alljoyn.bus.annotation.BusProperty;
-import org.alljoyn.bus.annotation.BusSignalHandler;
-import org.alljoyn.bus.annotation.Secure;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.alljoyn.bus.annotation.BusProperty;
 
 /**
  * A bus object that exists and is managed by some other connection to
@@ -69,7 +67,7 @@ public class ProxyBusObject {
      * @param busInterfaces  A list of BusInterfaces that this proxy should respond to.
      */
     protected ProxyBusObject(BusAttachment busAttachment, String busName, String objPath, int sessionId,
-                             Class[] busInterfaces) {
+                             Class<?>[] busInterfaces) {
         this(busAttachment, busName, objPath, sessionId, busInterfaces, false);
     }
 
@@ -84,7 +82,7 @@ public class ProxyBusObject {
      * @param secure         the security mode for the remote object
      */
     protected ProxyBusObject(BusAttachment busAttachment, String busName, String objPath, int sessionId,
-                             Class[] busInterfaces, boolean secure) {
+                             Class<?>[] busInterfaces, boolean secure) {
         this.bus = busAttachment;
         this.busName = busName;
         this.objPath = objPath;
@@ -108,7 +106,7 @@ public class ProxyBusObject {
     private synchronized native void destroy();
 
     /** Called by native code to lazily add an interface when a proxy method is invoked. */
-    private int addInterface(String name) throws AnnotationBusException {
+    protected int addInterface(String name) throws AnnotationBusException {
         for (Class<?> intf : proxy.getClass().getInterfaces()) {
             if (name.equals(InterfaceDescription.getName(intf))) {
                 InterfaceDescription desc = new InterfaceDescription();
@@ -178,6 +176,7 @@ public class ProxyBusObject {
             this.invocationCache = new HashMap<String, List<Invocation>>();
         }
 
+        @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws BusException {
             /*
              * Some notes on performance.
@@ -318,6 +317,7 @@ public class ProxyBusObject {
     /**
      * Release native resources.
      */
+    @Override
     protected void finalize() throws Throwable {
         try {
             destroy();
@@ -347,6 +347,7 @@ public class ProxyBusObject {
     /**
      * Gets a proxy to an interface of this remote bus object.
      *
+     * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
      * @param intf one of the interfaces supplied when the proxy bus object was
      *             created
      * @return the proxy implementing the interface
@@ -394,6 +395,7 @@ public class ProxyBusObject {
     /**
      * Get a property from an interface on the remote object.
      *
+     * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
      * @param iface the interface that the property exists on
      * @param propertyName the name of the property
      * @return Variant containing the value of the property
@@ -406,6 +408,7 @@ public class ProxyBusObject {
     /**
      * Set a property on an interface on the remote object.
      *
+     * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
      * @param iface the interface that the property exists on
      * @param propertyName the name of the property
      * @param value the value for the property
@@ -418,6 +421,7 @@ public class ProxyBusObject {
     /**
      * Get all properties from an interface on the remote object.
      *
+     * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
      * @param iface the interface
      * @return a Map of name/value associations
      * @throws BusException if request cannot be honored
@@ -433,5 +437,35 @@ public class ProxyBusObject {
         }
         return map;
     }
+
+    /**
+     * Function to register a handler for property change events.
+     * Note that registering the same handler callback for the same
+     * interface will overwrite the previous registration.  The same
+     * handler callback may be registered for several different
+     * interfaces simultaneously.
+     *
+     * @param iface             Remote object's interface on which the property is defined.
+     * @param properties        The name of the properties to monitor (NULL for all).
+     * @param listener          Reference to the object that will receive the callback.
+     * @return
+     *      - #ER_OK if the handler was registered successfully
+     *      - #ER_BUS_NO_SUCH_INTERFACE if the specified interfaces does not exist on the remote object.
+     *      - #ER_BUS_NO_SUCH_PROPERTY if the property does not exist
+     */
+    public native Status registerPropertiesChangedListener(String iface, String[] properties,
+                                                           PropertiesChangedListener listener);
+
+    /**
+     * Function to unregister a handler for property change events.
+     *
+     * @param iface     Remote object's interface on which the property is defined.
+     * @param listener  Reference to the object that used to receive the callback.
+     * @return
+     *      - #ER_OK if the handler was registered successfully
+     *      - #ER_BUS_NO_SUCH_INTERFACE if the specified interfaces does not exist on the remote object.
+     */
+    public native Status unregisterPropertiesChangedListener(String iface,
+                                                             PropertiesChangedListener listener);
 }
 

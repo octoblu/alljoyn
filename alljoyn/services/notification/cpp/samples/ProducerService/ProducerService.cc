@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -39,7 +39,8 @@ using namespace qcc;
 NotificationService* prodService = 0;
 BusAttachment* bus = 0;
 CommonBusListener* notificationBusListener = 0;
-AboutPropertyStoreImpl* propertyStoreImpl = 0;
+AboutData* aboutData = NULL;
+AboutObj* aboutObj = NULL;
 NotificationSender* Sender = 0;
 static volatile sig_atomic_t s_interrupt = false;
 
@@ -310,9 +311,13 @@ void cleanup()
         delete notificationBusListener;
         notificationBusListener = NULL;
     }
-    if (propertyStoreImpl) {
-        delete propertyStoreImpl;
-        propertyStoreImpl = NULL;
+    if (aboutData) {
+        delete aboutData;
+        aboutData = NULL;
+    }
+    if (aboutObj) {
+        delete aboutObj;
+        bus = NULL;
     }
     if (bus) {
         delete bus;
@@ -329,7 +334,7 @@ void signal_callback_handler(int32_t signum)
 int main()
 {
     notificationBusListener = new CommonBusListener();
-    propertyStoreImpl = new AboutPropertyStoreImpl();
+    aboutData = new AboutData("en");
 
     // Allow CTRL+C to end application
     signal(SIGINT, signal_callback_handler);
@@ -351,6 +356,8 @@ int main()
         cleanup();
         return 1;
     }
+
+    aboutObj = new AboutObj(*bus, AboutObj::ANNOUNCED);
 
     qcc::String device_id;
     GuidUtil::GetInstance()->GetDeviceIdString(&device_id);
@@ -380,21 +387,21 @@ int main()
 
         DeviceNamesType deviceNames;
         deviceNames.insert(std::pair<qcc::String, qcc::String>("en", device_name));
-        status = CommonSampleUtil::fillPropertyStore(propertyStoreImpl, app_id, app_name, device_id, deviceNames);
+        status = CommonSampleUtil::fillAboutData(aboutData, app_id, app_name, device_id, deviceNames);
         if (status != ER_OK) {
-            std::cout << "Could not fill PropertyStore." << std::endl;
+            std::cout << "Could not fill About Data." << std::endl;
             cleanup();
             return 1;
         }
 
-        status = CommonSampleUtil::prepareAboutService(bus, propertyStoreImpl,
+        status = CommonSampleUtil::prepareAboutService(bus, aboutData, aboutObj,
                                                        notificationBusListener, SERVICE_PORT);
         if (status != ER_OK) {
             std::cout << "Could not set up the AboutService." << std::endl;
             cleanup();
             return 1;
         }
-        Sender = prodService->initSend(bus, propertyStoreImpl);
+        Sender = prodService->initSend(bus, aboutData);
         if (!Sender) {
             std::cout << "Could not initialize the sender" << std::endl;
             CommonSampleUtil::aboutServiceDestroy(bus, notificationBusListener);
@@ -446,7 +453,11 @@ int main()
         std::cout << "Going to call aboutServiceDestroy" << std::endl;
         CommonSampleUtil::aboutServiceDestroy(bus, notificationBusListener);
         std::cout << "Going to sleep:" << sleepTime << std::endl;
+#ifdef _WIN32
+        Sleep(sleepTime * 1000);
+#else
         sleep(sleepTime);
+#endif
     }
 
     std::cout << "Exiting the application deletes the bus connection." << std::endl;

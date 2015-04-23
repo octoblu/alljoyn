@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -24,35 +24,48 @@ import org.alljoyn.bus.annotation.BusInterface;
 import org.alljoyn.bus.annotation.BusSignal;
 import org.alljoyn.ns.transport.TransportNotificationText;
 
-/** 
- * The interface used to send and receive "session less" notification signals  
+/**
+ * The interface used to send and receive "session less" notification signals
  */
-@BusInterface (name = NotificationTransport.IF_NAME)
-public interface NotificationTransport extends BusObject {
-	
-	/**
-	 * AllJoyn interface name
-	 */
-	public static final String IF_NAME = "org.alljoyn.Notification"; 
+@BusInterface(name = NotificationTransport.IF_NAME, announced = "true")
+public interface NotificationTransport extends BusObject
+{
 
-	/**
-	 * The interface version
-	 */
-	public static final short VERSION  = 1;
-	
-	/**
-	 * Use the method to send or receive AJ session less signal
-	 * @param version The version of the message signature 
-	 * @param msgId The notification message id
-	 * @param messageType Notification message type id
-	 * @param deviceId Device Id
-	 * @param deviceName Device Name
-	 * @param appId App Id 
-	 * @param appName App Name
-	 * @param attributes Attributes key-value pair
-	 * @param customAttributes customAttributes
-	 * @param text Array of NotificationText objects
-	 */
-	@BusSignal(signature = "qiqssaysa{iv}a{ss}ar")
-	public void notify(int version, int msgId, short messageType, String deviceId, String deviceName, byte[] appId, String appName, Map<Integer, Variant> attributes, Map<String, String> customAttributes, TransportNotificationText[] text); 
+    /**
+     * AllJoyn interface name
+     */
+    public static final String IF_NAME = "org.alljoyn.Notification";
+
+    /**
+     * The interface version
+     */
+    public static final short VERSION = 1;
+
+    /**
+     * Use the method to send or receive AJ session less signal
+     * 
+     * @param version
+     *            The version of the message signature
+     * @param msgId
+     *            The notification message id
+     * @param messageType
+     *            Notification message type id
+     * @param deviceId
+     *            Device Id
+     * @param deviceName
+     *            Device Name
+     * @param appId
+     *            App Id
+     * @param appName
+     *            App Name
+     * @param attributes
+     *            Attributes key-value pair
+     * @param customAttributes
+     *            customAttributes
+     * @param text
+     *            Array of NotificationText objects
+     */
+    @BusSignal(signature = "qiqssaysa{iv}a{ss}ar")
+    public void notify(int version, int msgId, short messageType, String deviceId, String deviceName, byte[] appId, String appName, Map<Integer, Variant> attributes,
+            Map<String, String> customAttributes, TransportNotificationText[] text);
 }

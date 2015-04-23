@@ -1,4 +1,4 @@
-# Copyright (c) 2010 - 2011, AllSeen Alliance. All rights reserved.
+# Copyright (c) 2010 - 2014, AllSeen Alliance. All rights reserved.
 #
 #    Permission to use, copy, modify, and/or distribute this software for any
 #    purpose with or without fee is hereby granted, provided that the above
@@ -16,12 +16,19 @@
 Import('env')
 import os
 
+# Linux specific vars
+vars = Variables()
+vars.Add(BoolVariable('GCOV', 'Compile with gcov support', 'no'))
+vars.Update(env)
+
+Help(vars.GenerateHelpText(env))
+
 # Linux specific flags
 env.Append(CPPDEFINES = ['QCC_OS_LINUX'])
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_C99_FP_MACROS_DYNAMIC'])
 
 env.Append(CFLAGS = ['-Wall',
-                     '-Werror=non-virtual-dtor',
+                     '-Werror',
                      '-pipe',
                      '-std=c99',
                      '-fno-strict-aliasing',
@@ -32,7 +39,7 @@ env.Append(CFLAGS = ['-Wall',
                      '-Wno-long-long'])
 
 env.Append(CXXFLAGS = ['-Wall',
-                       '-Werror=non-virtual-dtor',
+                       '-Werror',
                        '-pipe',
                        '-std=gnu++0x',
                        '-fno-exceptions',
@@ -56,5 +63,11 @@ else:
    env.Append(CFLAGS = '-Os')
    env.Append(CXXFLAGS = '-Os')
    env.Append(LINKFLAGS = ['-s', '-Wl,--gc-sections'])
+
+
+if env['GCOV']:
+    env.Append(CCFLAGS = ['-fprofile-arcs', '-ftest-coverage'])
+    env.Append(LIBS = ['gcov'])
+
 
 env.SConscript('${CPU}/SConscript')

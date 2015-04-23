@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,13 @@
 #ifndef ASYNC_TASK_QUEUE_H_
 #define ASYNC_TASK_QUEUE_H_
 
+#ifdef _WIN32
+#include <Windows.h>
+#define pthread_mutex_t CRITICAL_SECTION
+#define pthread_cond_t CONDITION_VARIABLE
+#else
 #include <pthread.h>
+#endif
 #include <queue>
 
 namespace ajn {
@@ -85,7 +91,11 @@ class AsyncTaskQueue {
     /**
      * The thread responsible for receiving messages
      */
+#ifdef _WIN32
+    HANDLE m_handle;
+#else
     pthread_t m_Thread;
+#endif
 
     /**
      * A Queue that holds the messages

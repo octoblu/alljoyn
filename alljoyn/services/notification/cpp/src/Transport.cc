@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -170,7 +170,6 @@ QStatus Transport::deleteMsg(int32_t msgId)
 QStatus Transport::startSenderTransport(BusAttachment* bus, bool startSuperAgent)
 {
     QCC_DbgTrace(("Transport::startSenderTransport"));
-    std::vector<String> interfaces;
     QStatus status;
 
     if ((status = setBusAttachment(bus)) != ER_OK) {
@@ -183,14 +182,7 @@ QStatus Transport::startSenderTransport(BusAttachment* bus, bool startSuperAgent
         goto exit;
     }
 
-    { //Handling AboutService
-        AboutServiceApi* aboutService = AboutServiceApi::getInstance();
-        if (!aboutService) {
-            status = ER_FAIL;
-            QCC_LogError(status, ("AboutService is not defined"));
-            goto exit;
-        }
-
+    {
 
         for (int32_t messageTypeIndx = 0; messageTypeIndx < MESSAGE_TYPE_CNT; messageTypeIndx++) {
             status = ER_OK;
@@ -201,13 +193,6 @@ QStatus Transport::startSenderTransport(BusAttachment* bus, bool startSuperAgent
                 if (status != ER_OK) {
                     goto exit;
                 }
-
-                if (!interfaces.size()) {
-                    interfaces.push_back(AJ_SA_INTERFACE_NAME);
-                }
-
-                status = aboutService->AddObjectDescription(AJ_PRODUCER_SERVICE_PATH_PREFIX +
-                                                            MessageTypeUtil::getMessageTypeString(messageTypeIndx), interfaces);
             } else {
                 m_Producers[messageTypeIndx] = new NotificationTransportProducer(m_Bus,
                                                                                  AJ_PRODUCER_SERVICE_PATH_PREFIX + MessageTypeUtil::getMessageTypeString(messageTypeIndx), status);
@@ -215,13 +200,6 @@ QStatus Transport::startSenderTransport(BusAttachment* bus, bool startSuperAgent
                 if (status != ER_OK) {
                     goto exit;
                 }
-
-                if (!interfaces.size()) {
-                    interfaces.push_back(AJ_NOTIFICATION_INTERFACE_NAME);
-                }
-
-                status = aboutService->AddObjectDescription(AJ_PRODUCER_SERVICE_PATH_PREFIX +
-                                                            MessageTypeUtil::getMessageTypeString(messageTypeIndx), interfaces);
             }
 
             if (status != ER_OK) {
@@ -235,7 +213,7 @@ QStatus Transport::startSenderTransport(BusAttachment* bus, bool startSuperAgent
                 goto exit;
             }
         }
-    } //Handling AboutService
+    }
 
     //Code handles NotificationProducerReceiver - Start
     m_NotificationProducerReceiver = new NotificationProducerReceiver(m_Bus, status);
@@ -296,13 +274,19 @@ QStatus Transport::listenForAnnouncements()
 {
     m_AnnounceListener = new NotificationAnnounceListener();
 
-    QStatus status;
     const char* interfaces[] = { "org.alljoyn.Notification.Superagent" };
-    status = AnnouncementRegistrar::RegisterAnnounceHandler(*m_Bus, *m_AnnounceListener, interfaces, 1);
-    if (status != ER_OK) {
-        QCC_DbgHLPrintf(("Could not create AnnouncementListener. AnnounceHandlerApi not initialized"));
-        cleanupAnnouncementListener();
+
+    QStatus status;
+
+    m_Bus->RegisterAboutListener(*m_AnnounceListener);
+
+    status = m_Bus->WhoImplements(interfaces, sizeof(interfaces) / sizeof(interfaces[0]));
+    if (ER_OK == status) {
+        QCC_DbgTrace(("WhoImplements called.\n"));
+    } else {
+        QCC_LogError(status, ("WhoImplements call FAILED with status %s\n"));
     }
+
     return status;
 }
 
@@ -628,6 +612,7 @@ void Transport::cleanupReceiverTransport()
     cleanupNotificationProducerSender();
     cleanupTransportConsumer(true);
     cleanupTransportSuperAgent(true);
+    cleanupSuperAgentBusListener(true);
     cleanupAnnouncementListener(true);
     QCC_DbgTrace(("Transport::cleanupReceiverTransport end"));
 }
@@ -665,20 +650,37 @@ void Transport::cleanupTransportSuperAgent(bool unregister)
     QCC_DbgTrace(("Transport::cleanupTransportSuperAgent end"));
 }
 
+void Transport::cleanupSuperAgentBusListener(bool unregister)
+{
+    QCC_DbgTrace(("Transport::cleanupSuperAgentBusListener start"));
+    if (!m_SuperAgentBusListener) {
+        return;
+    }
+
+    if (unregister) {
+        m_Bus->UnregisterBusListener(*m_SuperAgentBusListener);
+    }
+
+    delete m_SuperAgentBusListener;
+    m_SuperAgentBusListener = 0;
+    QCC_DbgTrace(("Transport::cleanupSuperAgentBusListener end"));
+}
+
 void Transport::cleanupAnnouncementListener(bool unregister)
 {
-    QCC_DbgTrace(("Transport::cleanupTransportSuperAgent start"));
+    QCC_DbgTrace(("Transport::cleanupAnnouncementListener start"));
     if (!m_AnnounceListener) {
         return;
     }
 
     if (unregister) {
         const char* interfaces[] = { "org.alljoyn.Notification.Superagent" };
-        AnnouncementRegistrar::UnRegisterAnnounceHandler(*m_Bus, *m_AnnounceListener, interfaces, 1);
+        m_Bus->CancelWhoImplements(interfaces, sizeof(interfaces) / sizeof(interfaces[0]));
+        m_Bus->UnregisterAboutListener(*m_AnnounceListener);
     }
     delete m_AnnounceListener;
     m_AnnounceListener = 0;
-    QCC_DbgTrace(("Transport::cleanupTransportSuperAgent end"));
+    QCC_DbgTrace(("Transport::cleanupAnnouncementListener end"));
 }
 
 void Transport::cleanupNotificationProducerSender()

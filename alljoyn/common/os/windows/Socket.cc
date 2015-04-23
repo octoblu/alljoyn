@@ -52,40 +52,22 @@ namespace qcc {
 const SocketFd INVALID_SOCKET_FD = INVALID_SOCKET;
 const int MAX_LISTEN_CONNECTIONS = SOMAXCONN;
 
-/*
- * Called before any operation that might be called before winsock has been started.
- */
-void WinsockCheck()
-{
-    static bool initialized = false;
-    if (!initialized) {
-        QCC_DbgHLPrintf(("Initialized winsock"));
-        WSADATA wsaData;
-        WORD version = MAKEWORD(2, 0);
-        int error = WSAStartup(version, &wsaData);
-        if (error) {
-            QCC_LogError(ER_OS_ERROR, ("WSAStartup failed with error: %d", error));
-        } else {
-            initialized = true;
-        }
-    }
-}
-
 qcc::String StrError()
 {
     WinsockCheck();
     int errnum = WSAGetLastError();
     char msgbuf[256];
 
-    FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
-                   NULL,
-                   errnum,
-                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                   (LPSTR) msgbuf,
-                   sizeof(msgbuf),
-                   NULL);
+    if (!FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
+                        NULL,
+                        errnum,
+                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                        (LPSTR)msgbuf,
+                        sizeof(msgbuf),
+                        NULL)) {
+        msgbuf[0] = '\0';
+    }
     return U32ToString(errnum) + " - " + msgbuf;
-
 }
 
 void MakeSockAddr(const IPAddress& addr,
@@ -299,7 +281,7 @@ QStatus Accept(SocketFd sockfd, IPAddress& remoteAddr, uint16_t& remotePort, Soc
             status = ER_OS_ERROR;
             QCC_LogError(status, ("Listening: %s", StrError().c_str()));
         }
-        newSockfd = -1;
+        newSockfd = qcc::INVALID_SOCKET_FD;
     } else {
         if (addr.ss_family == AF_INET) {
             struct sockaddr_in* sa = reinterpret_cast<struct sockaddr_in*>(&addr);
@@ -323,7 +305,7 @@ QStatus Accept(SocketFd sockfd, IPAddress& remoteAddr, uint16_t& remotePort, Soc
             status = ER_OS_ERROR;
             QCC_LogError(status, ("Failed to set socket non-blocking %s", StrError().c_str()));
             closesocket(newSockfd);
-            newSockfd = -1;
+            newSockfd = qcc::INVALID_SOCKET_FD;
         } else {
             QCC_DbgHLPrintf(("Accept(sockfd = %d) newSockfd = %d", sockfd, newSockfd));
         }
@@ -951,6 +933,58 @@ QStatus SetBlocking(SocketFd sockfd, bool blocking)
         status = ER_OS_ERROR;
         QCC_LogError(status, ("Failed to set socket non-blocking %s", StrError().c_str()));
     }
+    return status;
+}
+
+QStatus SetSndBuf(SocketFd sockfd, size_t bufSize)
+{
+    QStatus status = ER_OK;
+    int arg = bufSize;
+    int r = setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char*)&arg, sizeof(arg));
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Setting SO_SNDBUF failed: (%d) %s", errno, strerror(errno)));
+    }
+    return status;
+}
+
+QStatus GetSndBuf(SocketFd sockfd, size_t& bufSize)
+{
+    QStatus status = ER_OK;
+    int arg = 0;
+    socklen_t len = sizeof(arg);
+    int r = getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char*)&arg, &len);
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Getting SO_SNDBUF failed: (%d) %s", errno, strerror(errno)));
+    }
+    bufSize = arg;
+    return status;
+}
+
+QStatus SetRcvBuf(SocketFd sockfd, size_t bufSize)
+{
+    QStatus status = ER_OK;
+    int arg = bufSize;
+    int r = setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (const char*)&arg, sizeof(arg));
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Setting SO_RCVBUF failed: (%d) %s", errno, strerror(errno)));
+    }
+    return status;
+}
+
+QStatus GetRcvBuf(SocketFd sockfd, size_t& bufSize)
+{
+    QStatus status = ER_OK;
+    int arg = 0;
+    socklen_t len = sizeof(arg);
+    int r = getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (char*)&arg, &len);
+    if (r != 0) {
+        status = ER_OS_ERROR;
+        QCC_LogError(status, ("Getting SO_RCVBUF failed: (%d) %s", errno, strerror(errno)));
+    }
+    bufSize = arg;
     return status;
 }
 

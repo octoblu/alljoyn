@@ -37,7 +37,7 @@ using namespace qcc;
 
 static int MakeSock(AddressFamily family, SocketType type)
 {
-    SocketFd sock = static_cast<SocketFd>(-1);
+    SocketFd sock = qcc::INVALID_SOCKET_FD;
     QStatus status = Socket(family, type, sock);
     if (ER_OK != status) {
         QCC_LogError(status, ("Socket failed"));
@@ -50,13 +50,13 @@ static SocketFd CopySock(const SocketFd& inFd)
 {
     SocketFd outFd;
     QStatus status = SocketDup(inFd, outFd);
-    return (status == ER_OK) ? outFd : -1;
+    return (status == ER_OK) ? outFd : qcc::INVALID_SOCKET_FD;
 }
 
 SocketStream::SocketStream(SocketFd sock) :
     isConnected(true),
     sock(sock),
-    sourceEvent(new Event(sock, Event::IO_READ, false)),
+    sourceEvent(new Event(sock, Event::IO_READ)),
     sinkEvent(new Event(*sourceEvent, Event::IO_WRITE, false)),
     isDetached(false),
     sendTimeout(Event::WAIT_FOREVER)
@@ -67,17 +67,18 @@ SocketStream::SocketStream(SocketFd sock) :
 SocketStream::SocketStream(AddressFamily family, SocketType type) :
     isConnected(false),
     sock(MakeSock(family, type)),
-    sourceEvent(new Event(sock, Event::IO_READ, false)),
+    sourceEvent(new Event(sock, Event::IO_READ)),
     sinkEvent(new Event(*sourceEvent, Event::IO_WRITE, false)),
     isDetached(false),
     sendTimeout(Event::WAIT_FOREVER)
 {
+
 }
 
 SocketStream::SocketStream(const SocketStream& other) :
     isConnected(other.isConnected),
     sock(CopySock(other.sock)),
-    sourceEvent(new Event(sock, Event::IO_READ, false)),
+    sourceEvent(new Event(sock, Event::IO_READ)),
     sinkEvent(new Event(*sourceEvent, Event::IO_WRITE, false)),
     isDetached(other.isDetached),
     sendTimeout(other.sendTimeout)
@@ -94,7 +95,7 @@ SocketStream SocketStream::operator=(const SocketStream& other)
         isConnected = other.isConnected;
         sock = CopySock(other.sock);
         delete sourceEvent;
-        sourceEvent = new Event(sock, Event::IO_READ, false);
+        sourceEvent = new Event(sock, Event::IO_READ);
         delete sinkEvent;
         sinkEvent = new Event(*sourceEvent, Event::IO_WRITE, false);
         isDetached = other.isDetached;
@@ -277,4 +278,9 @@ QStatus SocketStream::PushBytesAndFds(const void* buf, size_t numBytes, size_t& 
         }
     }
     return status;
+}
+
+QStatus SocketStream::SetNagle(bool reuse)
+{
+    return qcc::SetNagle(sock, reuse);
 }

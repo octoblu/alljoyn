@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,28 @@ NotificationAnnounceListener::~NotificationAnnounceListener()
 {
 }
 
+void NotificationAnnounceListener::Announced(const char* busName, uint16_t version, ajn::SessionPort port, const ajn::MsgArg& objectDescriptionArg, const ajn::MsgArg& aboutDataArg)
+{
+
+    QCC_DbgPrintf(("Received Announce Signal"));
+
+    Transport::getInstance()->getBusAttachment()->EnableConcurrentCallbacks();
+    AboutObjectDescription aboutObjectDescription;
+    aboutObjectDescription.CreateFromMsgArg(objectDescriptionArg);
+
+    if (aboutObjectDescription.HasInterface(AJ_SA_INTERFACE_NAME.c_str())) {
+        QCC_DbgPrintf((qcc::String("Received announce of superAgent interface").c_str()));
+
+
+        QStatus status = Transport::getInstance()->FindSuperAgent(busName);
+        if (status != ER_OK) {
+            QCC_DbgPrintf((qcc::String("FindAdvertisedName failed").c_str()));
+        }
+
+        return;
+    }
+}
+
 void NotificationAnnounceListener::Announce(uint16_t version, uint16_t port, const char* busName, const ObjectDescriptions& objectDescs, const AboutData& aboutData)
 {
 
@@ -63,5 +85,4 @@ void NotificationAnnounceListener::Announce(uint16_t version, uint16_t port, con
         }
     }
 }
-
 

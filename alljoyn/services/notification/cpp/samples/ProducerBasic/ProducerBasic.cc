@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -24,7 +24,6 @@
 #include <alljoyn/notification/RichAudioUrl.h>
 #include <alljoyn/notification/NotificationEnums.h>
 #include "CommonSampleUtil.h"
-#include <alljoyn/about/AboutServiceApi.h>
 #include <alljoyn/notification/Notification.h>
 #include <alljoyn/services_common/GuidUtil.h>
 #include <alljoyn/services_common/LogModulesNames.h>
@@ -57,7 +56,8 @@ using namespace services;
 NotificationService* prodService = 0;
 NotificationSender* Sender = 0;
 BusAttachment* bus = 0;
-AboutPropertyStoreImpl* propertyStoreImpl = 0;
+AboutData* aboutData = NULL;
+AboutObj* aboutObj = NULL;
 CommonBusListener*  busListener = 0;
 static volatile sig_atomic_t s_interrupt = false;
 
@@ -75,9 +75,13 @@ void cleanup()
         delete busListener;
         busListener = NULL;
     }
-    if (propertyStoreImpl) {
-        delete propertyStoreImpl;
-        propertyStoreImpl = NULL;
+    if (aboutData) {
+        delete aboutData;
+        aboutData = NULL;
+    }
+    if (aboutObj) {
+        delete aboutObj;
+        aboutObj = NULL;
     }
     if (bus) {
         delete bus;
@@ -129,25 +133,26 @@ int main()
     qcc::String appid;
     GuidUtil::GetInstance()->GenerateGUID(&appid);
 
-    propertyStoreImpl = new AboutPropertyStoreImpl();
+    aboutData = new AboutData("en");
     DeviceNamesType deviceNames;
     deviceNames.insert(std::pair<qcc::String, qcc::String>("en", "ProducerBasicDeviceName"));
-    status = CommonSampleUtil::fillPropertyStore(propertyStoreImpl, appid, APP_NAME, deviceid, deviceNames);
+    status = CommonSampleUtil::fillAboutData(aboutData, appid, APP_NAME, deviceid, deviceNames);
     if (status != ER_OK) {
-        std::cout << "Could not fill PropertyStore." << std::endl;
+        std::cout << "Could not fill About Data." << std::endl;
         cleanup();
         return 1;
     }
 
     busListener = new CommonBusListener();
-    status = CommonSampleUtil::prepareAboutService(bus, propertyStoreImpl, busListener, SERVICE_PORT);
+    aboutObj = new AboutObj(*bus, BusObject::ANNOUNCED);
+    status = CommonSampleUtil::prepareAboutService(bus, aboutData, aboutObj, busListener, SERVICE_PORT);
     if (status != ER_OK) {
         std::cout << "Could not set up the AboutService." << std::endl;
         cleanup();
         return 1;
     }
 
-    Sender = prodService->initSend(bus, propertyStoreImpl);
+    Sender = prodService->initSend(bus, aboutData);
     if (!Sender) {
         std::cout << "Could not initialize Sender - exiting application" << std::endl;
         cleanup();

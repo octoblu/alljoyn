@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -18,9 +18,15 @@
 #define NOTIFICATIONDISMISSERRECEIVER_H_
 
 #include <queue>
-#include <pthread.h>
 #include <qcc/String.h>
 #include "NotificationDismisser.h"
+#ifdef _WIN32
+#include <Windows.h>
+#define pthread_mutex_t CRITICAL_SECTION
+#define pthread_cond_t CONDITION_VARIABLE
+#else
+#include <pthread.h>
+#endif
 
 namespace ajn {
 namespace services {
@@ -64,7 +70,11 @@ class NotificationDismisserReceiver : public NotificationDismisser {
     /**
      * The thread responsible for receiving the notification
      */
+#ifdef _WIN32
+    HANDLE m_handle;
+#else
     pthread_t m_ReceiverThread;
+#endif
 
     /**
      * A Queue that holds the messages

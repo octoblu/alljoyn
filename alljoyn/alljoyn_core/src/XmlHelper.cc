@@ -88,6 +88,19 @@ QStatus XmlHelper::ParseInterface(const XmlElement* elem, ProxyBusObject* obj)
         QCC_LogError(status, ("Invalid interface name \"%s\" in XML introspection data for %s", ifName.c_str(), ident));
         return status;
     }
+
+    /*
+     * Due to a bug in AllJoyn 14.06 and previous, we need to ignore
+     * the introspected versions of the standard D-Bus interfaces.
+     * This will allow a maximal level of interoperability between
+     * this code and 14.06.  This hack should be removed when
+     * interface evolution is better supported.
+     */
+    if ((ifName == org::freedesktop::DBus::InterfaceName) ||
+        (ifName == org::freedesktop::DBus::Properties::InterfaceName)) {
+        return ER_OK;
+    }
+
     /*
      * Security on an interface can be "true", "inherit", or "off"
      * Security is implicitly off on the standard DBus interfaces.
@@ -287,6 +300,7 @@ QStatus XmlHelper::ParseNode(const XmlElement* root, ProxyBusObject* obj)
 {
     QStatus status = ER_OK;
 
+    (void)ident; /* suppress compiler warning */
     assert(root->GetName() == "node");
 
     if (GetSecureAnnotation(root) == "true") {
@@ -310,13 +324,13 @@ QStatus XmlHelper::ParseNode(const XmlElement* root, ProxyBusObject* obj)
                     childObjPath += '/';
                 }
                 childObjPath += relativePath;
-                if (!relativePath.empty() & IsLegalObjectPath(childObjPath.c_str())) {
+                if (!relativePath.empty() && IsLegalObjectPath(childObjPath.c_str())) {
                     /* Check for existing child with the same name. Use this child if found, otherwise create a new one */
                     ProxyBusObject* childObj = obj->GetChild(relativePath.c_str());
                     if (childObj) {
                         status = ParseNode(elem, childObj);
                     } else {
-                        ProxyBusObject newChild(*bus, obj->GetServiceName().c_str(), childObjPath.c_str(), obj->sessionId, obj->isSecure);
+                        ProxyBusObject newChild(*bus, obj->GetServiceName().c_str(), obj->GetUniqueName().c_str(), childObjPath.c_str(), obj->sessionId, obj->isSecure);
                         status = ParseNode(elem, &newChild);
                         if (ER_OK == status) {
                             obj->AddChild(newChild);

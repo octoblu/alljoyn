@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 #include <iostream>
+#include <sstream>
 #include <signal.h>
 #include <alljoyn/PasswordManager.h>
 #include <alljoyn/notification/NotificationService.h>
 #include "../common/NotificationReceiverTestImpl.h"
 #include "CommonSampleUtil.h"
-#include <alljoyn/about/AnnouncementRegistrar.h>
 #include <alljoyn/services_common/LogModulesNames.h>
 
 using namespace ajn;
@@ -79,7 +79,7 @@ int main()
     std::cout << "Begin Consumer Application. (Press CTRL+C to end application)" << std::endl;
     std::cout << "Enter in a list of app names (separated by ';') you would like to receive notifications from." << std::endl;
     std::cout << "Empty list means all app names." << std::endl;
-    std::getline(std::cin, listOfApps);
+    getline(std::cin, listOfApps);
 
     // Initialize Service object and send it Notification Receiver object
     conService = NotificationService::getInstance();

@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2011,2012 AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2011, 2012, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -31,6 +31,8 @@
 
 #include <Status.h>
 
+#include <qcc/CngCache.h>
+
 using namespace std;
 using namespace qcc;
 
@@ -38,10 +40,7 @@ using namespace qcc;
 
 namespace qcc {
 
-// Cache of open algorithm handles
-static BCRYPT_ALG_HANDLE algHandles[3][2] = { 0 };
-
-struct Crypto_Hash::Context {
+class Crypto_Hash::Context {
   public:
 
     Context(size_t digestSize) : digestSize(digestSize), handle(0), hashObj(NULL) { }
@@ -57,7 +56,25 @@ struct Crypto_Hash::Context {
     BCRYPT_HASH_HANDLE handle;
     uint8_t* hashObj;
     DWORD hashObjLen;
-
+  private:
+    /**
+     * Copy constructor
+     *
+     * @param src Context to be copied.
+     */
+    Context(const Context& src) {
+        /* private copy constructor to prevent copying */
+    }
+    /**
+     * Assignment operator
+     *
+     * @param src source Context
+     *
+     * @return copy of Context
+     */
+    Context& operator=(const Context& src) {
+        return *this;
+    }
 };
 
 QStatus Crypto_Hash::Init(Algorithm alg, const uint8_t* hmacKey, size_t keyLen)
@@ -101,8 +118,8 @@ QStatus Crypto_Hash::Init(Algorithm alg, const uint8_t* hmacKey, size_t keyLen)
     }
 
     // Open algorithm provider if required
-    if (!algHandles[alg][MAC]) {
-        if (BCryptOpenAlgorithmProvider(&algHandles[alg][MAC], algId, MS_PRIMITIVE_PROVIDER, MAC ? BCRYPT_ALG_HANDLE_HMAC_FLAG : 0) < 0) {
+    if (!cngCache.algHandles[alg][MAC]) {
+        if (BCryptOpenAlgorithmProvider(&cngCache.algHandles[alg][MAC], algId, MS_PRIMITIVE_PROVIDER, MAC ? BCRYPT_ALG_HANDLE_HMAC_FLAG : 0) < 0) {
             status = ER_CRYPTO_ERROR;
             QCC_LogError(status, ("Failed to open algorithm provider"));
             delete ctx;
@@ -113,10 +130,17 @@ QStatus Crypto_Hash::Init(Algorithm alg, const uint8_t* hmacKey, size_t keyLen)
 
     // Get length of hash object and allocate the object
     DWORD got;
-    BCryptGetProperty(algHandles[alg][MAC], BCRYPT_OBJECT_LENGTH, (PBYTE)&ctx->hashObjLen, sizeof(DWORD), &got, 0);
+    if (BCryptGetProperty(cngCache.algHandles[alg][MAC], BCRYPT_OBJECT_LENGTH, (PBYTE)&ctx->hashObjLen, sizeof(DWORD), &got, 0) < 0) {
+        status = ER_CRYPTO_ERROR;
+        QCC_LogError(status, ("Failed to get object length property"));
+        delete ctx;
+        ctx = NULL;
+        return status;
+    }
+
     ctx->hashObj = new uint8_t[ctx->hashObjLen];
 
-    if (BCryptCreateHash(algHandles[alg][MAC], &ctx->handle, ctx->hashObj, ctx->hashObjLen, (PUCHAR)hmacKey, (ULONG)keyLen, 0) < 0) {
+    if (BCryptCreateHash(cngCache.algHandles[alg][MAC], &ctx->handle, ctx->hashObj, ctx->hashObjLen, (PUCHAR)hmacKey, (ULONG)keyLen, 0) < 0) {
         status = ER_CRYPTO_ERROR;
         QCC_LogError(status, ("Failed to create hash"));
         delete ctx;

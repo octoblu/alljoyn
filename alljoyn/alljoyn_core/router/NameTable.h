@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011,2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -171,12 +171,27 @@ class NameTable {
     void RemoveVirtualAliases(const qcc::String& uniqueName);
 
     /**
+     * Update propagation info of names associated with a virtual endpoint.
+     *
+     * @param uniqueName  UniqueName of virtual endpoint whose propagation info is to be updated.
+     */
+    void UpdateVirtualAliases(const qcc::String& uniqueName);
+
+    /**
      * Find an endpoint for a given unique or alias bus name.
      *
      * @param busName   Name of bus.
      * @return  Returns the endpoint if it was found or an invalid endpoint if not found
      */
     BusEndpoint FindEndpoint(const qcc::String& busName) const;
+
+    /**
+     * Return whether this is a unique name of a locally connected endpoint.
+     *
+     * @param uniqueName   Unique name to check.
+     * @return  true if a locally connected endpoint has this unique name.
+     */
+    bool IsValidLocalUniqueName(const qcc::String& uniqueName) const;
 
     /**
      * Get all bus names from name table.
@@ -212,9 +227,19 @@ class NameTable {
 
   private:
     typedef struct {
+        BusEndpoint endpoint;
+        SessionOpts::NameTransferType nameTransfer;
+    }  UniqueNameEntry;
+
+    typedef struct {
         qcc::String endpointName;
         uint32_t flags;
     } NameQueueEntry;
+
+    typedef struct {
+        VirtualEndpoint endpoint;
+        SessionOpts::NameTransferType nameTransfer;
+    }  VirtualAliasEntry;
 
     /**
      * Hash functor
@@ -232,25 +257,41 @@ class NameTable {
     };
 
     mutable qcc::Mutex lock;                                             /**< Lock protecting name tables */
-    std::unordered_map<qcc::String, BusEndpoint, Hash, Equal> uniqueNames;   /**< Unique name table */
+    std::unordered_map<qcc::String, UniqueNameEntry, Hash, Equal> uniqueNames;   /**< Unique name table */
     std::unordered_map<qcc::String, std::deque<NameQueueEntry>, Hash, Equal> aliasNames;  /**< Alias name table */
     uint32_t uniqueId;
     qcc::String uniquePrefix;
 
     typedef qcc::ManagedObj<NameListener*> ProtectedNameListener;
     std::set<ProtectedNameListener> listeners;                         /**< Listeners regsitered with name table */
-    std::map<qcc::StringMapKey, VirtualEndpoint> virtualAliasNames;    /**< map of virtual aliases to virtual endpts */
+    std::map<qcc::StringMapKey, VirtualAliasEntry> virtualAliasNames;    /**< map of virtual aliases to virtual endpts */
+
+    /**
+     * Returns the minimum name transfer value for sessions with the endpoint.
+     *
+     * @param ep the endpoint
+     */
+    SessionOpts::NameTransferType GetNameTransfer(BusEndpoint& ep);
+
+    /**
+     * Returns the minimum name transfer value for sessions with the endpoint.
+     *
+     * @param vep the virtual endpoint
+     */
+    SessionOpts::NameTransferType GetNameTransfer(const VirtualEndpoint& vep);
 
     /**
      * Helper used to call the listners
      *
-     * @param aliasName   Well-known bus name
-     * @param origOwner   Unique bus name of original owner of aliasName or NULL if none existed.
-     * @param newOwner    Unique bus name of new owner of aliasName or NULL if none (now) exists.
+     * @param alias Well-known bus name now owned by listener.
+     * @param oldOwner Unique name of old owner of alias or NULL if none existed.
+     * @param oldOwnerNameTransfer Whether the old owner should be propagated (ALL_NAMES) or not (DAEMON_NAMES).
+     * @param newOwner Unique name of new owner of alias or NULL if none (now) exists.
+     * @param newOwnerNameTransfer Whether the new owner should be propagated (ALL_NAMES) or not (DAEMON_NAMES).
      */
     void CallListeners(const qcc::String& aliasName,
-                       const qcc::String* origOwner,
-                       const qcc::String* newOwner);
+                       const qcc::String* oldOwner, SessionOpts::NameTransferType oldOwnerNameTransfer,
+                       const qcc::String* newOwner, SessionOpts::NameTransferType newOwnerNameTransfer);
 };
 
 /**
@@ -265,15 +306,17 @@ class NameListener {
     virtual ~NameListener() { }
 
     /**
-     * Notify listener of a change in well-known bus name ownership.
+     * Called when a bus name changes ownership.
      *
-     * @param alias     Well-known bus name now owned by newOwner.
-     * @param oldOwner  Unique name of old owner of alias or NULL if none existed.
-     * @param newOwner  Unique name of new owner of alias or NULL if none (now) exists.
+     * @param alias Well-known bus name now owned by listener.
+     * @param oldOwner Unique name of old owner of alias or NULL if none existed.
+     * @param oldOwnerNameTransfer Whether the old owner should be propagated (ALL_NAMES) or not (DAEMON_NAMES).
+     * @param newOwner Unique name of new owner of alias or NULL if none (now) exists.
+     * @param newOwnerNameTransfer Whether the new owner should be propagated (ALL_NAMES) or not (DAEMON_NAMES).
      */
     virtual void NameOwnerChanged(const qcc::String& alias,
-                                  const qcc::String* oldOwner,
-                                  const qcc::String* newOwner) { }
+                                  const qcc::String* oldOwner, SessionOpts::NameTransferType oldOwnerNameTransfer,
+                                  const qcc::String* newOwner, SessionOpts::NameTransferType newOwnerNameTransfer) = 0;
 
     /**
      * Called upon completion of AddAlias call.

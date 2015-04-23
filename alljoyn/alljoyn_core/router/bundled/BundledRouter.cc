@@ -46,10 +46,6 @@
 #include "NullTransport.h"
 #include "PasswordManager.h"
 
-#if defined(QCC_OS_WINRT)
-#include "ProximityTransport.h"
-#endif
-
 #if defined(QCC_OS_ANDROID)
 //#include "android/WFDTransport.h"
 #endif
@@ -63,23 +59,17 @@ using namespace ajn;
 static const char bundledConfig[] =
     "<busconfig>"
     "  <type>alljoyn_bundled</type>"
-    "  <limit name=\"auth_timeout\">5000</limit>"
-    "  <limit name=\"max_incomplete_connections\">4</limit>"
-    "  <limit name=\"max_completed_connections\">16</limit>"
-    "  <limit name=\"max_untrusted_clients\">8</limit>"
-    "  <flag name=\"restrict_untrusted_clients\">false</flag>"
-    "</busconfig>";
-
-static const char internalConfig[] =
-    "<busconfig>"
-    "  <type>alljoyn</type>"
     "  <listen>unix:abstract=alljoyn</listen>"
 #if defined(QCC_OS_DARWIN)
     "  <listen>launchd:env=DBUS_LAUNCHD_SESSION_BUS_SOCKET</listen>"
 #endif
-    "  <listen>tcp:r4addr=0.0.0.0,r4port=0</listen>"
-    "  <listen>udp:u4addr=0.0.0.0,u4port=0</listen>"
-    "  <property name=\"ns_interfaces\">*</property>"
+    "  <listen>tcp:iface=*,port=0</listen>"
+    "  <listen>udp:iface=*,port=0</listen>"
+    "  <limit name=\"auth_timeout\">20000</limit>"
+    "  <limit name=\"max_incomplete_connections\">4</limit>"
+    "  <limit name=\"max_completed_connections\">16</limit>"
+    "  <limit name=\"max_untrusted_clients\">8</limit>"
+    "  <flag name=\"restrict_untrusted_clients\">false</flag>"
     "</busconfig>";
 
 class ClientAuthListener : public AuthListener {
@@ -146,6 +136,9 @@ class BundledRouter : public RouterLauncher, public TransportFactoryContainer {
     Mutex lock;
     std::set<NullTransport*> transports;
     ConfigDB* config;
+#ifndef NDEBUG
+    qcc::String configFile;
+#endif
 };
 
 bool ExistFile(const char* fileName) {
@@ -213,25 +206,26 @@ static BundledRouter bundledRouter;
 BundledRouter::BundledRouter() : transportsInitialized(false), stopping(false), ajBus(NULL), ajBusController(NULL)
 {
     NullTransport::RegisterRouterLauncher(this);
+    LoggerSetting::GetLoggerSetting("bundled-router");
 
     /*
      * Setup the config
      */
-    String configStr = internalConfig;
 #ifndef NDEBUG
 #if defined(QCC_OS_ANDROID)
-    qcc::String configFile = "/mnt/sdcard/.alljoyn/config.xml";
+    configFile = "/mnt/sdcard/.alljoyn/config.xml";
 #else
-    qcc::String configFile = "./config.xml";
+    configFile = "./config.xml";
 #endif
-    if (!ExistFile(configFile.c_str())) {
+    qcc::String configStr = bundledConfig;
+    if (ExistFile(configFile.c_str())) {
+        configStr = "";
+    } else {
         configFile = "";
-        configStr += bundledConfig;
     }
     config = new ConfigDB(configStr, configFile);
 #else
-    configStr += bundledConfig;
-    config = new ConfigDB(configStr);
+    config = new ConfigDB(bundledConfig);
 #endif
 }
 
@@ -258,6 +252,12 @@ QStatus BundledRouter::Start(NullTransport* nullTransport)
 
     QCC_DbgHLPrintf(("Using BundledRouter"));
 
+#ifndef NDEBUG
+    if (configFile.size() > 0) {
+        QCC_DbgHLPrintf(("Using external config file: %s", configFile.c_str()));
+    }
+#endif
+
     /*
      * If the bundled router is in the process of stopping we need to wait until the operation is
      * complete (BundledRouter::Join has exited) before we attempt to start up again.
@@ -272,12 +272,6 @@ QStatus BundledRouter::Start(NullTransport* nullTransport)
         lock.Lock(MUTEX_CONTEXT);
     }
     if (transports.empty()) {
-#if defined(QCC_OS_ANDROID)
-        LoggerSetting::GetLoggerSetting("bundled-router", LOG_DEBUG, true, NULL);
-#else
-        LoggerSetting::GetLoggerSetting("bundled-router", LOG_DEBUG, false, stdout);
-#endif
-
         if (!config->LoadConfig()) {
             status = ER_BUS_BAD_XML;
             QCC_LogError(status, ("Error parsing configuration"));
@@ -301,9 +295,6 @@ QStatus BundledRouter::Start(NullTransport* nullTransport)
             Add(new TransportFactory<TCPTransport>(TCPTransport::TransportName, false));
             Add(new TransportFactory<UDPTransport>(UDPTransport::TransportName, false));
 
-#if defined(QCC_OS_WINRT)
-//            Add(new TransportFactory<ProximityTransport>(ProximityTransport::TransportName, false));
-#endif
 #if defined(QCC_OS_ANDROID)
 //            QCC_DbgPrintf(("adding WFD transport"));
 //            Add(new TransportFactory<WFDTransport>(WFDTransport::TransportName, false));

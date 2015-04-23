@@ -213,7 +213,7 @@
                </fileset>
             
                <doctitle><![CDATA[<h1> Notification Service </h1>]]></doctitle> 
-               <bottom><![CDATA[<small>AllJoyn Notification Java API Reference Manual Version 14.06.00<br/>Copyright &copy; 2013-2014 AllSeen Alliance.<br/><b>THIS DOCUMENT AND ALL INFORMATION CONTAIN HEREIN ARE PROVIDED ON AN "AS-IS" BASIS WITHOUT WARRANTY OF ANY KIND</b>.<br/><b>MAY CONTAIN U.S. AND INTERNATIONAL EXPORT CONTROLLED INFORMATION</b><br/></small>]]></bottom> 
+               <bottom><![CDATA[<small>AllJoyn Notification Java API Reference Manual Version 14.12.00<br/>Copyright AllSeen Alliance.<br/><b>THIS DOCUMENT AND ALL INFORMATION CONTAIN HEREIN ARE PROVIDED ON AN "AS-IS" BASIS WITHOUT WARRANTY OF ANY KIND</b>.<br/><b>MAY CONTAIN U.S. AND INTERNATIONAL EXPORT CONTROLLED INFORMATION</b><br/></small>]]></bottom> 
          </javadoc>
      </target>
      

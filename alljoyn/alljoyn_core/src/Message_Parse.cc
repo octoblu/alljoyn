@@ -252,13 +252,8 @@ QStatus _Message::ParseArray(MsgArg* arg,
                         for (size_t i = 0; i < numElements; i++) {
                             // copy all of the elements into the larger container
                             bigger[i] = elements[i];
-                            // make sure the flags match assignment operator may
-                            // not no copy the ownership flags since only one
-                            // object can own the data and args.
-                            bigger[i].flags = elements[i].flags;
-                            // clear the flags to prevent the destructor from
-                            // freeing anything other than the MsgArg
-                            elements[i].flags = 0;
+                            // Since the copy constructor above makes a Clone i.e. deep copy,
+                            // it is ok to leave the flags for elements[i] as it is here.
                         }
                         delete [] elements;
                         elements = bigger;
@@ -526,8 +521,8 @@ QStatus _Message::ParseValue(MsgArg* arg, const char*& sigPtr, bool arrayElem)
             if (endianSwap) {
                 index = EndianSwap32(index);
             }
-            uint32_t numHandles = (hdrFields.field[ALLJOYN_HDR_FIELD_HANDLES].typeId == ALLJOYN_INVALID) ? 0 : hdrFields.field[ALLJOYN_HDR_FIELD_HANDLES].v_uint32;
-            if (index >=  numHandles) {
+            uint32_t num = (hdrFields.field[ALLJOYN_HDR_FIELD_HANDLES].typeId == ALLJOYN_INVALID) ? 0 : hdrFields.field[ALLJOYN_HDR_FIELD_HANDLES].v_uint32;
+            if (index >= num) {
                 status = ER_BUS_NO_SUCH_HANDLE;
             } else {
                 arg->typeId = typeId;
@@ -757,7 +752,7 @@ static const size_t MAX_PULL = (128 * 1024);
 
 /*
  * Timeout is scaled by the amount of data being read but is very conservative to allow for
- * congested Bluetooth links.
+ * congested links.
  */
 #define PULL_TIMEOUT(num)  (20000 + num / 2)
 
@@ -1235,7 +1230,8 @@ QStatus _Message::Unmarshal(qcc::String& endpointName, bool handlePassing, bool 
      * session.
      */
     if (senderField->typeId != ALLJOYN_INVALID) {
-        PeerState peerState = bus->GetInternal().GetPeerStateTable()->GetPeerState(senderField->v_string.str);
+        PeerState peerState = bus->GetInternal().GetPeerStateTable()->GetPeerState(senderField->v_string.str,
+                                                                                   (msgHeader.flags & ALLJOYN_FLAG_SESSIONLESS) == 0);
         bool unreliable = hdrFields.field[ALLJOYN_HDR_FIELD_TIME_TO_LIVE].typeId != ALLJOYN_INVALID;
         bool secure = (msgHeader.flags & ALLJOYN_FLAG_ENCRYPTED) != 0;
         if ((msgHeader.flags & ALLJOYN_FLAG_SESSIONLESS) == 0) {

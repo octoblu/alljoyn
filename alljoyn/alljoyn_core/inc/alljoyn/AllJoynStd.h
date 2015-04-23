@@ -32,13 +32,32 @@
 #define QCC_MODULE  "ALLJOYN"
 
 /** Router-to-router protocol version number */
-#define ALLJOYN_PROTOCOL_VERSION  10
+#define ALLJOYN_PROTOCOL_VERSION  11
 
 namespace ajn {
 
 
 namespace org {
 namespace alljoyn {
+
+/** Interface definitions for org.alljoyn.About */
+namespace About {
+
+extern const char* ObjectPath;        /**< Object path */
+extern const char* InterfaceName;     /**< Interface name */
+extern const char* WellKnownName;     /**< Well-known bus name */
+
+}
+
+/** Interface definitions for org.alljoyn.Icon */
+namespace Icon {
+
+extern const char* ObjectPath;        /**< Object path */
+extern const char* InterfaceName;     /**< Interface name */
+extern const char* WellKnownName;     /**< Well known bus name */
+
+}
+
 /** Interface definitions for org.alljoyn.Bus */
 namespace Bus {
 
@@ -201,6 +220,7 @@ extern const char* InterfaceName;                 /**< Interface name */
 #define ALLJOYN_ADVERTISENAME_REPLY_SUCCESS               1   /**< AdvertiseName reply: Success */
 #define ALLJOYN_ADVERTISENAME_REPLY_ALREADY_ADVERTISING   2   /**< AdvertiseName reply: This endpoint has already requested advertising this name */
 #define ALLJOYN_ADVERTISENAME_REPLY_FAILED                3   /**< AdvertiseName reply: Advertise failed */
+#define ALLJOYN_ADVERTISENAME_REPLY_TRANSPORT_NOT_AVAILABLE 4 /**< AdvertiseName reply: The specified transport is unavailable for advertising */
 // @}
 
 /**
@@ -241,6 +261,7 @@ extern const char* InterfaceName;                 /**< Interface name */
 #define ALLJOYN_FINDADVERTISEDNAME_REPLY_SUCCESS                1   /**< FindAdvertisedName reply: Success */
 #define ALLJOYN_FINDADVERTISEDNAME_REPLY_ALREADY_DISCOVERING    2   /**< FindAdvertisedName reply: This enpoint has already requested discover for name */
 #define ALLJOYN_FINDADVERTISEDNAME_REPLY_FAILED                 3   /**< FindAdvertisedName reply: Failed */
+#define ALLJOYN_FINDADVERTISEDNAME_REPLY_TRANSPORT_NOT_AVAILABLE 4  /**< FindAdvertisedName reply: The specified transport is unavailable for discovery */
 // @}
 
 /**
@@ -452,6 +473,51 @@ extern const char* InterfaceName;                 /**< Interface name */
 #define ALLJOYN_PING_REPLY_UNREACHABLE      6   /**< Ping reply: Unreachable */
 #define ALLJOYN_PING_REPLY_IN_PROGRESS      7   /**< Ping reply: Ping already in progress */
 // @}
+
+/** Reason why MPSessionChangedReason is called */
+// @{
+#define ALLJOYN_MPSESSIONCHANGED_LOCAL_MEMBER_ADDED 0 /** You were added to this session (catch up) */
+#define ALLJOYN_MPSESSIONCHANGED_REMOTE_MEMBER_ADDED 1 /** Another member was added to this session */
+#define ALLJOYN_MPSESSIONCHANGED_LOCAL_MEMBER_REMOVED 2 /** You were removed to this session (see all remaining members removed) */
+#define ALLJOYN_MPSESSIONCHANGED_REMOTE_MEMBER_REMOVED 3 /** Another member was removed from this session */
+// @}
+
+
+/** Indication to which side the SessionLost applies */
+// @{
+#define ALLJOYN_SESSIONLOST_DISPOSITION_HOST 0 /** Session was lost for the host side of the leaf node */
+#define ALLJOYN_SESSIONLOST_DISPOSITION_MEMBER 1 /** Session was lost for the joiner side of the leaf node */
+// @}
+
+
+/**
+ * @name org.alljoyn.Bus.SetIdleTimeouts
+ *  Interface: org.alljoyn.Bus
+ *  Method: SetIdleTimeouts(uint32_t inIdleTO, uint32_t inProbeTO)
+ *
+ *  Input params:
+ *     reqIdleTO -  Requested Idle Timeout for the link. i.e. time after which the Routing node
+ *                  must send a DBus ping to Leaf node in case of inactivity.
+ *                  Use 0 to leave unchanged.
+ *     reqProbeTO - Requested Probe timeout. The time from the Routing node sending the DBus
+ *                  ping to the expected response from the leaf node.
+ *                  Use 0 to leave unchanged.
+ *
+ *  Output params:
+ *     disposition - One of the ALLJOYN_SETIDLETIMEOUTS_* dispositions listed below
+ *     actIdleTO - Actual idle Timeout for the link that was set. i.e. time after which the Routing node
+ *                 will send a DBus ping to Leaf node in case of inactivity.
+ *     actProbeTO - Actual probe timeout i.e. The time from the Routing node sending the DBus ping
+ *                 to the expected response from the leaf node.
+ *
+ */
+// @{
+/* org.alljoyn.Bus.SetIdleTimeouts */
+#define ALLJOYN_SETIDLETIMEOUTS_REPLY_SUCCESS          1   /**< SetIdleTimeouts reply: Success */
+#define ALLJOYN_SETIDLETIMEOUTS_REPLY_NOT_ALLOWED      2   /**< SetIdleTimeouts reply: Not allowed for bus-to-bus and Null endpoints */
+#define ALLJOYN_SETIDLETIMEOUTS_REPLY_FAILED           3   /**< SetIdleTimeouts reply: Failed */
+// @}
+
 }
 
 #undef QCC_MODULE

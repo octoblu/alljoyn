@@ -7,7 +7,7 @@
 /******************************************************************************
  *
  *
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -92,7 +92,7 @@ class MyBusListener : public BusListener, public SessionListener {
     {
         printf("FoundAdvertisedName(name=%s, prefix=%s)\n", name, namePrefix);
         if (0 == strcmp(name, SERVICE_NAME)) {
-            /* We found a remote bus that is advertising basic sercice's  well-known name so connect to it */
+            /* We found a remote bus that is advertising basic service's  well-known name so connect to it */
             /* Since we are in a callback we must enable concurrent callbacks before calling a synchronous method. */
             g_msgBus->EnableConcurrentCallbacks();
             SessionOpts opts(SessionOpts::TRAFFIC_MESSAGES, false, SessionOpts::PROXIMITY_ANY, TRANSPORT_ANY);
@@ -180,7 +180,7 @@ QStatus CreateInterface(void)
 {
     /* Add org.alljoyn.Bus.method_sample interface */
     InterfaceDescription* testIntf = NULL;
-    QStatus status = g_msgBus->CreateInterface(INTERFACE_NAME, testIntf, true);
+    QStatus status = g_msgBus->CreateInterface(INTERFACE_NAME, testIntf, AJ_IFC_SECURITY_REQUIRED);
 
     if (status == ER_OK) {
         printf("Interface '%s' created.\n", INTERFACE_NAME);
@@ -295,21 +295,31 @@ QStatus MakeMethodCall(void)
     assert(alljoynTestIntf);
     remoteObj.AddInterface(*alljoynTestIntf);
 
-    Message reply(*g_msgBus);
-    MsgArg inputs[1];
-    char buffer[80];
+    /* The method call below specifies a small timeout value. Avoid timing out
+     * during the method call by prompting the user for a password here, instead
+     * of prompting the user during the method call.
+     */
+    QStatus status = remoteObj.SecureConnection(true);
 
-    sprintf(buffer, "%s says Hello AllJoyn!", clientName);
-
-    inputs[0].Set("s", buffer);
-
-    QStatus status = remoteObj.MethodCall(INTERFACE_NAME, "Ping", inputs, 1, reply, 5000);
-
-    if (ER_OK == status) {
-        printf("%s.Ping (path=%s) returned \"%s\".\n", INTERFACE_NAME,
-               SERVICE_PATH, reply->GetArg(0)->v_string.str);
+    if (ER_OK != status) {
+        printf("SecureConnection failed.\n");
     } else {
-        printf("MethodCall on %s.Ping failed.\n", INTERFACE_NAME);
+        Message reply(*g_msgBus);
+        MsgArg inputs[1];
+        char buffer[80];
+
+        sprintf(buffer, "%s says Hello AllJoyn!", clientName);
+
+        inputs[0].Set("s", buffer);
+
+        status = remoteObj.MethodCall(INTERFACE_NAME, "Ping", inputs, 1, reply, 5000);
+
+        if (ER_OK == status) {
+            printf("%s.Ping (path=%s) returned \"%s\".\n", INTERFACE_NAME,
+                   SERVICE_PATH, reply->GetArg(0)->v_string.str);
+        } else {
+            printf("MethodCall on %s.Ping failed.\n", INTERFACE_NAME);
+        }
     }
 
     return status;

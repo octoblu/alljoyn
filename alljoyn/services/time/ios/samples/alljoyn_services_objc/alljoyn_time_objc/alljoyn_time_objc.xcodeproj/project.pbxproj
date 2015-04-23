@@ -1,0 +1,478 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1999FC5019E17E7F000F3F94 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1999FC4F19E17E7F000F3F94 /* Foundation.framework */; };
+		1999FC5E19E17E7F000F3F94 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1999FC5D19E17E7F000F3F94 /* XCTest.framework */; };
+		1999FC5F19E17E7F000F3F94 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1999FC4F19E17E7F000F3F94 /* Foundation.framework */; };
+		1999FC6119E17E7F000F3F94 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1999FC6019E17E7F000F3F94 /* UIKit.framework */; };
+		1999FC6419E17E7F000F3F94 /* liballjoyn_time_objc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1999FC4C19E17E7F000F3F94 /* liballjoyn_time_objc.a */; };
+		1999FC6A19E17E7F000F3F94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1999FC6819E17E7F000F3F94 /* InfoPlist.strings */; };
+		1999FC6C19E17E7F000F3F94 /* alljoyn_time_objcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1999FC6B19E17E7F000F3F94 /* alljoyn_time_objcTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1999FC6219E17E7F000F3F94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1999FC4419E17E7F000F3F94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1999FC4B19E17E7F000F3F94;
+			remoteInfo = alljoyn_time_objc;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1999FC4A19E17E7F000F3F94 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1999FC4C19E17E7F000F3F94 /* liballjoyn_time_objc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liballjoyn_time_objc.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1999FC4F19E17E7F000F3F94 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1999FC5319E17E7F000F3F94 /* alljoyn_time_objc-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "alljoyn_time_objc-Prefix.pch"; sourceTree = "<group>"; };
+		1999FC5C19E17E7F000F3F94 /* alljoyn_time_objcTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = alljoyn_time_objcTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1999FC5D19E17E7F000F3F94 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		1999FC6019E17E7F000F3F94 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		1999FC6719E17E7F000F3F94 /* alljoyn_time_objcTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "alljoyn_time_objcTests-Info.plist"; sourceTree = "<group>"; };
+		1999FC6919E17E7F000F3F94 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1999FC6B19E17E7F000F3F94 /* alljoyn_time_objcTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = alljoyn_time_objcTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1999FC4919E17E7F000F3F94 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1999FC5019E17E7F000F3F94 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1999FC5919E17E7F000F3F94 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1999FC6419E17E7F000F3F94 /* liballjoyn_time_objc.a in Frameworks */,
+				1999FC5E19E17E7F000F3F94 /* XCTest.framework in Frameworks */,
+				1999FC6119E17E7F000F3F94 /* UIKit.framework in Frameworks */,
+				1999FC5F19E17E7F000F3F94 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1999FC4319E17E7F000F3F94 = {
+			isa = PBXGroup;
+			children = (
+				1999FC7519E17EC2000F3F94 /* time */,
+				1999FC5119E17E7F000F3F94 /* alljoyn_time_objc */,
+				1999FC6519E17E7F000F3F94 /* alljoyn_time_objcTests */,
+				1999FC4E19E17E7F000F3F94 /* Frameworks */,
+				1999FC4D19E17E7F000F3F94 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1999FC4D19E17E7F000F3F94 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC4C19E17E7F000F3F94 /* liballjoyn_time_objc.a */,
+				1999FC5C19E17E7F000F3F94 /* alljoyn_time_objcTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1999FC4E19E17E7F000F3F94 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC4F19E17E7F000F3F94 /* Foundation.framework */,
+				1999FC5D19E17E7F000F3F94 /* XCTest.framework */,
+				1999FC6019E17E7F000F3F94 /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1999FC5119E17E7F000F3F94 /* alljoyn_time_objc */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC5219E17E7F000F3F94 /* Supporting Files */,
+			);
+			path = alljoyn_time_objc;
+			sourceTree = "<group>";
+		};
+		1999FC5219E17E7F000F3F94 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC5319E17E7F000F3F94 /* alljoyn_time_objc-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1999FC6519E17E7F000F3F94 /* alljoyn_time_objcTests */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC6B19E17E7F000F3F94 /* alljoyn_time_objcTests.m */,
+				1999FC6619E17E7F000F3F94 /* Supporting Files */,
+			);
+			path = alljoyn_time_objcTests;
+			sourceTree = "<group>";
+		};
+		1999FC6619E17E7F000F3F94 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC6719E17E7F000F3F94 /* alljoyn_time_objcTests-Info.plist */,
+				1999FC6819E17E7F000F3F94 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1999FC7519E17EC2000F3F94 /* time */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC7619E17EDB000F3F94 /* ios */,
+			);
+			name = time;
+			sourceTree = "<group>";
+		};
+		1999FC7619E17EDB000F3F94 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC7819E17EEE000F3F94 /* src */,
+				1999FC7719E17EE8000F3F94 /* inc */,
+			);
+			name = ios;
+			sourceTree = "<group>";
+		};
+		1999FC7719E17EE8000F3F94 /* inc */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC7919E17EFB000F3F94 /* alljoyn */,
+			);
+			name = inc;
+			sourceTree = "<group>";
+		};
+		1999FC7819E17EEE000F3F94 /* src */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		1999FC7919E17EFB000F3F94 /* alljoyn */ = {
+			isa = PBXGroup;
+			children = (
+				1999FC7A19E17F00000F3F94 /* time */,
+			);
+			name = alljoyn;
+			sourceTree = "<group>";
+		};
+		1999FC7A19E17F00000F3F94 /* time */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = time;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1999FC4B19E17E7F000F3F94 /* alljoyn_time_objc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1999FC6F19E17E7F000F3F94 /* Build configuration list for PBXNativeTarget "alljoyn_time_objc" */;
+			buildPhases = (
+				1999FC4819E17E7F000F3F94 /* Sources */,
+				1999FC4919E17E7F000F3F94 /* Frameworks */,
+				1999FC4A19E17E7F000F3F94 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = alljoyn_time_objc;
+			productName = alljoyn_time_objc;
+			productReference = 1999FC4C19E17E7F000F3F94 /* liballjoyn_time_objc.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		1999FC5B19E17E7F000F3F94 /* alljoyn_time_objcTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1999FC7219E17E7F000F3F94 /* Build configuration list for PBXNativeTarget "alljoyn_time_objcTests" */;
+			buildPhases = (
+				1999FC5819E17E7F000F3F94 /* Sources */,
+				1999FC5919E17E7F000F3F94 /* Frameworks */,
+				1999FC5A19E17E7F000F3F94 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1999FC6319E17E7F000F3F94 /* PBXTargetDependency */,
+			);
+			name = alljoyn_time_objcTests;
+			productName = alljoyn_time_objcTests;
+			productReference = 1999FC5C19E17E7F000F3F94 /* alljoyn_time_objcTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1999FC4419E17E7F000F3F94 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = Allseen;
+			};
+			buildConfigurationList = 1999FC4719E17E7F000F3F94 /* Build configuration list for PBXProject "alljoyn_time_objc" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1999FC4319E17E7F000F3F94;
+			productRefGroup = 1999FC4D19E17E7F000F3F94 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1999FC4B19E17E7F000F3F94 /* alljoyn_time_objc */,
+				1999FC5B19E17E7F000F3F94 /* alljoyn_time_objcTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1999FC5A19E17E7F000F3F94 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1999FC6A19E17E7F000F3F94 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1999FC4819E17E7F000F3F94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1999FC5819E17E7F000F3F94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1999FC6C19E17E7F000F3F94 /* alljoyn_time_objcTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1999FC6319E17E7F000F3F94 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1999FC4B19E17E7F000F3F94 /* alljoyn_time_objc */;
+			targetProxy = 1999FC6219E17E7F000F3F94 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		1999FC6819E17E7F000F3F94 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1999FC6919E17E7F000F3F94 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1999FC6D19E17E7F000F3F94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		1999FC6E19E17E7F000F3F94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		1999FC7019E17E7F000F3F94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/alljoyn_time_objc.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_time_objc/alljoyn_time_objc-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"$(ALLJOYN_SDK_ROOT)/build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc\"",
+					"\"$(ALLJOYN_SDK_ROOT)/alljoyn_objc/AllJoynFramework/AllJoynFramework\"",
+					"\"$(ALLJOYN_SDK_ROOT)/services/about/ios/inc\"",
+					"\"$(ALLJOYN_SDK_ROOT)/services/about/cpp/inc\"",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/time/cpp/inc\"",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "armv7 armv7s i386";
+			};
+			name = Debug;
+		};
+		1999FC7119E17E7F000F3F94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/alljoyn_time_objc.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_time_objc/alljoyn_time_objc-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"$(ALLJOYN_SDK_ROOT)/build/darwin/arm/$(PLATFORM_NAME)/$(CONFIGURATION)/dist/cpp/inc\"",
+					"\"$(ALLJOYN_SDK_ROOT)/alljoyn_objc/AllJoynFramework/AllJoynFramework\"",
+					"\"$(ALLJOYN_SDK_ROOT)/services/about/ios/inc\"",
+					"\"$(ALLJOYN_SDK_ROOT)/services/about/cpp/inc\"",
+					"\"$(ALLSEEN_BASE_SERVICES_ROOT)/time/cpp/inc\"",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "armv7 armv7s i386";
+			};
+			name = Release;
+		};
+		1999FC7319E17E7F000F3F94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_time_objc/alljoyn_time_objc-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "alljoyn_time_objcTests/alljoyn_time_objcTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		1999FC7419E17E7F000F3F94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "alljoyn_time_objc/alljoyn_time_objc-Prefix.pch";
+				INFOPLIST_FILE = "alljoyn_time_objcTests/alljoyn_time_objcTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1999FC4719E17E7F000F3F94 /* Build configuration list for PBXProject "alljoyn_time_objc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1999FC6D19E17E7F000F3F94 /* Debug */,
+				1999FC6E19E17E7F000F3F94 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1999FC6F19E17E7F000F3F94 /* Build configuration list for PBXNativeTarget "alljoyn_time_objc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1999FC7019E17E7F000F3F94 /* Debug */,
+				1999FC7119E17E7F000F3F94 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		1999FC7219E17E7F000F3F94 /* Build configuration list for PBXNativeTarget "alljoyn_time_objcTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1999FC7319E17E7F000F3F94 /* Debug */,
+				1999FC7419E17E7F000F3F94 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1999FC4419E17E7F000F3F94 /* Project object */;
+}

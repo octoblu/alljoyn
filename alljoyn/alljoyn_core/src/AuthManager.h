@@ -57,7 +57,7 @@ class AuthManager {
      * provide a function of this type when registering with the AllJoynAuthentication mechanism manager.
      *
      * @param keyStore  The key store for keys and other security credentials required for the
-     *                  authentication mechansim.
+     *                  authentication mechanism.
      *
      * @param listener  Provides callouts for authentication mechanisms that interact with the user or
      *                  application.
@@ -116,6 +116,7 @@ class AuthManager {
             if (name == "ALLJOYN_ECDHE_NULL") {
             } else if (name == "ALLJOYN_ECDHE_PSK") {
             } else if (name == "ALLJOYN_ECDHE_ECDSA") {
+            } else if (name == "GSSAPI") {
             } else if (!authMechanisms.count(name)) {
                 status = ER_BUS_INVALID_AUTH_MECHANISM;
                 QCC_LogError(status, ("Unknown authentication mechanism %s", name.c_str()));

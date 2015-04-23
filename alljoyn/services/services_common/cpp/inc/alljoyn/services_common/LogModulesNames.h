@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,7 @@ static char const* const CONTROLPANEL_MODULE_LOG_NAME = "ControlPanel";
 static char const* const ONBOARDING_MODULE_LOG_NAME = "Onboarding";
 static char const* const CONFIG_MODULE_LOG_NAME = "Config";
 static char const* const SERVICES_COMMON_MODULE_LOG_NAME = "services_common";
-
+static char const* const TIME_MODULE_LOG_NAME = "Time";
 static const uint32_t ALL_LOG_LEVELS = 15;
 } //namespace logModules
 } //namespace services

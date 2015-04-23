@@ -1,12 +1,12 @@
 /**
  * @file
- * This file redefines __dllexport or __dllimport on relevant platforms
+ * This file defines the attributes of exported functions.
  *
  * This file also defines the deferred callback mechanism used to make sure the
  * callbacks occur on the same thread that registered for the callback.
  */
 /******************************************************************************
- * Copyright (c) 2009-2013, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -25,14 +25,23 @@
 
 #include <qcc/platform.h>
 
-/** This @#define allows for redefinition to __dllexport or __dllimport on relevant platforms */
+/**
+ * This @#define allows for setting of visibility support on relevant platforms
+ */
 #ifndef AJ_API
-#  if defined(QCC_OS_GROUP_WINDOWS)
-#    define AJ_API __declspec(dllexport)
-#  elif defined(QCC_OS_GROUP_POSIX)
+#  if defined(QCC_OS_GROUP_POSIX)
 #    define AJ_API __attribute__((visibility("default")))
 #  else
 #    define AJ_API
+#  endif
+#endif
+
+/** This @#define allows for calling convention redefinition on relevant platforms */
+#ifndef AJ_CALL
+#  if defined(QCC_OS_GROUP_WINDOWS)
+#    define AJ_CALL __stdcall
+#  else
+#    define AJ_CALL
 #  endif
 #endif
 
@@ -40,17 +49,22 @@
 extern "C" {
 #endif
 
+typedef enum {
+    UNANNOUNCED, ///< The interface is not announced
+    ANNOUNCED    ///< The interface is announced
+} alljoyn_about_announceflag;
+
 /**
  * Unity-specific function to process alternate-thread callbacks on the main thread.
  *
  * @return the number of callbacks processed.
  */
-extern AJ_API int alljoyn_unity_deferred_callbacks_process();
+extern AJ_API int AJ_CALL alljoyn_unity_deferred_callbacks_process();
 
 /**
  * Enable/disable main thread callback behavior.
  */
-extern AJ_API void alljoyn_unity_set_deferred_callback_mainthread_only(QCC_BOOL mainthread_only);
+extern AJ_API void AJ_CALL alljoyn_unity_set_deferred_callback_mainthread_only(QCC_BOOL mainthread_only);
 
 #ifdef __cplusplus
 } /* extern "C" */

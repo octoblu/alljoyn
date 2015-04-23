@@ -6,7 +6,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -36,8 +36,6 @@
 #include <qcc/posix/Thread.h>
 #elif defined(QCC_OS_GROUP_WINDOWS)
 #include <qcc/windows/Thread.h>
-#elif defined(QCC_OS_GROUP_WINRT)
-#include <qcc/winrt/Thread.h>
 #else
 #error No OS GROUP defined.
 #endif
@@ -308,7 +306,6 @@ class Thread {
     ThreadHandle handle;            ///< Thread handle.
     ThreadReturn exitValue;         ///< The returned 'value' from Run.
     void* arg;                      ///< Run thread argument.
-    unsigned int threadId;          ///< Thread ID used by windows
     ThreadListener* listener;       ///< Listener notified of thread events (or NULL).
     bool isExternal;                ///< If true, Thread is external (i.e. lifecycle not managed by Thread obj)
     void* platformContext;          ///< Context data specific to platform implementation
@@ -318,12 +315,13 @@ class Thread {
     ThreadListeners auxListeners;
     Mutex auxListenersLock;
 
-#ifdef QCC_OS_GROUP_POSIX
+#if defined(QCC_OS_GROUP_POSIX)
     int32_t waitCount;
     Mutex waitLock;
     bool hasBeenJoined;
     qcc::Mutex hbjMutex;
-    int32_t exitCount;
+#elif defined(QCC_OS_GROUP_WINDOWS)
+    unsigned int threadId;          ///< Thread ID used by windows
 #endif
 
     /** Lock that protects global list of Threads and their handles */
@@ -331,6 +329,9 @@ class Thread {
 
     /** Thread list */
     static std::map<ThreadHandle, Thread*>* threadList;
+
+    /** Called on thread exit to deallocate external Thread objects */
+    static void STDCALL CleanExternalThread(void* thread);
 
     /**
      * C callable thread entry point.

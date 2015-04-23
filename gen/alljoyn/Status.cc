@@ -7,7 +7,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -27,17 +27,8 @@
 
 #define CASE(_status) case _status: return #_status 
     
-const char* QCC_StatusText(QStatus status)
+AJ_API const char* AJ_CALL QCC_StatusText(QStatus status)
 {
-#if defined(NDEBUG)
-    static char code[8];
-#ifdef _WIN32
-    _snprintf(code, sizeof(code), "0x%04x", status);
-#else
-    snprintf(code, sizeof(code), "0x%04x", status);
-#endif
-    return code;
-#else
     switch (status) {
         CASE(ER_OK);
         CASE(ER_FAIL);
@@ -69,6 +60,8 @@ const char* QCC_StatusText(QStatus status)
         CASE(ER_CONN_REFUSED);
         CASE(ER_BAD_ARG_COUNT);
         CASE(ER_WARNING);
+        CASE(ER_EOF);
+        CASE(ER_DEADLOCK);
         CASE(ER_COMMON_ERRORS);
         CASE(ER_STOPPING_THREAD);
         CASE(ER_ALERTED_THREAD);
@@ -168,7 +161,6 @@ const char* QCC_StatusText(QStatus status)
         CASE(ER_BUS_REPLY_IS_ERROR_MESSAGE);
         CASE(ER_BUS_NOT_AUTHENTICATING);
         CASE(ER_BUS_NO_LISTENER);
-        CASE(ER_BUS_BT_TRANSPORT_ERROR);
         CASE(ER_BUS_NOT_ALLOWED);
         CASE(ER_BUS_WRITE_QUEUE_FULL);
         CASE(ER_BUS_ENDPOINT_CLOSING);
@@ -221,7 +213,6 @@ const char* QCC_StatusText(QStatus status)
         CASE(ER_BUS_NO_SUCH_HANDLE);
         CASE(ER_BUS_HANDLES_NOT_ENABLED);
         CASE(ER_BUS_HANDLES_MISMATCH);
-        CASE(ER_BT_MAX_CONNECTIONS_USED);
         CASE(ER_BUS_NO_SESSION);
         CASE(ER_BUS_ELEMENT_NOT_FOUND);
         CASE(ER_BUS_NOT_A_DICTIONARY);
@@ -246,9 +237,11 @@ const char* QCC_StatusText(QStatus status)
         CASE(ER_ALLJOYN_JOINSESSION_REPLY_FAILED);
         CASE(ER_ALLJOYN_LEAVESESSION_REPLY_NO_SESSION);
         CASE(ER_ALLJOYN_LEAVESESSION_REPLY_FAILED);
+        CASE(ER_ALLJOYN_ADVERTISENAME_REPLY_TRANSPORT_NOT_AVAILABLE);
         CASE(ER_ALLJOYN_ADVERTISENAME_REPLY_ALREADY_ADVERTISING);
         CASE(ER_ALLJOYN_ADVERTISENAME_REPLY_FAILED);
         CASE(ER_ALLJOYN_CANCELADVERTISENAME_REPLY_FAILED);
+        CASE(ER_ALLJOYN_FINDADVERTISEDNAME_REPLY_TRANSPORT_NOT_AVAILABLE);
         CASE(ER_ALLJOYN_FINDADVERTISEDNAME_REPLY_ALREADY_DISCOVERING);
         CASE(ER_ALLJOYN_FINDADVERTISEDNAME_REPLY_FAILED);
         CASE(ER_ALLJOYN_CANCELFINDADVERTISEDNAME_REPLY_FAILED);
@@ -357,8 +350,26 @@ const char* QCC_StatusText(QStatus status)
         CASE(ER_ALLJOYN_PING_REPLY_FAILED);
         CASE(ER_TCP_MAX_UNTRUSTED);
         CASE(ER_ALLJOYN_PING_REPLY_IN_PROGRESS);
+        CASE(ER_LANGUAGE_NOT_SUPPORTED);
+        CASE(ER_ABOUT_FIELD_ALREADY_SPECIFIED);
+        CASE(ER_UDP_NOT_DISCONNECTED);
+        CASE(ER_UDP_ENDPOINT_NOT_STARTED);
+        CASE(ER_UDP_ENDPOINT_REMOVED);
+        CASE(ER_ARDP_VERSION_NOT_SUPPORTED);
+        CASE(ER_CONNECTION_LIMIT_EXCEEDED);
+        CASE(ER_ARDP_WRITE_BLOCKED);
+        CASE(ER_PERMISSION_DENIED);
+        CASE(ER_ABOUT_DEFAULT_LANGUAGE_NOT_SPECIFIED);
+        CASE(ER_ABOUT_SESSIONPORT_NOT_BOUND);
+        CASE(ER_ABOUT_ABOUTDATA_MISSING_REQUIRED_FIELD);
+        CASE(ER_ABOUT_INVALID_ABOUTDATA_LISTENER);
+        CASE(ER_BUS_PING_GROUP_NOT_FOUND);
+        CASE(ER_BUS_REMOVED_BY_BINDER_SELF);
+        CASE(ER_INVALID_CONFIG);
+        CASE(ER_ABOUT_INVALID_ABOUTDATA_FIELD_VALUE);
+        CASE(ER_ABOUT_INVALID_ABOUTDATA_FIELD_APPID_SIZE);
     default:
-        static char code[20];
+        static char code[22];
 #ifdef _WIN32
         _snprintf(code, sizeof(code), "<unknown>: 0x%04x", status);
 #else
@@ -366,5 +377,4 @@ const char* QCC_StatusText(QStatus status)
 #endif
         return code;
     }
-#endif
 }

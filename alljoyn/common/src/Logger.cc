@@ -6,7 +6,7 @@
 /******************************************************************************
  *
  *
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
-#if defined(QCC_OS_GROUP_WINDOWS) || defined(QCC_OS_GROUP_WINRT)
+#if defined(QCC_OS_GROUP_WINDOWS)
 #elif defined(QCC_OS_ANDROID)
 #include <android/log.h>
 #else
@@ -63,7 +63,7 @@ void qcc::Log(int priority, const char* format, ...)
 
     loggerSettings->lock.Lock();
 
-#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_GROUP_WINRT)
+#if !defined(QCC_OS_GROUP_WINDOWS)
     if (loggerSettings->UseSyslog()) {
 
 #if defined(QCC_OS_ANDROID)
@@ -99,7 +99,7 @@ LoggerSetting* LoggerSetting::singleton = NULL;
 
 void LoggerSetting::SetSyslog(bool enable)
 {
-#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_GROUP_WINRT)
+#if !defined(QCC_OS_GROUP_WINDOWS)
     lock.Lock();
 #if !defined(QCC_OS_ANDROID)
     if (enable) {
@@ -138,7 +138,7 @@ void LoggerSetting::SetLevel(int level)
     lock.Lock();
     this->level = level;
 
-#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_GROUP_WINRT) && !defined(QCC_OS_ANDROID)
+#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_ANDROID)
     if (UseSyslog()) {
         setlogmask(LOG_UPTO(level));
     }
@@ -157,28 +157,20 @@ void LoggerSetting::SetName(const char* name)
 }
 
 
-LoggerSetting::LoggerSetting() :
-    name(NULL), level(LOG_WARNING), useSyslog(false), file(NULL)
-{
-    singleton = this;
-}
-
-
 LoggerSetting::LoggerSetting(const char* name, int level, bool useSyslog, FILE* file) :
     name(name), level(level), useSyslog(useSyslog), file(file)
 {
-#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_GROUP_WINRT) && !defined(QCC_OS_ANDROID)
+#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_ANDROID)
     if (useSyslog) {
         openlog(name, 0, LOG_DAEMON);
     }
 #endif
-    singleton = this;
 }
 
 
 LoggerSetting::~LoggerSetting()
 {
-#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_GROUP_WINRT) && !defined(QCC_OS_ANDROID)
+#if !defined(QCC_OS_GROUP_WINDOWS) && !defined(QCC_OS_ANDROID)
     if (useSyslog) {
         closelog();
     }
@@ -187,7 +179,8 @@ LoggerSetting::~LoggerSetting()
 
 
 LoggerSetting* LoggerSetting::GetLoggerSetting(const char* name, int level,
-                                               bool useSyslog, FILE* file) {
+                                               bool useSyslog, FILE* file)
+{
     if (!singleton) {
         singleton = new LoggerSetting(name, level, useSyslog, file);
     } else {
@@ -200,3 +193,36 @@ LoggerSetting* LoggerSetting::GetLoggerSetting(const char* name, int level,
     }
     return singleton;
 }
+int loggerInitCounter = 0;
+bool LoggerInit::cleanedup = false;
+LoggerInit::LoggerInit()
+{
+    loggerInitCounter++;
+    //Do nothing. singleton will be initialized in the first call to GetLoggerSetting
+}
+
+LoggerInit::~LoggerInit()
+{
+
+    if (--loggerInitCounter == 0 && !cleanedup) {
+        //Cleanup singleton
+        if (LoggerSetting::singleton) {
+            delete LoggerSetting::singleton;
+            LoggerSetting::singleton = NULL;
+        }
+        cleanedup = true;
+    }
+}
+void LoggerInit::Cleanup()
+{
+    if (!cleanedup) {
+        //Cleanup singleton
+        if (LoggerSetting::singleton) {
+            delete LoggerSetting::singleton;
+            LoggerSetting::singleton = NULL;
+        }
+        cleanedup = true;
+
+    }
+}
+

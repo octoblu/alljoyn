@@ -1134,7 +1134,7 @@ void* WFDTransport::Run(void* arg)
         vector<Event*> checkEvents, signaledEvents;
         checkEvents.push_back(&stopEvent);
         for (list<pair<qcc::String, SocketFd> >::const_iterator i = m_listenFds.begin(); i != m_listenFds.end(); ++i) {
-            checkEvents.push_back(new Event(i->second, Event::IO_READ, false));
+            checkEvents.push_back(new Event(i->second, Event::IO_READ));
         }
         m_listenFdsLock.Unlock(MUTEX_CONTEXT);
 
@@ -1696,7 +1696,9 @@ void WFDTransport::EnableAdvertisementInstance(ListenRequest& listenRequest)
                  * information.
                  */
                 P2PNameService::Instance().Enable(TRANSPORT_WFD);
-                IpNameService::Instance().Enable(TRANSPORT_WFD, m_listenPort, 0, 0, 0, true, false, false, false);
+                std::map<qcc::String, uint16_t> listenPortMap;
+                listenPortMap["*"] = m_listenPort;
+                IpNameService::Instance().Enable(TRANSPORT_WFD, listenPortMap, 0, std::map<qcc::String, uint16_t>(), 0, true, false, false, false);
                 m_isNsEnabled = true;
             }
         } else {
@@ -1828,7 +1830,9 @@ void WFDTransport::DisableAdvertisementInstance(ListenRequest& listenRequest)
          * enabled ports tells it to disable.
          */
         P2PNameService::Instance().Disable(TRANSPORT_WFD);
-        IpNameService::Instance().Enable(TRANSPORT_WFD, m_listenPort, 0, 0, 0, false, false, false, false);
+        std::map<qcc::String, uint16_t> listenPortMap;
+        listenPortMap["*"] = m_listenPort;
+        IpNameService::Instance().Enable(TRANSPORT_WFD, listenPortMap, 0, std::map<qcc::String, uint16_t>(), 0, false, false, false, false);
 
         m_isNsEnabled = false;
 
@@ -1953,7 +1957,9 @@ void WFDTransport::DisableDiscoveryInstance(ListenRequest& listenRequest)
          * service that we have no enabled ports tells it to disable.
          */
         P2PNameService::Instance().Disable(TRANSPORT_WFD);
-        IpNameService::Instance().Enable(TRANSPORT_WFD, m_listenPort, 0, 0, 0, false, false, false, false);
+        std::map<qcc::String, uint16_t> listenPortMap;
+        listenPortMap["*"] = m_listenPort;
+        IpNameService::Instance().Enable(TRANSPORT_WFD, listenPortMap, 0, std::map<qcc::String, uint16_t>(), 0, false, false, false, false);
         m_isNsEnabled = false;
 
         /*
@@ -2864,7 +2870,7 @@ QStatus WFDTransport::Connect(const char* connectSpec, const SessionOpts& opts, 
      * This is a new not previously satisfied connection request, so attempt
      * to connect to the remote WFD address and port specified in the connectSpec.
      */
-    SocketFd sockFd = -1;
+    SocketFd sockFd = qcc::INVALID_SOCKET_FD;
     status = Socket(QCC_AF_INET, QCC_SOCK_STREAM, sockFd);
     if (status == ER_OK) {
         /* Turn off Nagle */
@@ -3280,7 +3286,7 @@ void WFDTransport::DoStartListen(qcc::String& normSpec)
      * so we don't have to wait for four minutes to relaunch the daemon if it
      * crashes.
      */
-    SocketFd listenFd = -1;
+    SocketFd listenFd = qcc::INVALID_SOCKET_FD;
     status = Socket(QCC_AF_INET, QCC_SOCK_STREAM, listenFd);
     if (status != ER_OK) {
         m_listenFdsLock.Unlock(MUTEX_CONTEXT);
@@ -3481,7 +3487,7 @@ void WFDTransport::DoStopListen(qcc::String& normSpec)
      * the server accept loop, it knows that an FD will be deleted here.
      */
     m_listenFdsLock.Lock(MUTEX_CONTEXT);
-    qcc::SocketFd stopFd = -1;
+    qcc::SocketFd stopFd = qcc::INVALID_SOCKET_FD;
     bool found = false;
     for (list<pair<qcc::String, SocketFd> >::iterator i = m_listenFds.begin(); i != m_listenFds.end(); ++i) {
         if (i->first == normSpec) {

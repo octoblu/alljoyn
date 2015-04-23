@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+ * Copyright AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -16,18 +16,20 @@
 
 #include <iostream>     // std::cout
 #include <fstream>      // std::ifstream
-#include <unistd.h>
 #include <sys/types.h>
-#include <pwd.h>
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <alljoyn/services_common/GuidUtil.h>
-#if defined(QCC_OS_DARWIN)
+#if defined(QCC_OS_DARWIN) || defined(_WIN32)
 #include <limits.h>
 #else
 #include <linux/limits.h>
+#endif
+#ifdef _WIN32
+#include <Rpc.h>
+#pragma comment(lib, "rpcrt4.lib")
 #endif
 
 static const char DEVICE_ID_FILE_NAME[] = "alljoyn-deviceId.txt";
@@ -70,6 +72,10 @@ const char* GuidUtil::GetDeviceIdFileName()
 {
     static std::string sFileName;
     if (sFileName.length() == 0) {
+#ifdef _WIN32
+        sFileName = "C:\\";
+        sFileName += DEVICE_ID_FILE_NAME;
+#else
         //Get the path of the binary
         char buf[PATH_MAX] = { 0 };
         ssize_t ret = readlink("/proc/self/exe", buf, PATH_MAX);
@@ -78,12 +84,13 @@ const char* GuidUtil::GetDeviceIdFileName()
             perror("lstat");
         }
         sFileName += buf;
-        unsigned found = sFileName.find_last_of("/");
+        size_t found = sFileName.find_last_of("/");
         if (found !=  std::string::npos) {
             sFileName.erase(found + 1);
         }
         //Add file name
         sFileName += DEVICE_ID_FILE_NAME;
+#endif
     }
     return sFileName.c_str();
 }
@@ -111,10 +118,20 @@ void GuidUtil::WriteGUIDToFile(char* strGUID)
 
 void GuidUtil::GenerateGUIDUtil(char* strGUID)
 {
+#ifdef _WIN32
+    UUID uuid;
+    UuidCreate(&uuid);
+    RPC_CSTR str;
+    UuidToStringA(&uuid, &str);
+    memcpy(strGUID, str, GUID_STRING_MAX_LENGTH + GUID_HYPHEN_MAX_LENGTH);
+    strGUID[GUID_STRING_MAX_LENGTH + GUID_HYPHEN_MAX_LENGTH + 1] = 0;
+    RpcStringFreeA(&str);
+#else
     std::ifstream ifs("/proc/sys/kernel/random/uuid", std::ifstream::in);
     ifs.getline(strGUID, GUID_STRING_MAX_LENGTH + GUID_HYPHEN_MAX_LENGTH + END_OF_STRING_LENGTH);
     ifs.close();
     NormalizeString(strGUID);
+#endif
 }
 
 void GuidUtil::GenerateGUID(qcc::String* guid)

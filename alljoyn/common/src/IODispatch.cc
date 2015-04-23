@@ -20,14 +20,16 @@
  *    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  ******************************************************************************/
 #include <qcc/IODispatch.h>
+#include <qcc/StringUtil.h>
 #define QCC_MODULE "IODISPATCH"
 
 using namespace qcc;
 using namespace std;
 
+int32_t IODispatch::iodispatchCnt = 0;
 
 IODispatch::IODispatch(const char* name, uint32_t concurrency) :
-    timer(name, true, concurrency, false, 96),
+    timer((String(name) + U32ToString(IncrementAndFetch(&iodispatchCnt)).c_str()), true, concurrency, false, 96),
     reload(false),
     isRunning(false),
     numAlarmsInProgress(0),
@@ -241,6 +243,13 @@ void IODispatch::AlarmTriggered(const Alarm& alarm, QStatus reason)
          * read and write alarms are removed before deleting the entry from the map)
          */
         assert(false);
+        /*
+         * asserts are compiled out so me must return to prevent segfaults in
+         * release code.
+         */
+        QCC_LogError(ER_FAIL, ("Unexpected error, stream is not found. The dispatchEntries map should always have a stream."));
+        lock.Unlock();
+        return;
     }
     if (((it->second.stopping_state != IO_RUNNING) && ctxt->type != IO_EXIT)) {
         /* If stream is being stopped and this is not an exit alarm, return.
@@ -306,13 +315,11 @@ void IODispatch::AlarmTriggered(const Alarm& alarm, QStatus reason)
 
     case IO_EXIT:
 
-        if (isRunning) {
-            lock.Unlock();
-            /* Timer is running. Remove any pending alarms */
-            timer.ForceRemoveAlarm(dispatchEntry.readAlarm, true /* blocking */);
-            timer.ForceRemoveAlarm(dispatchEntry.writeAlarm, true /* blocking */);
-            lock.Lock();
-        }
+        lock.Unlock();
+        /* Remove any pending alarms */
+        timer.ForceRemoveAlarm(dispatchEntry.readAlarm, true /* blocking */);
+        timer.ForceRemoveAlarm(dispatchEntry.writeAlarm, true /* blocking */);
+        lock.Lock();
         /* If IODispatch has been stopped,
          * RemoveAlarms may not have successfully removed the alarm.
          * In that case, wait for any alarms that are in progress to finish.
@@ -334,6 +341,13 @@ void IODispatch::AlarmTriggered(const Alarm& alarm, QStatus reason)
              * while the exit callback was being made
              */
             assert(false);
+            /*
+             * since asserts are compiled out or release code we must add code
+             * to handle this if it occurs.
+             */
+            QCC_LogError(ER_FAIL, ("The IO stream entry was not found on IO_EXIT"));
+            lock.Unlock();
+            return;
         }
         if (it->second.readCtxt) {
             delete it->second.readCtxt;

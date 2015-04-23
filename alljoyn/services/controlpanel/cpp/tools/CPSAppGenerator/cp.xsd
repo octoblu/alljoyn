@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- 
+    Copyright AllSeen Alliance. All rights reserved.
+ 
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted, provided that the above
+    copyright notice and this permission notice appear in all copies.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+    ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gen="http://www.alljoyn.org/controlpanel/gen" targetNamespace="http://www.alljoyn.org/controlpanel/gen" elementFormDefault="qualified">
+
+<!--
+================================================================================
+        NONEMPTY-STRING
+================================================================================
+-->
+<xs:simpleType name='NonEmptyString'>
+  <xs:restriction base='xs:string'>
+    <xs:minLength value='1'/>
+  </xs:restriction>
+</xs:simpleType>
+
+<!--
+================================================================================
+        NAME-STRING
+================================================================================
+-->
+<xs:simpleType name='NameString'>
+  <xs:restriction base='xs:string'>
+    <xs:minLength value='1'/>
+    <xs:maxLength value='50'/>
+    <xs:pattern value="[^ ]{0,50}"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<!--
+================================================================================
+        BASIC TYPES
+================================================================================
+-->
+  <xs:complexType name="CodeOrValueStringWithLang">
+	<xs:choice>
+	  <xs:sequence>
+		  <xs:element name="code" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+	  </xs:sequence>
+	  <xs:sequence>
+		  <xs:element name="value" minOccurs="1" maxOccurs="unbounded">
+			  <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="gen:NonEmptyString">
+					<xs:attribute name="language" type="gen:NameString" use="required"/>
+					<xs:attribute name="type" use="required">
+					  <xs:simpleType>
+						<xs:restriction base="gen:NonEmptyString">
+						  <xs:pattern value="constant"/>
+						  <xs:pattern value="literal"/>
+						</xs:restriction>
+					  </xs:simpleType>
+					</xs:attribute>
+				  </xs:extension>
+				</xs:simpleContent>
+			  </xs:complexType>
+		  </xs:element>
+	  </xs:sequence>
+	</xs:choice>
+  </xs:complexType>
+  <xs:complexType name="CodeOrValueString">
+    <xs:simpleContent>
+      <xs:extension base="gen:NonEmptyString">
+        <xs:attribute name="code" type="xs:boolean" default="false"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="CodeOrValueBool">
+    <xs:simpleContent>
+      <xs:extension base="xs:boolean">
+        <xs:attribute name="code" type="xs:boolean" default="false"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>  
+  <xs:complexType name="LanguageSetType">
+    <xs:sequence>
+      <xs:element name="language" type="gen:NameString" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="gen:NameString" use="required"/>
+  </xs:complexType>
+  <!--
+================================================================================
+        PROPERTY TYPES
+================================================================================
+	-->
+  <xs:complexType name="ConstraintsType">
+    <xs:sequence>
+      <xs:element name="constraint" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="display" type="gen:CodeOrValueStringWithLang" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="value" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ConstraintRangeType">
+    <xs:sequence>
+      <xs:element name="min" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="max" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="increment" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PropertyHints">
+    <xs:sequence>
+      <xs:element name="hint" minOccurs="1" maxOccurs="unbounded">
+        <xs:simpleType>
+          <xs:restriction base="gen:NonEmptyString">
+            <xs:enumeration value="switch"/>
+            <xs:enumeration value="checkbox"/>
+            <xs:enumeration value="spinner"/>
+            <xs:enumeration value="radiobutton"/>
+            <xs:enumeration value="slider"/>
+            <xs:enumeration value="timepicker"/>
+            <xs:enumeration value="datepicker"/>
+            <xs:enumeration value="numberpicker"/>
+            <xs:enumeration value="keypad"/>
+            <xs:enumeration value="rotaryknob"/>
+            <xs:enumeration value="textview"/>
+            <xs:enumeration value="numericview"/>
+            <xs:enumeration value="edittext"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="NonConstrainedPropertyType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="getCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="setCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="secured" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <!-- nee Metadata -->
+      <xs:element name="enabled" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="writable" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="bgcolor" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="hints" type="gen:PropertyHints" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="StringPropertyType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="getCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="setCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="secured" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <!-- nee Metadata -->
+      <xs:element name="enabled" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="writable" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="bgcolor" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="hints" type="gen:PropertyHints" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="constraintVals" type="gen:ConstraintsType" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ScalarPropertyType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="getCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="setCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="secured" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <!-- nee Metadata -->
+      <xs:element name="enabled" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="writable" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="bgcolor" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="hints" type="gen:PropertyHints" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="constraintDefs" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:choice>
+			  <xs:element name="constraintVals" type="gen:ConstraintsType"/>
+			  <xs:element name="constraintRange" type="gen:ConstraintRangeType"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="unitMeasure" type="gen:CodeOrValueStringWithLang" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="dataType" use="required">
+      <xs:simpleType>
+        <xs:restriction base="gen:NonEmptyString">
+          <xs:pattern value="INT16"/>
+          <xs:pattern value="UINT16"/>
+          <xs:pattern value="INT32"/>
+          <xs:pattern value="UINT32"/>
+          <xs:pattern value="INT64"/>
+          <xs:pattern value="UINT64"/>
+          <xs:pattern value="DOUBLE"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <!--
+================================================================================
+        DIALOG TYPE
+================================================================================
+  -->
+  <xs:complexType name="DialogHints">
+    <xs:sequence>
+      <xs:element name="hint" minOccurs="1" maxOccurs="unbounded">
+        <xs:simpleType>
+          <xs:restriction base="gen:NonEmptyString">
+            <xs:enumeration value="alertdialog"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="DialogType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="secured" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="enabled" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="message" type="gen:CodeOrValueStringWithLang" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="bgcolor" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="hints" type="gen:DialogHints" minOccurs="0" maxOccurs="1"/>
+	  <xs:element name="button" minOccurs="1" maxOccurs="3">
+        <xs:complexType>
+          <xs:sequence>
+			  <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="1" maxOccurs="1"/>
+			  <xs:element name="executeCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+          </xs:sequence>
+        </xs:complexType>
+	  </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!--
+================================================================================
+        ACTION TYPES
+        This section contains schema types that model the ActionWidget
+================================================================================
+  -->
+  <xs:complexType name="ActionPropertyHints">
+    <xs:sequence>
+      <xs:element name="hint" minOccurs="1" maxOccurs="unbounded">
+        <xs:simpleType>
+          <xs:restriction base="gen:NonEmptyString">
+            <xs:enumeration value="actionButton"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ActionType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="onAction">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="executeCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="dialog" type="gen:DialogType" minOccurs="1" maxOccurs="1"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="secured" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <!-- nee metadata -->
+      <xs:element name="enabled" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="bgcolor" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="hints" type="gen:ActionPropertyHints" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <!--
+================================================================================
+        LABEL TYPE
+================================================================================
+  -->
+  <xs:complexType name="LabelHints">
+    <xs:sequence>
+      <xs:element name="hint" minOccurs="1" maxOccurs="unbounded">
+        <xs:simpleType>
+          <xs:restriction base="gen:NonEmptyString">
+            <xs:enumeration value="textlabel"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="LabelPropertyType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="enabled" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="bgcolor" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="hints" type="gen:LabelHints" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+ <!--
+================================================================================
+        LISTPROPERTY TYPE
+================================================================================
+  -->
+  <xs:complexType name="ListPropertyHints">
+    <xs:sequence>
+      <xs:element name="hint" minOccurs="1" maxOccurs="unbounded">
+        <xs:simpleType>
+          <xs:restriction base="gen:NonEmptyString">
+            <xs:enumeration value="dynamicspinner"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ListPropertyType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="secured" type="xs:boolean" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="enabled" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="bgcolor" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="hints" type="gen:ListPropertyHints" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="getNumRecords" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="getRecordId" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="getRecordName" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="viewRecord" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="updateRecord" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="deleteRecord" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="addRecord" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="confirmRecord" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="cancelRecord" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>      
+      <xs:element name="recordName" type="gen:StringPropertyType"/>
+      <xs:element name="recordContainer" type="gen:ContainerType"/>
+    </xs:sequence>
+  </xs:complexType>  
+  <!--
+================================================================================
+        CONTAINER TYPES
+================================================================================
+  -->
+  <xs:complexType name="ContainerHints">
+    <xs:sequence>
+      <xs:element name="hint" minOccurs="1" maxOccurs="unbounded">
+        <xs:simpleType>
+          <xs:restriction base="gen:NonEmptyString">
+            <xs:enumeration value="vertical_linear"/>
+            <xs:enumeration value="horizontal_linear"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ContainerType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dismissable" type="xs:boolean" minOccurs="0" maxOccurs="1"/>      
+      <xs:element name="secured" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <!-- nee elements -->
+      <xs:element name="enabled" type="gen:CodeOrValueString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="bgcolor" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="label" type="gen:CodeOrValueStringWithLang" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="hints" type="gen:ContainerHints" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="elements" minOccurs="1" maxOccurs="1">
+        <xs:complexType>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="container" type="gen:ContainerType"/>
+            <xs:element name="stringProperty" type="gen:StringPropertyType"/>
+            <xs:element name="booleanProperty" type="gen:NonConstrainedPropertyType"/>
+            <xs:element name="dateProperty" type="gen:NonConstrainedPropertyType"/>
+            <xs:element name="timeProperty" type="gen:NonConstrainedPropertyType"/>
+            <xs:element name="scalarProperty" type="gen:ScalarPropertyType"/>
+            <xs:element name="labelProperty" type="gen:LabelPropertyType"/>
+            <!--xs:element name="listProperty" type="gen:ListPropertyType"/-->            
+            <xs:element name="action" type="gen:ActionType"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!--
+================================================================================
+        CONTROL PANEL
+================================================================================
+	-->
+  <xs:complexType name="ControlPanelType">
+    <xs:sequence>
+      <xs:element name="rootContainer" type="gen:ContainerType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="languageSet" type="gen:NameString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="ControlPanelDeviceType">
+    <xs:sequence>
+      <xs:element name="name" type="gen:NameString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="headerCode" type="gen:NonEmptyString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="url" type="gen:CodeOrValueString" minOccurs="0" maxOccurs="1"/>      
+      <xs:element name="languageSet" type="gen:LanguageSetType" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="controlPanels" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="controlPanel" type="gen:ControlPanelType" minOccurs="1" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="notificationActions" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:choice minOccurs="1" maxOccurs="unbounded">
+
+            <xs:element name="dialog" minOccurs="1" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="gen:DialogType">
+                    <xs:attribute name="languageSet" type="gen:NameString" use="required"/>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+
+            <xs:element name="container" minOccurs="1" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="gen:ContainerType">
+                    <xs:attribute name="languageSet" type="gen:NameString" use="required"/>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>            
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="controlPanelDevice" type="gen:ControlPanelDeviceType"/>
+</xs:schema>

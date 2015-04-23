@@ -1,4 +1,4 @@
-# Copyright (c) 2010 - 2014, AllSeen Alliance. All rights reserved.
+# Copyright AllSeen Alliance. All rights reserved.
 #
 #    Permission to use, copy, modify, and/or distribute this software for any
 #    purpose with or without fee is hereby granted, provided that the above
@@ -76,14 +76,14 @@ def javadoc_emitter(source, target, env):
    return tlist, slist
 
 def javadoc_generator(source, target, env, for_signature):
-   javadoc_classpath = '-classpath %s' % (env['JAVACLASSPATH'])
+   javadoc_classpath = '-classpath \"%s\"' % (env['JAVACLASSPATH'])
    javadoc_windowtitle = '-windowtitle \"%s\"' % (env['PROJECT_LONG_NAME'])
    javadoc_doctitle = '-doctitle \"%s<br/><h3>%s</h3>\"' % (env['PROJECT_LONG_NAME'], env['PROJECT_NUMBER'])
    javadoc_header = '-header \"<b>%s</b>\"' % (env['PROJECT_SHORT_NAME'])
    try:
       copyright = env['PROJECT_COPYRIGHT']
    except KeyError:
-      copyright = "Copyright &copy; 2010-2014 AllSeen Alliance.<br/><p>AllJoyn is a trademark of Qualcomm Innovation Center, Inc. AllJoyn is used here with permission to identify unmodified materials originating in the AllJoyn project.<br/>The AllJoyn open source project is hosted by the AllSeen Alliance.</p><b>THIS DOCUMENT AND ALL INFORMATION CONTAIN HEREIN ARE PROVIDED ON AN \"AS-IS\" BASIS WITHOUT WARRANTY OF ANY KIND</b>.<br/><b>MAY CONTAIN U.S. AND INTERNATIONAL EXPORT CONTROLLED INFORMATION</b>"
+      copyright = "Copyright AllSeen Alliance, Inc. All Rights Reserved.<br/><p>AllSeen, AllSeen Alliance, and AllJoyn are trademarks of the AllSeen Alliance, Inc in the United States and other jurisdictions.<br/></p><b>THIS DOCUMENT AND ALL INFORMATION CONTAIN HEREIN ARE PROVIDED ON AN \"AS-IS\" BASIS WITHOUT WARRANTY OF ANY KIND</b>.<br/><b>MAY CONTAIN U.S. AND INTERNATIONAL EXPORT CONTROLLED INFORMATION</b>"
    javadoc_bottom = '-bottom \"' + "<small>%s %s ($(%s$))<br/>%s<br/></small>" % (env['PROJECT_LONG_NAME'], env['PROJECT_NUMBER'], datetime.now().strftime('%a %b %d %H:%M:%S %Y'), copyright) + '\"'
    javadoc_overview = ''
    for s in source:

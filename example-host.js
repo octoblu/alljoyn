@@ -1,4 +1,4 @@
-var alljoyn = require('alljoyn');
+var alljoyn = require('./');
 
 console.log("Test loading alljoyn bus...", alljoyn);
 var sessionId = 0;

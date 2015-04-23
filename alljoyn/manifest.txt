@@ -1,0 +1,1 @@
+Git: alljoyn.git tag: 'v14.12b' (+0 changes) commit ref: 108de2eff845662cd41558c1939cd9d17410f711

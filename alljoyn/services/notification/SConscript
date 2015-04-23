@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014, AllSeen Alliance. All rights reserved.
+# Copyright AllSeen Alliance. All rights reserved.
 #
 #    Permission to use, copy, modify, and/or distribute this software for any
 #    purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@ import os
 Import('env')
 
 env['_ALLJOYN_NOTIFICATION_'] = True
+env['OBJDIR_SERVICES_NOTIFICATION'] = env['OBJDIR'] + '/services/notification'
 
 # Make config library and header file paths available to the global environment
 env.Append(LIBPATH = '$DISTDIR/notification/lib');
@@ -38,7 +39,7 @@ nsenv = env.Clone()
 
 for b in nsenv['bindings']:
     if os.path.exists('%s/SConscript' % b):
-        nsenv.VariantDir('$OBJDIR/%s' % b, b, duplicate = 0)
+        nsenv.VariantDir('$OBJDIR_SERVICES_NOTIFICATION/%s' % b, b, duplicate = 0)
 
-nsenv.SConscript(['$OBJDIR/%s/SConscript' % b for b in env['bindings'] if os.path.exists('%s/SConscript' % b) ],
+nsenv.SConscript(['$OBJDIR_SERVICES_NOTIFICATION/%s/SConscript' % b for b in env['bindings'] if os.path.exists('%s/SConscript' % b) ],
                  exports = ['nsenv'])

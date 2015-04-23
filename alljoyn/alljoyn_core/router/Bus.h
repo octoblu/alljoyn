@@ -102,7 +102,7 @@ class Bus : public BusAttachment, public NameListener {
 
     /**
      * Get addresses that can be used by applications running on other
-     * machines (i.e., tcp: and bluetooth:).
+     * machines (i.e., tcp:).
      *
      * @return  External bus addresses in standard DBus address notation
      */
@@ -135,10 +135,9 @@ class Bus : public BusAttachment, public NameListener {
 
   private:
 
-    /**
-     * Forwards name owner changed events from the name table to a registered bus listener.
-     */
-    void NameOwnerChanged(const qcc::String& alias, const qcc::String* oldOwner, const qcc::String* newOwner);
+    void NameOwnerChanged(const qcc::String& alias,
+                          const qcc::String* oldOwner, SessionOpts::NameTransferType oldOwnerNameTransfer,
+                          const qcc::String* newOwner, SessionOpts::NameTransferType newOwnerNameTransfer);
 
     /**
      * Listen for incomming AllJoyn connections on a single transport address.

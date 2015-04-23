@@ -317,7 +317,6 @@ static void usage(void)
     printf("   -c <calls>           = Number of roundtrip calls to make\n");
     printf("   -d <delay>           = Delay between each rountdtrip call in milliseconds\n");
     printf("   -f <prefix>          = FindAdvertisedName prefix\n");
-    printf("   -b                   = Advertise over Bluetooth (enables selective advertising)\n");
     printf("   -t                   = Advertise over TCP (enables selective advertising)\n");
 }
 
@@ -372,10 +371,8 @@ int main(int argc, char** argv)
             }
         } else if (0 == strcmp("-f", argv[i])) {
             g_findPrefix = argv[++i];
-        } else if (0 == strcmp("-b", argv[i])) {
-            transportOpts |= TRANSPORT_BLUETOOTH;
         } else if (0 == strcmp("-t", argv[i])) {
-            transportOpts |= TRANSPORT_WLAN;
+            transportOpts |= TRANSPORT_TCP;
         } else {
             status = ER_FAIL;
             printf("Unknown option %s\n", argv[i]);

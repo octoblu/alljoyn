@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2009-2011, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2011, 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +37,7 @@ using namespace qcc;
 
 QStatus qcc::DeleteFile(qcc::String fileName)
 {
-    if (DeleteFileA(fileName.c_str())) {
+    if (::DeleteFileA(fileName.c_str())) {
         return ER_OK;
     } else {
         return ER_OS_ERROR;
@@ -132,12 +132,12 @@ QStatus FileSource::PullBytes(void* buf, size_t reqBytes, size_t& actualBytes, u
 
     if (ret) {
         actualBytes = readBytes;
-        return ((0 < reqBytes) && (0 == readBytes)) ? ER_NONE : ER_OK;
+        return ((0 < reqBytes) && (0 == readBytes)) ? ER_EOF : ER_OK;
     } else {
         DWORD error = ::GetLastError();
         if (ERROR_HANDLE_EOF == error) {
             actualBytes = 0;
-            return ER_NONE;
+            return ER_EOF;
         } else {
             QCC_LogError(ER_FAIL, ("ReadFile returned error (%d)", error));
             return ER_FAIL;
