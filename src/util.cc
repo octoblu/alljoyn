@@ -29,7 +29,7 @@ void msgArgToObject(const ajn::MsgArg* arg, size_t index, v8::Local<v8::Object> 
 		  break;
 		case ajn::ALLJOYN_STRUCT:
 			if(arg->v_struct.numMembers > 0){
-			  v8::Local<v8::Object> inner = v8::Object::New();
+			  v8::Local<v8::Object> inner = NanNew<v8::Object>();
 			  for(size_t ix=0; ix<arg->v_struct.numMembers; ix++){
 			  	msgArgToObject(&arg->v_struct.members[ix], ix, inner);
 			  }

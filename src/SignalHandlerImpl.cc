@@ -9,7 +9,7 @@
 SignalHandlerImpl::SignalHandlerImpl(NanCallback* sig){
   loop = uv_default_loop();
   signalCallback.callback = sig;
-  uv_async_init(loop, &signal_async, signal_callback);
+  uv_async_init(loop, &signal_async, (uv_async_cb) signal_callback);
 }
 
 SignalHandlerImpl::~SignalHandlerImpl(){
@@ -18,7 +18,7 @@ SignalHandlerImpl::~SignalHandlerImpl(){
 void SignalHandlerImpl::signal_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
-    v8::Local<v8::Object> msg = v8::Object::New();
+    v8::Local<v8::Object> msg = NanNew<v8::Object>();
     size_t msgIndex = 0;
     const ajn::MsgArg* arg = (*holder->message)->GetArg(msgIndex);
     while(arg != NULL){
@@ -27,7 +27,7 @@ void SignalHandlerImpl::signal_callback(uv_async_t *handle, int status) {
       arg = (*holder->message)->GetArg(msgIndex);
     }
 
-    v8::Local<v8::Object> sender = v8::Object::New();
+    v8::Local<v8::Object> sender = NanNew<v8::Object>();
     sender->Set(NanNew<v8::String>("sender"), NanNew<v8::String>((*holder->message)->GetSender()));
     sender->Set(NanNew<v8::String>("session_id"), NanNew<v8::Integer>((*holder->message)->GetSessionId()));
     sender->Set(NanNew<v8::String>("timestamp"), NanNew<v8::Integer>((*holder->message)->GetTimeStamp()));

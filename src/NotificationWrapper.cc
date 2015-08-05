@@ -59,7 +59,7 @@ NotificationWrapper::NotificationWrapper(const char* appName, ajn::BusAttachment
 }
 
 void NotificationWrapper::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(NotificationWrapper::New);
+  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(NotificationWrapper::New);
   NanAssignPersistent(notification_constructor, tpl);
   tpl->SetClassName(NanNew<v8::String>("NotificationService"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);

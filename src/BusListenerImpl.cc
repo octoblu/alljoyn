@@ -1,4 +1,4 @@
-#include "nan.h"
+#include <nan.h>
 
 #include "BusListenerImpl.h"
 #include <alljoyn/InterfaceDescription.h>
@@ -9,9 +9,9 @@ BusListenerImpl::BusListenerImpl(NanCallback* foundNameCallback, NanCallback* lo
   foundName.callback = foundNameCallback;
   lostName.callback = lostNameCallback;
   nameChanged.callback = nameChangedCallback;
-  uv_async_init(loop, &found_async, found_callback);
-  uv_async_init(loop, &lost_async, lost_callback);
-  uv_async_init(loop, &name_change_async, name_change_callback);
+  uv_async_init(loop, &found_async, (uv_async_cb) found_callback);
+  uv_async_init(loop, &lost_async, (uv_async_cb) lost_callback);
+  uv_async_init(loop, &name_change_async, (uv_async_cb) name_change_callback);
   
   foundName.data = 0;
   lostName.data = 0;

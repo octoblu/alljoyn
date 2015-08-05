@@ -40,7 +40,7 @@ BusConnection::~BusConnection(){
 }
 
 void BusConnection::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(BusConnection::New);
+  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(BusConnection::New);
   NanAssignPersistent(bus_constructor, tpl);
   tpl->SetClassName(NanNew<v8::String>("BusAttachment"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);

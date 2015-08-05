@@ -8,8 +8,8 @@ SessionPortListenerImpl::SessionPortListenerImpl(NanCallback* accept, NanCallbac
   loop = uv_default_loop();
   acceptCallback.callback = accept;
   joinedCallback.callback = joined;
-  uv_async_init(loop, &accept_async, accept_callback);
-  uv_async_init(loop, &joined_async, joined_callback);
+  uv_async_init(loop, &accept_async, (uv_async_cb) accept_callback);
+  uv_async_init(loop, &joined_async, (uv_async_cb) joined_callback);
   uv_rwlock_init(&calllock);
 }
 

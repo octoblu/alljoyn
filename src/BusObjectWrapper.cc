@@ -37,7 +37,7 @@ NAN_METHOD(BusObjectConstructor) {
 BusObjectWrapper::BusObjectWrapper(const char* path):object(new BusObjectImpl(path)){}
 
 void BusObjectWrapper::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(BusObjectWrapper::New);
+  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(BusObjectWrapper::New);
   NanAssignPersistent(busobject_constructor, tpl);
   tpl->SetClassName(NanNew<v8::String>("BusObject"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);

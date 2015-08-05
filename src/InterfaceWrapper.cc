@@ -23,7 +23,7 @@ NAN_METHOD(InterfaceDescriptionWrapper) {
 InterfaceWrapper::InterfaceWrapper():interface(NULL){}
 
 void InterfaceWrapper::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(InterfaceWrapper::New);
+  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(InterfaceWrapper::New);
   NanAssignPersistent(interface_constructor, tpl);
   tpl->SetClassName(NanNew<v8::String>("InterfaceDescription"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);

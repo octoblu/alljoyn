@@ -40,7 +40,7 @@ SessionPortListenerWrapper::~SessionPortListenerWrapper(){
 }
 
 void SessionPortListenerWrapper::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(SessionPortListenerWrapper::New);
+  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(SessionPortListenerWrapper::New);
   NanAssignPersistent(portlistener_constructor, tpl);
   tpl->SetClassName(NanNew<v8::String>("SessionPortListener"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
