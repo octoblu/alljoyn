@@ -25,8 +25,13 @@
       "<!(node -e \"require('nan')\")"
     ],
     'cflags':[
+      "-Wall",
       '-Wno-deprecated',
-      '-Wno-ignored-qualifiers'
+      '-Wno-ignored-qualifiers',
+      "-Wno-unused-parameter",
+      "-Wextra",
+      "-S",
+      "-g",
     ],
     'xcode_settings': {
         'OTHER_CFLAGS': [
@@ -68,7 +73,7 @@
       'dependencies': [
         'alljoyn',
         'ajrouter',
-        'ajnotification'
+        'ajnotification',
       ],
       'sources': [
         '<!@(ls -1 src/*.cc)',
@@ -113,7 +118,7 @@
         'alljoyn/alljoyn_core/src/BusObject.cc',
         'alljoyn/alljoyn_core/src/BusUtil.cc',
         'alljoyn/alljoyn_core/src/ClientRouter.cc',
-        'alljoyn/alljoyn_core/src/ClientTransport.cc', #renamed to avoid conflict
+        'alljoyn/alljoyn_core/src/ClientTransportShared.cc', #renamed to avoid conflict
         'alljoyn/alljoyn_core/src/CompressionRules.cc',
         'alljoyn/alljoyn_core/src/CredentialAccessor.cc',
         'alljoyn/alljoyn_core/src/DBusCookieSHA1.cc',
@@ -289,9 +294,22 @@
         'ajrouter'
       ],
       'sources': [
-        'src/test_allchat.cc',
+        'test/test_allchat.cc',
         'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
       ],
-    }
+    },
+    {
+      'target_name': 'aboutclient',
+      'type': 'executable',
+      'dependencies': [
+        'alljoynstatus',
+        'alljoyn',
+        'ajrouter'
+      ],
+      'sources': [
+        'test/aclient.cc',
+        'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
+      ],
+    },    
   ]
 }
