@@ -16,12 +16,12 @@ class SignalHandlerImpl : public ajn::MessageReceiver {
   	uv_async_t signal_async;
 
   struct CallbackHolder{
-    NanCallback* callback;
+    Nan::Callback* callback;
     ajn::Message* message;
   } signalCallback;
 
   public:
-  	SignalHandlerImpl(NanCallback* sig);
+  	SignalHandlerImpl(Nan::Callback* sig);
   	~SignalHandlerImpl();
   	static void signal_callback(uv_async_t *handle, int status);
 

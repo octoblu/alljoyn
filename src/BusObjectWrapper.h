@@ -5,7 +5,7 @@
 #include <alljoyn/BusObject.h>
 #include <alljoyn/AllJoynStd.h>
 
-NAN_METHOD(BusObjectConstructor);
+using namespace Nan;  // NOLINT(build/namespaces)
 
 class BusObjectImpl : public ajn::BusObject{
 public:
@@ -20,12 +20,13 @@ class BusObjectWrapper : public node::ObjectWrap {
     static NAN_METHOD(New);
     static NAN_METHOD(AddInterfaceInternal);
     static NAN_METHOD(Signal);
+
+    static Persistent<v8::Function> constructor;    
+
   public:
   	BusObjectWrapper(const char* path);
-    static void Init ();
-    static v8::Handle<v8::Value> NewInstance();
+    static void Init (v8::Handle<v8::Object> target);
     BusObjectImpl* object;
 };
-
 
 #endif

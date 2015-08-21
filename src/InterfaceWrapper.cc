@@ -4,65 +4,52 @@
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-static v8::Persistent<v8::FunctionTemplate> interface_constructor;
 
-v8::Handle<v8::Value> InterfaceWrapper::NewInstance() {
-    NanScope();
-
-    v8::Local<v8::Object> obj;
-    v8::Local<v8::FunctionTemplate> con = NanNew<v8::FunctionTemplate>(interface_constructor);
-    obj = con->GetFunction()->NewInstance(0, NULL);
-    return obj;
-}
-
-NAN_METHOD(InterfaceDescriptionWrapper) {
-    NanScope();
-    NanReturnValue(InterfaceWrapper::NewInstance());
-}
+Persistent<v8::Function> InterfaceWrapper::constructor;
 
 InterfaceWrapper::InterfaceWrapper():interface(NULL){}
 
-void InterfaceWrapper::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(InterfaceWrapper::New);
-  NanAssignPersistent(interface_constructor, tpl);
-  tpl->SetClassName(NanNew<v8::String>("InterfaceDescription"));
+void InterfaceWrapper::Init(v8::Handle<v8::Object> target) {
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(InterfaceWrapper::New);
+  tpl->SetClassName(Nan::New<v8::String>("InterfaceDescription").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "addSignal", InterfaceWrapper::AddSignal);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "activate", InterfaceWrapper::Activate);
+  SetPrototypeMethod(tpl, "addSignal", InterfaceWrapper::AddSignal);
+  SetPrototypeMethod(tpl, "activate", InterfaceWrapper::Activate);
+
+  constructor.Reset(tpl->GetFunction());
+  Set(target, Nan::New("InterfaceDescription").ToLocalChecked(), tpl->GetFunction());
 }
 
 NAN_METHOD(InterfaceWrapper::New) {
-  NanScope();
-
   InterfaceWrapper* obj = new InterfaceWrapper();
-  obj->Wrap(args.This());
+  obj->Wrap(info.This());
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(InterfaceWrapper::AddSignal) {
-  NanScope();
+  
   int annotation = 0;
-  if (args.Length() == 0 || !args[0]->IsString())
-    return NanThrowError("AddSignal requires a name string argument");
-  if (args.Length() == 1 || !args[1]->IsString())
-    return NanThrowError("AddSignal requires an param signature string argument");
-  if (args.Length() == 2 || !args[2]->IsString())
-    return NanThrowError("AddSignal requires an argument list string argument");
-  if(args.Length() >= 4){
-    annotation = args[3]->Int32Value();
+  if (info.Length() == 0 || !info[0]->IsString())
+    return Nan::ThrowError("AddSignal requires a name string argument");
+  if (info.Length() == 1 || !info[1]->IsString())
+    return Nan::ThrowError("AddSignal requires an param signature string argument");
+  if (info.Length() == 2 || !info[2]->IsString())
+    return Nan::ThrowError("AddSignal requires an argument list string argument");
+  if(info.Length() >= 4){
+    annotation = info[3]->Int32Value();
   }
 
-  InterfaceWrapper* wrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(args.This());
-  QStatus status = wrapper->interface->AddSignal(strdup(*NanUtf8String(args[0])), strdup(*NanUtf8String(args[1])), strdup(*NanUtf8String(args[2])), annotation);
-  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+  InterfaceWrapper* wrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(info.This());
+  QStatus status = wrapper->interface->AddSignal(strdup(*Utf8String(info[0])), strdup(*Utf8String(info[1])), strdup(*Utf8String(info[2])), annotation);
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(static_cast<int>(status)));
 }
 
 NAN_METHOD(InterfaceWrapper::Activate) {
-  NanScope();
-  InterfaceWrapper* wrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(args.This());
+  
+  InterfaceWrapper* wrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(info.This());
   wrapper->interface->Activate();
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 

@@ -9,19 +9,21 @@
 #include <alljoyn/AllJoynStd.h>
 #include "BusListenerImpl.h"
 
-NAN_METHOD(BusListenerConstructor);
+using namespace Nan;  // NOLINT(build/namespaces)
 
 class BusListenerWrapper : public node::ObjectWrap {
+  public:
+	static void Init(v8::Handle<v8::Object> target);
+    BusListenerImpl *listener;
+
   private:
+  	BusListenerWrapper(Nan::Callback* foundName, Nan::Callback* lostName, Nan::Callback* nameChanged);
+  	~BusListenerWrapper();
 
     static NAN_METHOD(New);
-  public:
-  	BusListenerWrapper(NanCallback* foundName, NanCallback* lostName, NanCallback* nameChanged);
-  	~BusListenerWrapper();
-    static void Init ();
-    static v8::Handle<v8::Value> NewInstance();
 
-    BusListenerImpl *listener;
+    static Persistent<v8::Function> constructor;
+
 };
 
 #endif

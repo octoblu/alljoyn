@@ -4,61 +4,39 @@
 #include "SessionPortListenerImpl.h"
 #include <alljoyn/AllJoynStd.h>
 
-static v8::Persistent<v8::FunctionTemplate> portlistener_constructor;
+Persistent<v8::Function> SessionPortListenerWrapper::constructor;
 
-v8::Handle<v8::Value> SessionPortListenerWrapper::NewInstance() {
-    NanScope();
 
-    v8::Local<v8::Object> obj;
-    v8::Local<v8::FunctionTemplate> con = NanNew<v8::FunctionTemplate>(portlistener_constructor);
-    obj = con->GetFunction()->NewInstance(0, NULL);
-    return obj;
-}
-
-NAN_METHOD(SessionPortListenerConstructor) {
-  NanScope();
-  if(args.Length() < 2){
-    return NanThrowError("SessionPortListener requires callbacks for AcceptSessionJoiner and SessionJoined.");
-  }
-  v8::Local<v8::Object> obj;
-  v8::Local<v8::FunctionTemplate> con = NanNew<v8::FunctionTemplate>(portlistener_constructor);
-
-  v8::Handle<v8::Value> argv[] = {
-    args[0],
-    args[1],
-    args[2]
-  };
-  obj = con->GetFunction()->NewInstance(3, argv);
-  NanReturnValue(obj);
-}
-
-SessionPortListenerWrapper::SessionPortListenerWrapper(NanCallback* accept, NanCallback* joined)
+SessionPortListenerWrapper::SessionPortListenerWrapper(Nan::Callback* accept, Nan::Callback* joined)
   :listener(new SessionPortListenerImpl(accept, joined)){
 }
 
 SessionPortListenerWrapper::~SessionPortListenerWrapper(){
 }
 
-void SessionPortListenerWrapper::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(SessionPortListenerWrapper::New);
-  NanAssignPersistent(portlistener_constructor, tpl);
-  tpl->SetClassName(NanNew<v8::String>("SessionPortListener"));
+void SessionPortListenerWrapper::Init(v8::Handle<v8::Object> target) {
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(SessionPortListenerWrapper::New);
+  tpl->SetClassName(Nan::New<v8::String>("SessionPortListener").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+  constructor.Reset(tpl->GetFunction());
+  Set(target, Nan::New("SessionPortListener").ToLocalChecked(), tpl->GetFunction());
+
 }
 
 NAN_METHOD(SessionPortListenerWrapper::New) {
-  NanScope();
-  if(args.Length() < 2){
-    return NanThrowError("SessionPortListener requires callbacks for AcceptSessionJoiner and SessionJoined.");
+  
+  if(info.Length() < 2){
+    return Nan::ThrowError("SessionPortListener requires callbacks for AcceptSessionJoiner and SessionJoined.");
   }
-  v8::Local<v8::Function> accept = args[0].As<v8::Function>();
-  NanCallback *acceptCall = new NanCallback(accept);
-  v8::Local<v8::Function> joined = args[1].As<v8::Function>();
-  NanCallback *joinedCall = new NanCallback(joined);
+  v8::Local<v8::Function> accept = info[0].As<v8::Function>();
+  Nan::Callback *acceptCall = new Nan::Callback(accept);
+  v8::Local<v8::Function> joined = info[1].As<v8::Function>();
+  Nan::Callback *joinedCall = new Nan::Callback(joined);
 
   SessionPortListenerWrapper* obj = new SessionPortListenerWrapper(acceptCall, joinedCall);
-  obj->Wrap(args.This());
+  obj->Wrap(info.This());
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
