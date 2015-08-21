@@ -19,9 +19,9 @@
       'alljoyn/alljoyn_core/router/posix',
       'alljoyn/alljoyn_core/src',
       'alljoyn/common/inc',
-      'alljoyn/services/services_common/cpp/inc',
       'alljoyn/services/about/cpp/inc',
-      'alljoyn/services/notification/cpp/inc',
+      'services/base/services_common/cpp/inc',
+      'services/base/notification/cpp/inc',
       "<!(node -e \"require('nan')\")"
     ],
     'cflags':[
@@ -107,13 +107,13 @@
         'alljoyn/alljoyn_core/src/AuthMechRSA.cc',
         'alljoyn/alljoyn_core/src/AuthMechSRP.cc',
         'alljoyn/alljoyn_core/src/AutoPinger.cc',
-        'alljoyn/alljoyn_core/src/AutoPingerInternal.cc',
+        #'alljoyn/alljoyn_core/src/AutoPingerInternal.cc',
         'alljoyn/alljoyn_core/src/BusAttachment.cc',
         'alljoyn/alljoyn_core/src/BusEndpoint.cc',
         'alljoyn/alljoyn_core/src/BusObject.cc',
         'alljoyn/alljoyn_core/src/BusUtil.cc',
         'alljoyn/alljoyn_core/src/ClientRouter.cc',
-        'alljoyn/alljoyn_core/src/ClientTransportShared.cc', #renamed to avoid conflict
+        'alljoyn/alljoyn_core/src/ClientTransport.cc', #renamed to avoid conflict
         'alljoyn/alljoyn_core/src/CompressionRules.cc',
         'alljoyn/alljoyn_core/src/CredentialAccessor.cc',
         'alljoyn/alljoyn_core/src/DBusCookieSHA1.cc',
@@ -219,8 +219,8 @@
       ],
       'sources': [
         '<!@(ls -1 alljoyn/services/about/cpp/src/*.cc)',
-        '<!@(ls -1 alljoyn/services/notification/cpp/src/*.cc)',
-        '<!@(ls -1 alljoyn/services/services_common/cpp/src/*.cc)'
+        '<!@(ls -1 services/base/notification/cpp/src/*.cc)',
+        '<!@(ls -1 services/base/services_common/cpp/src/*.cc)'
       ],
     },
     {

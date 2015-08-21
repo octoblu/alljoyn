@@ -11,7 +11,7 @@
 #    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 #    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 #    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-# 
+#
 
 Import('ajenv')
 Import('common_static_objs')
@@ -53,6 +53,16 @@ else:
 # AllJoyn Static Library
 libs = libenv.StaticLibrary('alljoyn', static_objs)
 if libenv['LIBTYPE'] != 'static':
-    libs.append(libenv.SharedLibrary('alljoyn', shared_objs))
+    import os
+    version = os.environ['ALLJOYN_PV']
+    shlib_suffix = libenv.subst('$SHLIBSUFFIX')
+    ilib_suffix = shlib_suffix + '.' + version
+    (major, minor) = version.split(".")
+    soname = 'liballjoyn' + shlib_suffix + "." + major
+    from SCons import Util
+    shlink_flags = Util.CLVar(libenv.subst('$SHLINKFLAGS'))
+    shlink_flags += ['-Wl,-Bsymbolic','-Wl,-soname=%s' % soname]
+    libs.append(libenv.SharedLibrary('alljoyn', shared_objs, SHLIBSUFFIX=ilib_suffix, SHLINKFLAGS=shlink_flags))
+
 
 Return ('libs', 'static_objs', 'shared_objs')

@@ -6,7 +6,7 @@
 /******************************************************************************
  *
  *
- * Copyright (c) 2014-2015, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -23,19 +23,15 @@
 #include <qcc/CommonGlobals.h>
 #include <qcc/String.h>
 #include <qcc/Logger.h>
-#include <qcc/Util.h>
 
 #define QCC_MODULE "STATICGLOBALS"
 
-#ifdef QCC_OS_GROUP_WINDOWS
-#include <qcc/windows/utility.h>
-#endif
 #ifdef CRYPTO_CNG
 #include <qcc/CngCache.h>
 #endif
 namespace qcc {
 /** Assign enough memory to store all static/global values */
-static uint64_t commonDummy[RequiredArrayLength(sizeof(StaticGlobals), uint64_t)];
+static uint64_t commonDummy[sizeof(StaticGlobals) / 4];
 
 /** Assign commonGlobals to be a reference to the allocated memory */
 StaticGlobals& commonGlobals = ((StaticGlobals &)commonDummy);

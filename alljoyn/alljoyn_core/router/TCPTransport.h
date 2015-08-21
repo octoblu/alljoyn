@@ -232,7 +232,7 @@ class TCPTransport : public Transport, public _RemoteEndpoint::EndpointListener,
      *
      * @return the TransportMask for this transport.
      */
-    TransportMask GetTransportMask() const { return TRANSPORT_TCP; }
+    TransportMask GetTransportMask() const { return TRANSPORT_WLAN; }
 
     /**
      * Get a list of the possible listen specs of the current Transport for a

@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2014-2015, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -27,7 +27,6 @@
 
 #include <qcc/platform.h>
 #include <qcc/Debug.h>
-#include <qcc/Util.h>
 #include <qcc/Crypto.h>
 
 #include <qcc/CngCache.h>
@@ -79,7 +78,7 @@ void CngCache::Cleanup()
 /**
  * The one and only CNG cache instance.
  */
-uint64_t cngCacheDummy[RequiredArrayLength(sizeof(CngCache), uint64_t)];
+uint64_t cngCacheDummy[sizeof(CngCache) / 8];
 
 CngCache& cngCache = (CngCache &)cngCacheDummy;
 

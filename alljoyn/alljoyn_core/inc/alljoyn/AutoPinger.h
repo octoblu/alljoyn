@@ -5,7 +5,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2015, AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2014, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -28,7 +28,9 @@
 #endif
 
 #include <map>
+#include <qcc/Timer.h>
 #include <qcc/String.h>
+#include <qcc/Mutex.h>
 #include <qcc/Debug.h>
 #include <alljoyn/Status.h>
 #include <alljoyn/PingListener.h>
@@ -36,14 +38,14 @@
 namespace ajn {
 /// @cond ALLJOYN_DEV
 /** @internal Forward references */
-class AutoPingerInternal;
 class BusAttachment;
+struct PingGroup;
 /// @endcond
 
 /**
  * AutoPinger class
  */
-class AutoPinger {
+class AutoPinger : public qcc::AlarmListener {
   public:
 
 
@@ -59,7 +61,7 @@ class AutoPinger {
     /**
      * Destructor
      */
-    ~AutoPinger();
+    virtual ~AutoPinger();
 
     /**
      * Pause all ping actions
@@ -124,11 +126,30 @@ class AutoPinger {
     QStatus RemoveDestination(const qcc::String& group, const qcc::String& destination, bool removeAll = false);
 
   private:
+    friend class AutoPingAsyncCB;
+    friend struct Destination;
+    friend class PingAsyncContext;
+
+    enum PingState {
+        UNKNOWN,
+        LOST,
+        AVAILABLE
+    };
+
     AutoPinger(const AutoPinger&);
     void operator=(const AutoPinger&);
 
-    AutoPingerInternal*internal;
+    bool UpdatePingStateOfDestination(const qcc::String& group, const qcc::String& destination, const AutoPinger::PingState state);
+    void PingGroupDestinations(const qcc::String& group);
+    bool IsRunning();
+    void AlarmTriggered(const qcc::Alarm& alarm, QStatus reason);
 
+    qcc::Timer timer; /* Single Timerthread */
+    BusAttachment& busAttachment;
+    qcc::Mutex pingerMutex;
+    std::map<qcc::String, PingGroup*> pingGroups;
+
+    bool pausing;
 };
 static class AutoPingerInit {
   public:
@@ -139,4 +160,5 @@ static class AutoPingerInit {
     static bool cleanedup;
 } autoPingerInit;
 }
+#undef QCC_MODULE
 #endif /* AUTOPINGER_H_ */
