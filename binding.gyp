@@ -30,6 +30,7 @@
       '-Wno-ignored-qualifiers',
       "-Wno-unused-parameter",
       "-Wextra",
+      "-std=c++11"
     ],
     'xcode_settings': {
         'OTHER_CFLAGS': [
