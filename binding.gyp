@@ -30,8 +30,6 @@
       '-Wno-ignored-qualifiers',
       "-Wno-unused-parameter",
       "-Wextra",
-      "-S",
-      "-g",
     ],
     'xcode_settings': {
         'OTHER_CFLAGS': [
