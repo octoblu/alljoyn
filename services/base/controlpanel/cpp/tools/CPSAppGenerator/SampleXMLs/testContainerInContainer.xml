@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+   <!--
+
+        Copyright AllSeen Alliance. All rights reserved.
+
+           Permission to use, copy, modify, and/or distribute this software for any
+           purpose with or without fee is hereby granted, provided that the above
+           copyright notice and this permission notice appear in all copies.
+
+           THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+           WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+           MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+           ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+           WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+           ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+           OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+  -->
+<controlPanelDevice xmlns="http://www.alljoyn.org/controlpanel/gen">
+    <name>MyDevice</name>
+    <headerCode>#include "ControlPanelProvided.h"</headerCode>
+    <languageSet name="myLanguages">
+        <language>en</language>
+    </languageSet>
+    <controlPanels>
+        <controlPanel languageSet="myLanguages">
+            <rootContainer>
+                <name>rootContainer</name>
+                <secured>false</secured>    
+                <enabled>true</enabled>
+                <bgcolor>0x200</bgcolor>
+                <label>
+                    <value type="literal" language="en">My Label of my container</value>
+                </label>
+                <hints>
+                    <hint>vertical_linear</hint>
+                </hints>
+                <elements>
+                    <scalarProperty dataType="INT32">
+                        <name>fanSpeedProperty</name>
+                        <getCode>getint32Var</getCode>
+                        <setCode>setint32Var(%s)</setCode>
+                        <secured>false</secured>
+                        <enabled>false</enabled>
+                        <writable>false</writable>
+                        <label>
+                            <value type="literal" language="en">Oven Fan Speed</value>
+                        </label>
+                        <bgcolor>0x350</bgcolor>
+                        <unitMeasure>
+                          <value type="literal" language="en">RPM</value>
+                        </unitMeasure>
+                    </scalarProperty>
+                    <container>
+                        <name>childContainer</name>
+                        <secured>false</secured>    
+                        <enabled>true</enabled>
+                        <bgcolor>0x200</bgcolor>
+                        <label>
+                            <value type="literal" language="en">Label of Child container</value>
+                        </label>
+                        <hints>
+                            <hint>horizontal_linear</hint>
+                        </hints>
+                        <elements>
+                            <scalarProperty dataType="UINT16">
+                                <name>heatProperty</name>
+                                <getCode>getuint16Var</getCode>
+                                <setCode>setuint16Var(%s)</setCode>
+                                <secured>false</secured>
+                                <enabled>true</enabled>
+                                <writable>true</writable>
+                                <label>
+                                    <value type="literal" language="en">Oven Temperature</value>
+                                </label>
+                                <bgcolor>0x500</bgcolor>
+                                <hints>
+                                    <hint>spinner</hint>
+                                </hints>
+                                <constraintDefs>
+                                    <constraintVals>
+                                        <constraint>
+                                            <display>
+                                                <value type="literal" language="en">Regular</value>
+                                            </display>
+                                            <value>175</value>
+                                        </constraint>
+                                        <constraint>
+                                            <display>
+                                                <value type="literal" language="en">Hot</value>
+                                            </display>
+                                            <value>200</value>
+                                        </constraint>                    
+                                        <constraint>
+                                            <display>
+                                                <value type="literal" language="en">Very Hot</value>
+                                            </display>
+                                            <value>225</value>                    
+                                        </constraint>
+                                    </constraintVals>
+                                </constraintDefs>
+                                <unitMeasure>
+                                    <value type="literal" language="en">Degrees</value>
+                                </unitMeasure>
+                            </scalarProperty>
+                        </elements>
+                    </container>            
+                </elements>        
+            </rootContainer>
+        </controlPanel>
+    </controlPanels>
+</controlPanelDevice>
