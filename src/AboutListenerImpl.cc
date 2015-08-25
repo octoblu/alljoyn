@@ -2,16 +2,16 @@
 #include "util.h"
 
 AboutListenerImpl::AboutListenerImpl(Callback *callback){
-  loop = uv_default_loop();
-  aboutCallback.callback = callback;
-  uv_async_init(loop, &about_async, (uv_async_cb) about_callback);
-  uv_rwlock_init(&calllock);
+  this->jsCallback = callback;
+  worker = new UVThreadSwitcher(std::bind(&AboutListenerImpl::uvCallback, this, std::placeholders::_1));
 };
 
+AboutListenerImpl::~AboutListenerImpl(){
+  delete worker;
+}
 
-void
-AboutListenerImpl::about_callback(uv_async_t *handle, int status){
-  CallbackHolder* holder = (CallbackHolder*) handle->data;
+void AboutListenerImpl::uvCallback(void *userData){
+  AnnouncedData *holder = (AnnouncedData *) userData;
 
   HandleScope scope;
 
@@ -26,8 +26,6 @@ AboutListenerImpl::about_callback(uv_async_t *handle, int status){
   }
 
   size_t aboutDataSize = holder->aboutDataArg->v_array.GetNumElements();
-
-
   v8::Local<v8::Object> aboutData = Nan::New<v8::Object>();
 
   for(size_t i=0;i<aboutDataSize;i++){
@@ -46,8 +44,7 @@ AboutListenerImpl::about_callback(uv_async_t *handle, int status){
     aboutData
   };
 
-
-  holder->callback->Call(5, argv);
+  this->jsCallback->Call(5, argv);
 
   if(holder->objectDescriptionArg){
     delete holder->objectDescriptionArg;
@@ -62,16 +59,16 @@ AboutListenerImpl::about_callback(uv_async_t *handle, int status){
     free((void *)holder->busName);
     holder->busName = NULL;
   }
-
 }
 
 void 
 AboutListenerImpl::Announced(const char* busName, uint16_t version, SessionPort port, const MsgArg& objectDescriptionArg, const MsgArg& aboutDataArg) {
-  about_async.data = (void*) &aboutCallback;
-  aboutCallback.busName = strdup(busName);
-  aboutCallback.version = version;
-  aboutCallback.port = port;
-  aboutCallback.objectDescriptionArg = new ajn::MsgArg(objectDescriptionArg);
-  aboutCallback.aboutDataArg = new ajn::MsgArg(aboutDataArg);
-  uv_async_send(&about_async);
+  AnnouncedData *data = new AnnouncedData();
+  data->busName = strdup(busName);
+  data->version = version;
+  data->port = port;
+  data->objectDescriptionArg = new ajn::MsgArg(objectDescriptionArg);
+  data->aboutDataArg = new ajn::MsgArg(aboutDataArg);
+
+  worker->execute((void *)data);
 }

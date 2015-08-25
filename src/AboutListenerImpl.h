@@ -4,34 +4,32 @@
 #include <nan.h>
 #include <uv.h>
 #include <alljoyn/AllJoynStd.h>
+#include <functional>
 
 #include "AboutListener.h"
+#include "UVThreadSwitcher.h"
 
 using namespace ajn;
 using namespace Nan;
 
+struct AnnouncedData{
+  const char* busName;
+  uint16_t version;
+  SessionPort port;
+  ajn::MsgArg* objectDescriptionArg;
+  ajn::MsgArg* aboutDataArg;
+};
+
 class AboutListenerImpl : public AboutListener {
-    uv_loop_t *loop;
-    uv_async_t about_async;
-    uv_rwlock_t calllock;
-
-    struct CallbackHolder{
-      Nan::Callback* callback;
-      const char* busName;
-      uint16_t version;
-      SessionPort port;
-      ajn::MsgArg* objectDescriptionArg;
-      ajn::MsgArg* aboutDataArg;
-    } aboutCallback;
-
+  Callback *jsCallback;
+  UVThreadSwitcher *worker;
 
   public:
     AboutListenerImpl(Callback *callback);
-
+    virtual ~AboutListenerImpl();
 
   private:
-    static void about_callback(uv_async_t *handle, int status);
-
+    void uvCallback(void *userData);
     void Announced(const char* busName, uint16_t version, SessionPort port, const MsgArg& objectDescriptionArg, const MsgArg& aboutDataArg);
 };
 
