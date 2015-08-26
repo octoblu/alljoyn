@@ -3,11 +3,16 @@
 #include "BusObjectWrapper.h"
 #include "InterfaceWrapper.h"
 #include "util.h"
+#include "UVThreadSwitcher.h"
 #include <string.h>
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-Persistent<v8::Function> BusObjectWrapper::constructor;
+using namespace v8;
+using namespace std;
+using namespace ajn;
+
+Nan::Persistent<v8::Function> BusObjectWrapper::constructor;
 
 BusObjectWrapper::BusObjectWrapper(const char* path):object(new BusObjectImpl(path)){}
 
@@ -50,8 +55,16 @@ NAN_METHOD(BusObjectWrapper::AddInterfaceInternal) {
   }
   BusObjectWrapper* obj = node::ObjectWrap::Unwrap<BusObjectWrapper>(info.This());
   InterfaceWrapper* interWrapper = node::ObjectWrap::Unwrap<InterfaceWrapper>(info[0].As<v8::Object>());
-  QStatus status = obj->object->AddInter(interWrapper->interface);
-  info.GetReturnValue().Set(Nan::New<v8::Integer>(static_cast<int>(status)));
+  QStatus status = obj->object->AddInterface(interWrapper->interface);
+  if(info.Length()==1){
+  }else{
+    if(status==ER_OK){
+      Local<Object> v8CallbackObject = info[1].As<Object>();
+
+      status = obj->object->AddMethodHandlers(interWrapper->interface, v8CallbackObject);      
+    }
+  }
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(static_cast<int>(status)));  
 }
 
 NAN_METHOD(BusObjectWrapper::Signal) {
@@ -81,12 +94,126 @@ NAN_METHOD(BusObjectWrapper::Signal) {
   info.GetReturnValue().Set(Nan::New<v8::Integer>(static_cast<int>(status)));
 }
 
-BusObjectImpl::BusObjectImpl(const char* path):ajn::BusObject(path){
+BusObjectImpl::BusObjectImpl(const char* path):ajn::BusObject(path) {
+  switcher = new UVThreadSwitcher(std::bind(&BusObjectImpl::v8MethodHandler, this, std::placeholders::_1));
+}
+BusObjectImpl::~BusObjectImpl() {
+  delete switcher;
+
+  unordered_map<const ajn::InterfaceDescription*, Nan::Callback*>::iterator itor;
+  for( itor = v8CallbackMap.begin(); itor != v8CallbackMap.end(); ++itor ){
+    delete (*itor).second;
+  }
 }
 
-QStatus BusObjectImpl::AddInter(ajn::InterfaceDescription* interface){
-    return AddInterface(*interface);
+QStatus 
+BusObjectImpl::AddInterface(ajn::InterfaceDescription* interface){
+    return ajn::BusObject::AddInterface(*interface);
 }
 
-BusObjectImpl::~BusObjectImpl(){
+
+QStatus
+BusObjectImpl::AddMethodHandlers(ajn::InterfaceDescription* interface, Local<Object> v8CallbackObject){
+  Local<Array> keys = v8CallbackObject->GetPropertyNames();
+
+  vector<BusObject::MethodEntry> methodEntries;
+
+  size_t size = keys->Length();
+
+  for(size_t i=0;i<size;i++){
+    Local<Value> key = Nan::Get(keys, i).ToLocalChecked();
+    Local<Function> value = Nan::Get(v8CallbackObject, key).ToLocalChecked().As<Function>();
+
+    v8CallbackMap.insert(make_pair(interface, new Nan::Callback(value)));
+
+    BusObject::MethodEntry entry = {
+      interface->GetMember(*Utf8String(key)),
+      static_cast<MessageReceiver::MethodHandler>(&BusObjectImpl::MethodHandler)
+    };
+
+    methodEntries.push_back(entry);
+  }
+
+  return BusObject::AddMethodHandlers((const MethodEntry*)&methodEntries[0], size);      
 }
+
+struct BusMethodData{
+  ajn::Message *message;
+  const ajn::InterfaceDescription *interface;
+};
+
+void 
+BusObjectImpl::MethodHandler(const ajn::InterfaceDescription::Member* member, ajn::Message& msg){
+  BusMethodData *userData = new BusMethodData();
+  userData->message = new ajn::Message(msg);
+  userData->interface = member->iface;
+
+  switcher->execute((void *)userData);
+}
+
+void
+BusObjectImpl::v8MethodHandler(void *userData){
+  BusMethodData *busMethodData = (BusMethodData *) userData;
+
+  ajn::Message *ajnMsg = busMethodData->message;
+
+  v8::Local<v8::Object> msg = Nan::New<v8::Object>();
+  size_t msgIndex = 0;
+  const ajn::MsgArg* arg = (*ajnMsg)->GetArg(msgIndex);
+  while(arg != NULL){
+    msgArgToObject(arg, msgIndex, msg);
+    msgIndex++;
+    arg = (*ajnMsg)->GetArg(msgIndex);
+  }
+
+
+  v8::Local<v8::Object> sender = Nan::New<v8::Object>();
+
+  Nan::Set(sender, 
+    Nan::New<v8::String>("sender").ToLocalChecked(), 
+    Nan::New<v8::String>((*ajnMsg)->GetSender()).ToLocalChecked()
+  );
+  Nan::Set(sender, 
+    Nan::New<v8::String>("session_id").ToLocalChecked(), 
+    Nan::New<v8::Integer>((*ajnMsg)->GetSessionId())
+  );
+  Nan::Set(sender, 
+    Nan::New<v8::String>("timestamp").ToLocalChecked(), 
+    Nan::New<v8::Integer>((*ajnMsg)->GetTimeStamp())
+  );
+  Nan::Set(sender, 
+    Nan::New<v8::String>("member_name").ToLocalChecked(), 
+    Nan::New<v8::String>((*ajnMsg)->GetMemberName()).ToLocalChecked()
+  );
+  Nan::Set(sender, 
+    Nan::New<v8::String>("object_path").ToLocalChecked(), 
+    Nan::New<v8::String>((*ajnMsg)->GetObjectPath()).ToLocalChecked()
+  );
+  Nan::Set(sender, 
+    Nan::New<v8::String>("signature").ToLocalChecked(), 
+    Nan::New<v8::String>((*ajnMsg)->GetSignature()).ToLocalChecked()
+  );    
+
+  v8::Local<v8::Value> argv[] = {
+    sender,
+    msg    
+  };
+
+  Nan::Callback *v8Callback = (*v8CallbackMap.find(busMethodData->interface)).second;
+
+  v8::Handle<v8::Value> rval = v8Callback->Call(2, argv);
+
+  MsgArg outArg("s", *Utf8String(rval));
+
+  QStatus status = BusObject::MethodReply((*ajnMsg), &outArg, 1);
+  if (ER_OK != status) {
+      printf("Ping: Error sending reply.\n");
+  }
+
+  delete ajnMsg;
+
+  delete busMethodData;
+}
+
+
+

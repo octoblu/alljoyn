@@ -11,8 +11,11 @@ using namespace Nan;  // NOLINT(build/namespaces)
 class InterfaceWrapper : public node::ObjectWrap {
   private:
     static NAN_METHOD(New);
+    static NAN_METHOD(AddProperty);
+    static NAN_METHOD(AddMethod);
     static NAN_METHOD(AddSignal);
     static NAN_METHOD(Activate);
+    static NAN_METHOD(Introspect);
 
   public:
   	InterfaceWrapper();
