@@ -243,6 +243,41 @@ void msgArgToObject(const ajn::MsgArg* arg, size_t index, v8::Local<v8::Object> 
 	}
 }
 
+void objToMsgArg(const char* signature, v8::Local<v8::Value> obj, ajn::MsgArg *out){
+
+	size_t sigLen = strlen(signature);
+
+	while(sigLen--){
+		char sigChar = *signature++;
+		switch(sigChar){
+			case ajn::ALLJOYN_STRING:{
+				char *valueChar = strdup(*Utf8String(obj));
+				out->Set("s", valueChar);
+				out->Stabilize();
+				free(valueChar);
+				break;
+			}
+			case ajn::ALLJOYN_OBJECT_PATH:{
+				char *valueChar = strdup(*Utf8String(obj));
+				out->Set("o", *Utf8String(obj));
+				out->Stabilize();
+				free(valueChar);
+				break;
+			}
+		}
+	}
+
+	// if(obj->IsString()){
+	// 	out->Set(signiture, *Utf8String(obj));
+	// }else if(obj->IsInt32()){
+	// 	return new ajn::MsgArg("i", obj->Int32Value());
+	// }else if(obj->IsNumber()){
+	// 	return new ajn::MsgArg("d", obj->NumberValue());
+	// }else if(obj->IsBoolean() || obj->IsBooleanObject()){
+	// 	return new ajn::MsgArg("b", obj->BooleanValue());
+	// }	
+}
+
 ajn::MsgArg* objToMsgArg(v8::Local<v8::Value> obj){
 	if(obj->IsString()){
 		return new ajn::MsgArg("s", strdup(*Utf8String(obj)));

@@ -183,7 +183,7 @@ NAN_METHOD(BusConnection::FindAdvertisedName) {
     return Nan::ThrowError("FindAdvertisedName requires a namePrefix string argument");
 
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(info.This());
-  QStatus status = connection->bus->FindAdvertisedName(strdup(*Utf8String(info[0])));
+  QStatus status = connection->bus->FindAdvertisedName(*Utf8String(info[0]));
   info.GetReturnValue().Set(Nan::New<v8::Integer>(static_cast<int>(status)));
 }
 

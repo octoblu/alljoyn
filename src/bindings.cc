@@ -6,6 +6,7 @@
 #include "BusObjectWrapper.h"
 #include "SessionPortListenerWrapper.h"
 #include "NotificationWrapper.h"
+#include "ProxyBusObjectWrapper.h"
 
 using namespace v8;
 
@@ -16,6 +17,7 @@ void init(Handle<Object> target) {
   BusObjectWrapper::Init(target);
   SessionPortListenerWrapper::Init(target);
   NotificationWrapper::Init(target);
+  ProxyBusObjectWrapper::Init(target);
 }
 
 NODE_MODULE(node_alljoyn, init)

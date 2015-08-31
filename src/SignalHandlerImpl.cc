@@ -52,16 +52,10 @@ void SignalHandlerImpl::signal_callback(uv_async_t *handle, int status) {
       Nan::New<v8::String>("signature").ToLocalChecked(), 
       Nan::New<v8::String>((*holder->message)->GetSignature()).ToLocalChecked()
     );    
-    // sender->Set(Nan::New<v8::String>("sender"), Nan::New<v8::String>((*holder->message)->GetSender()));
-    // sender->Set(Nan::New<v8::String>("session_id"), Nan::New<v8::Integer>((*holder->message)->GetSessionId()));
-    // sender->Set(Nan::New<v8::String>("timestamp"), Nan::New<v8::Integer>((*holder->message)->GetTimeStamp()));
-    // sender->Set(Nan::New<v8::String>("member_name"), Nan::New<v8::String>((*holder->message)->GetMemberName()));
-    // sender->Set(Nan::New<v8::String>("object_path"), Nan::New<v8::String>((*holder->message)->GetObjectPath()));
-    // sender->Set(Nan::New<v8::String>("signature"), Nan::New<v8::String>((*holder->message)->GetSignature()));
 
     v8::Local<v8::Value> argv[] = {
-      msg,
-      sender
+      sender,
+      msg
     };
     holder->callback->Call(2, argv);
 

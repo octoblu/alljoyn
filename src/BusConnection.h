@@ -40,7 +40,7 @@ class BusConnection : public node::ObjectWrap {
     static NAN_METHOD(RegisterAboutListener);
     static NAN_METHOD(WhoImplements);
     
-    static Persistent<v8::Function> constructor;
+    static Nan::Persistent<v8::Function> constructor;
 };
 
 #endif
