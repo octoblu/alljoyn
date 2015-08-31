@@ -1,17 +1,19 @@
-#include "nan.h"
+#include <nan.h>
 
 #include "BusListenerImpl.h"
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-BusListenerImpl::BusListenerImpl(NanCallback* foundNameCallback, NanCallback* lostNameCallback, NanCallback* nameChangedCallback){
+using namespace Nan;  // NOLINT(build/namespaces)
+
+BusListenerImpl::BusListenerImpl(Nan::Callback* foundNameCallback, Nan::Callback* lostNameCallback, Nan::Callback* nameChangedCallback){
   loop = uv_default_loop();
   foundName.callback = foundNameCallback;
   lostName.callback = lostNameCallback;
   nameChanged.callback = nameChangedCallback;
-  uv_async_init(loop, &found_async, found_callback);
-  uv_async_init(loop, &lost_async, lost_callback);
-  uv_async_init(loop, &name_change_async, name_change_callback);
+  uv_async_init(loop, &found_async, (uv_async_cb) found_callback);
+  uv_async_init(loop, &lost_async, (uv_async_cb) lost_callback);
+  uv_async_init(loop, &name_change_async, (uv_async_cb) name_change_callback);
   
   foundName.data = 0;
   lostName.data = 0;
@@ -34,8 +36,9 @@ void BusListenerImpl::found_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
     uv_rwlock_rdlock(&holder->datalock);
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::String>(holder->data)
+    v8::Local<v8::Value> argv[] = {
+      // New<v8::Integer>(*reinterpret_cast<int*>(const_cast<char*>(data)))
+      Nan::New(holder->data).ToLocalChecked()
     };
     uv_rwlock_rdunlock(&holder->datalock);
     holder->callback->Call(1, argv);
@@ -45,8 +48,8 @@ void BusListenerImpl::lost_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
     uv_rwlock_rdlock(&holder->datalock);
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::String>(holder->data)
+    v8::Local<v8::Value> argv[] = {
+      Nan::New(holder->data).ToLocalChecked()
     };
     uv_rwlock_rdunlock(&holder->datalock);
     holder->callback->Call(1, argv);
@@ -56,8 +59,8 @@ void BusListenerImpl::name_change_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
     uv_rwlock_rdlock(&holder->datalock);
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::String>(holder->data)
+    v8::Local<v8::Value> argv[] = {
+      Nan::New(holder->data).ToLocalChecked()
     };
     uv_rwlock_rdunlock(&holder->datalock);
     holder->callback->Call(1, argv);

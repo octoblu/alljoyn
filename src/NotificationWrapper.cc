@@ -8,25 +8,7 @@
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-static v8::Persistent<v8::FunctionTemplate> notification_constructor;
-
-NAN_METHOD(NotificationConstructor) {
-  NanScope();
-  if(args.Length() == 0 || !args[0]->IsString()){
-    return NanThrowError("Notification requires an application name, BusAttachment, and port number.");
-  }
-
-  v8::Local<v8::Object> obj;
-  v8::Local<v8::FunctionTemplate> con = NanNew<v8::FunctionTemplate>(notification_constructor);
-
-  v8::Handle<v8::Value> argv[] = {
-    args[0],
-    args[1],
-    args[2]
-  };
-  obj = con->GetFunction()->NewInstance(3, argv);
-  NanReturnValue(obj);
-}
+Persistent<v8::Function> NotificationWrapper::constructor;
 
 NotificationWrapper::NotificationWrapper(const char* appName, ajn::BusAttachment* bus, int port):propertyStore(new ajn::services::AboutPropertyStoreImpl()){
   propertyStore->setDeviceId("FEDCBA0987654321");
@@ -58,47 +40,49 @@ NotificationWrapper::NotificationWrapper(const char* appName, ajn::BusAttachment
   notificationSender = notificationService->initSend(bus, propertyStore);
 }
 
-void NotificationWrapper::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(NotificationWrapper::New);
-  NanAssignPersistent(notification_constructor, tpl);
-  tpl->SetClassName(NanNew<v8::String>("NotificationService"));
+void NotificationWrapper::Init(v8::Handle<v8::Object> target) {
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(NotificationWrapper::New);
+  tpl->SetClassName(Nan::New<v8::String>("NotificationService").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "notify", NotificationWrapper::Notify);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "deleteLastMsg", NotificationWrapper::DeleteLastMsg);
+  SetPrototypeMethod(tpl, "notify", NotificationWrapper::Notify);
+  SetPrototypeMethod(tpl, "deleteLastMsg", NotificationWrapper::DeleteLastMsg);
+
+  constructor.Reset(tpl->GetFunction());
+  Set(target, Nan::New("NotificationService").ToLocalChecked(), tpl->GetFunction());
 }
 
 NAN_METHOD(NotificationWrapper::New) {
-  NanScope();
-  if(args.Length() < 1 || !args[0]->IsString()){
-    return NanThrowError("Notification requires an application name.");
+  
+  if(info.Length() < 1 || !info[0]->IsString()){
+    return Nan::ThrowError("Notification requires an application name.");
   }
-  char* name = strdup(*NanUtf8String(args[0]));
-  BusConnection* busWrapper = node::ObjectWrap::Unwrap<BusConnection>(args[1].As<v8::Object>());
-  NotificationWrapper* obj = new NotificationWrapper(name, busWrapper->bus, args[2]->Int32Value());
-  obj->Wrap(args.This());
+  char* name = strdup(*Utf8String(info[0]));
+  BusConnection* busWrapper = node::ObjectWrap::Unwrap<BusConnection>(info[1].As<v8::Object>());
+  NotificationWrapper* obj = new NotificationWrapper(name, busWrapper->bus, info[2]->Int32Value());
+  obj->Wrap(info.This());
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(NotificationWrapper::Notify) {
-  NanScope();
-  if(args.Length() < 2){
-    return NanThrowError("Notification.Notify requires a message and TTL (in seconds).");
+  
+  if(info.Length() < 2){
+    return Nan::ThrowError("Notification.Notify requires a message and TTL (in seconds).");
   }
-  NotificationWrapper* obj = node::ObjectWrap::Unwrap<NotificationWrapper>(args.This());
-  ajn::services::NotificationText textToSend("en", strdup(*NanUtf8String(args[0])));
+  NotificationWrapper* obj = node::ObjectWrap::Unwrap<NotificationWrapper>(info.This());
+  ajn::services::NotificationText textToSend("en", strdup(*Utf8String(info[0])));
   std::vector<ajn::services::NotificationText> msg;
   msg.push_back(textToSend);
   ajn::services::Notification notification(ajn::services::INFO, msg);
-  QStatus status = obj->notificationSender->send(notification, args[1]->Int32Value());
-  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+  QStatus status = obj->notificationSender->send(notification, info[1]->Int32Value());
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(static_cast<int>(status)));
 }
 
 NAN_METHOD(NotificationWrapper::DeleteLastMsg) {
-  NanScope();
-  NotificationWrapper* obj = node::ObjectWrap::Unwrap<NotificationWrapper>(args.This());
+  
+  NotificationWrapper* obj = node::ObjectWrap::Unwrap<NotificationWrapper>(info.This());
   QStatus status = obj->notificationSender->deleteLastMsg(ajn::services::INFO);
-  NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(static_cast<int>(status)));
 }
 
 //// NotificationBusListener

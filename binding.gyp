@@ -19,14 +19,18 @@
       'alljoyn/alljoyn_core/router/posix',
       'alljoyn/alljoyn_core/src',
       'alljoyn/common/inc',
-      'alljoyn/services/services_common/cpp/inc',
       'alljoyn/services/about/cpp/inc',
-      'alljoyn/services/notification/cpp/inc',
+      'services/base/services_common/cpp/inc',
+      'services/base/notification/cpp/inc',
       "<!(node -e \"require('nan')\")"
     ],
     'cflags':[
+      "-Wall",
       '-Wno-deprecated',
-      '-Wno-ignored-qualifiers'
+      '-Wno-ignored-qualifiers',
+      "-Wno-unused-parameter",
+      "-Wextra",
+      "-std=c++11"
     ],
     'xcode_settings': {
         'OTHER_CFLAGS': [
@@ -68,7 +72,7 @@
       'dependencies': [
         'alljoyn',
         'ajrouter',
-        'ajnotification'
+        'ajnotification',
       ],
       'sources': [
         '<!@(ls -1 src/*.cc)',
@@ -107,7 +111,7 @@
         'alljoyn/alljoyn_core/src/AuthMechRSA.cc',
         'alljoyn/alljoyn_core/src/AuthMechSRP.cc',
         'alljoyn/alljoyn_core/src/AutoPinger.cc',
-        'alljoyn/alljoyn_core/src/AutoPingerInternal.cc',
+        #'alljoyn/alljoyn_core/src/AutoPingerInternal.cc',
         'alljoyn/alljoyn_core/src/BusAttachment.cc',
         'alljoyn/alljoyn_core/src/BusEndpoint.cc',
         'alljoyn/alljoyn_core/src/BusObject.cc',
@@ -219,8 +223,8 @@
       ],
       'sources': [
         '<!@(ls -1 alljoyn/services/about/cpp/src/*.cc)',
-        '<!@(ls -1 alljoyn/services/notification/cpp/src/*.cc)',
-        '<!@(ls -1 alljoyn/services/services_common/cpp/src/*.cc)'
+        '<!@(ls -1 services/base/notification/cpp/src/*.cc)',
+        '<!@(ls -1 services/base/services_common/cpp/src/*.cc)'
       ],
     },
     {
@@ -289,9 +293,22 @@
         'ajrouter'
       ],
       'sources': [
-        'src/test_allchat.cc',
+        'test/test_allchat.cc',
         'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
       ],
-    }
+    },
+    {
+      'target_name': 'aboutclient',
+      'type': 'executable',
+      'dependencies': [
+        'alljoynstatus',
+        'alljoyn',
+        'ajrouter'
+      ],
+      'sources': [
+        'test/aclient.cc',
+        'alljoyn/alljoyn_core/router/bundled/BundledRouter.cc'
+      ],
+    },    
   ]
 }

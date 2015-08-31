@@ -15,7 +15,7 @@ class SessionPortListenerImpl : public ajn::SessionPortListener {
     uv_rwlock_t calllock;
 
   struct CallbackHolder{
-    NanCallback* callback;
+    Nan::Callback* callback;
     const char* data;
     int id, port;
     bool rval;
@@ -23,7 +23,7 @@ class SessionPortListenerImpl : public ajn::SessionPortListener {
   } acceptCallback, joinedCallback;
 
   public:
-  	SessionPortListenerImpl(NanCallback* accept, NanCallback* joined);
+  	SessionPortListenerImpl(Nan::Callback* accept, Nan::Callback* joined);
   	~SessionPortListenerImpl();
   	static void accept_callback(uv_async_t *handle, int status);
   	static void joined_callback(uv_async_t *handle, int status);

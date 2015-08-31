@@ -5,63 +5,46 @@
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-static v8::Persistent<v8::FunctionTemplate> listener_constructor;
+Persistent<v8::Function> BusListenerWrapper::constructor;
 
-v8::Handle<v8::Value> BusListenerWrapper::NewInstance() {
-    NanScope();
-
-    v8::Local<v8::Object> obj;
-    v8::Local<v8::FunctionTemplate> con = NanNew<v8::FunctionTemplate>(listener_constructor);
-    obj = con->GetFunction()->NewInstance(0, NULL);
-    return obj;
-}
-
-NAN_METHOD(BusListenerConstructor) {
-  NanScope();
-  if(args.Length() < 3){
-    return NanThrowError("BusListener requires callbacks for FoundAdvertisedName, LostAdvertisedName, and NameOwnerChanged.");
-  }
-  v8::Local<v8::Object> obj;
-  v8::Local<v8::FunctionTemplate> con = NanNew<v8::FunctionTemplate>(listener_constructor);
-
-  v8::Handle<v8::Value> argv[] = {
-    args[0],
-    args[1],
-    args[2]
-  };
-  obj = con->GetFunction()->NewInstance(3, argv);
-  NanReturnValue(obj);
-}
-
-BusListenerWrapper::BusListenerWrapper(NanCallback* foundName, NanCallback* lostName, NanCallback* nameChanged)
+BusListenerWrapper::BusListenerWrapper(Nan::Callback* foundName, Nan::Callback* lostName, Nan::Callback* nameChanged)
   :listener(new BusListenerImpl(foundName, lostName, nameChanged)){
 }
 
 BusListenerWrapper::~BusListenerWrapper(){
 }
 
-void BusListenerWrapper::Init () {
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(BusListenerWrapper::New);
-  NanAssignPersistent(listener_constructor, tpl);
-  tpl->SetClassName(NanNew<v8::String>("BusListener"));
+void BusListenerWrapper::Init(v8::Handle<v8::Object> target) {
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
+  tpl->SetClassName(Nan::New("BusListener").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+  constructor.Reset(tpl->GetFunction());
+  Set(target, Nan::New("BusListener").ToLocalChecked(), tpl->GetFunction());
 }
 
 NAN_METHOD(BusListenerWrapper::New) {
-  NanScope();
-  if(args.Length() < 3){
-    return NanThrowError("BusListener requires callbacks for FoundAdvertisedName, LostAdvertisedName, and NameOwnerChanged.");
+  if(info.Length() < 3){
+    return Nan::ThrowError("BusListener requires callbacks for FoundAdvertisedName, LostAdvertisedName, and NameOwnerChanged.");
   }
-  v8::Local<v8::Function> foundName = args[0].As<v8::Function>();
-  NanCallback *foundNameCall = new NanCallback(foundName);
-  v8::Local<v8::Function> lostName = args[1].As<v8::Function>();
-  NanCallback *lostNameCall = new NanCallback(lostName);
-  v8::Local<v8::Function> changeName = args[2].As<v8::Function>();
-  NanCallback *nameChangeCall = new NanCallback(changeName);
 
-  BusListenerWrapper* obj = new BusListenerWrapper(foundNameCall, lostNameCall, nameChangeCall);
-  obj->Wrap(args.This());
+  if (info.IsConstructCall()) {
+    v8::Local<v8::Function> foundName = info[0].As<v8::Function>();
+    Nan::Callback *foundNameCall = new Nan::Callback(foundName);
+    v8::Local<v8::Function> lostName = info[1].As<v8::Function>();
+    Nan::Callback *lostNameCall = new Nan::Callback(lostName);
+    v8::Local<v8::Function> changeName = info[2].As<v8::Function>();
+    Nan::Callback *nameChangeCall = new Nan::Callback(changeName);
 
-  NanReturnValue(args.This());
+    BusListenerWrapper* obj = new BusListenerWrapper(foundNameCall, lostNameCall, nameChangeCall);
+    obj->Wrap(info.This());
+
+    info.GetReturnValue().Set(info.This());
+  } else {
+    const int argc = 3;
+    v8::Local<v8::Value> argv[argc] = {info[0], info[1], info[2]};
+    v8::Local<v8::Function> cons = Nan::New(constructor);
+    info.GetReturnValue().Set(cons->NewInstance(argc, argv));
+  }
 }
 

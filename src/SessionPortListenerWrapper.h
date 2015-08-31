@@ -6,18 +6,18 @@
 #include <alljoyn/AllJoynStd.h>
 #include "SessionPortListenerImpl.h"
 
-NAN_METHOD(SessionPortListenerConstructor);
+using namespace Nan;  // NOLINT(build/namespaces)
+
 
 class SessionPortListenerWrapper : public node::ObjectWrap {
   private:
-
     static NAN_METHOD(New);
-  public:
-  	SessionPortListenerWrapper(NanCallback* accept, NanCallback* joined);
-  	~SessionPortListenerWrapper();
-    static void Init ();
-    static v8::Handle<v8::Value> NewInstance();
 
+    static Persistent<v8::Function> constructor;
+  public:
+  	SessionPortListenerWrapper(Nan::Callback* accept, Nan::Callback* joined);
+  	~SessionPortListenerWrapper();
+    static void Init(v8::Handle<v8::Object> target);
     SessionPortListenerImpl* listener;
 };
 

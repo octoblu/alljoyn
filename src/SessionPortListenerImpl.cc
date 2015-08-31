@@ -4,12 +4,12 @@
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-SessionPortListenerImpl::SessionPortListenerImpl(NanCallback* accept, NanCallback* joined){
+SessionPortListenerImpl::SessionPortListenerImpl(Nan::Callback* accept, Nan::Callback* joined){
   loop = uv_default_loop();
   acceptCallback.callback = accept;
   joinedCallback.callback = joined;
-  uv_async_init(loop, &accept_async, accept_callback);
-  uv_async_init(loop, &joined_async, joined_callback);
+  uv_async_init(loop, &accept_async, (uv_async_cb) accept_callback);
+  uv_async_init(loop, &joined_async, (uv_async_cb) joined_callback);
   uv_rwlock_init(&calllock);
 }
 
@@ -19,9 +19,9 @@ SessionPortListenerImpl::~SessionPortListenerImpl(){
 void SessionPortListenerImpl::accept_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::Integer>(holder->port),
-      NanNew<v8::String>(holder->data)
+    v8::Local<v8::Value> argv[] = {
+      Nan::New<v8::Integer>(holder->port),
+      Nan::New(holder->data).ToLocalChecked()
     };
     v8::Handle<v8::Value> accept = holder->callback->Call(2, argv);
     holder->rval = accept->BooleanValue();
@@ -32,10 +32,10 @@ void SessionPortListenerImpl::accept_callback(uv_async_t *handle, int status) {
 void SessionPortListenerImpl::joined_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::Integer>(holder->port),
-      NanNew<v8::Integer>(holder->id),
-      NanNew<v8::String>(holder->data)
+    v8::Local<v8::Value> argv[] = {
+      Nan::New<v8::Integer>(holder->port),
+      Nan::New<v8::Integer>(holder->id),
+      Nan::New(holder->data).ToLocalChecked()
     };
     holder->callback->Call(3, argv);
 }

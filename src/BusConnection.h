@@ -7,10 +7,17 @@
 #include <alljoyn/BusObject.h>
 #include <alljoyn/AllJoynStd.h>
 
-NAN_METHOD(BusAttachmentWrapper);
+using namespace Nan;  // NOLINT(build/namespaces)
 
 class BusConnection : public node::ObjectWrap {
+  public:
+    static void Init(v8::Handle<v8::Object> target);
+
+    ajn::BusAttachment* bus;
+
   private:
+    explicit BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent);
+    ~BusConnection();
 
     static NAN_METHOD(New);
     static NAN_METHOD(Start);
@@ -28,13 +35,12 @@ class BusConnection : public node::ObjectWrap {
     static NAN_METHOD(RequestName);
     static NAN_METHOD(AdvertiseName);
     static NAN_METHOD(RegisterSignalHandler);
-
-  public:
-    ajn::BusAttachment* bus;
-  	BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent);
-    ~BusConnection();
-    static void Init ();
-    static v8::Handle<v8::Value> NewInstance(v8::Local<v8::String> &appName);
+    static NAN_METHOD(AddMatch);
+    static NAN_METHOD(CreateInterfacesFromXml);
+    static NAN_METHOD(RegisterAboutListener);
+    static NAN_METHOD(WhoImplements);
+    
+    static Nan::Persistent<v8::Function> constructor;
 };
 
 #endif

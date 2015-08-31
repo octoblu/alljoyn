@@ -7,7 +7,7 @@
  */
 
 /******************************************************************************
- * Copyright AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -61,7 +61,6 @@ AJ_API const char* AJ_CALL QCC_StatusText(QStatus status)
         CASE(ER_BAD_ARG_COUNT);
         CASE(ER_WARNING);
         CASE(ER_EOF);
-        CASE(ER_DEADLOCK);
         CASE(ER_COMMON_ERRORS);
         CASE(ER_STOPPING_THREAD);
         CASE(ER_ALERTED_THREAD);
@@ -369,7 +368,7 @@ AJ_API const char* AJ_CALL QCC_StatusText(QStatus status)
         CASE(ER_ABOUT_INVALID_ABOUTDATA_FIELD_VALUE);
         CASE(ER_ABOUT_INVALID_ABOUTDATA_FIELD_APPID_SIZE);
     default:
-        static char code[22];
+        static char code[20];
 #ifdef _WIN32
         _snprintf(code, sizeof(code), "<unknown>: 0x%04x", status);
 #else

@@ -13,10 +13,9 @@
 #include <alljoyn/about/AboutPropertyStoreImpl.h>
 #include <alljoyn/AllJoynStd.h>
 
-NAN_METHOD(NotificationConstructor);
+using namespace Nan;  // NOLINT(build/namespaces)
 
 class NotificationBusListener : public ajn::BusListener, public ajn::SessionPortListener {
-
   public:
     NotificationBusListener();
     bool AcceptSessionJoiner(ajn::SessionPort sessionPort, const char* joiner, const ajn::SessionOpts& opts);
@@ -32,9 +31,12 @@ class NotificationWrapper : public node::ObjectWrap {
     static NAN_METHOD(New);
     static NAN_METHOD(Notify);
     static NAN_METHOD(DeleteLastMsg);
+
+    static Persistent<v8::Function> constructor;
+
   public:
   	NotificationWrapper(const char* appName, ajn::BusAttachment* bus, int port);
-    static void Init ();
+    static void Init(v8::Handle<v8::Object> target);
     ajn::services::AboutPropertyStoreImpl* propertyStore;
     ajn::services::AboutServiceApi* aboutService;
     ajn::services::NotificationService* notificationService;

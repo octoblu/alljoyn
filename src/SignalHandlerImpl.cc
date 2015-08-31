@@ -1,4 +1,3 @@
-#include "nan.h"
 
 #include "util.h"
 #include "SignalHandlerImpl.h"
@@ -6,10 +5,10 @@
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-SignalHandlerImpl::SignalHandlerImpl(NanCallback* sig){
+SignalHandlerImpl::SignalHandlerImpl(Nan::Callback* sig){
   loop = uv_default_loop();
   signalCallback.callback = sig;
-  uv_async_init(loop, &signal_async, signal_callback);
+  uv_async_init(loop, &signal_async, (uv_async_cb) signal_callback);
 }
 
 SignalHandlerImpl::~SignalHandlerImpl(){
@@ -18,7 +17,7 @@ SignalHandlerImpl::~SignalHandlerImpl(){
 void SignalHandlerImpl::signal_callback(uv_async_t *handle, int status) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
-    v8::Local<v8::Object> msg = v8::Object::New();
+    v8::Local<v8::Object> msg = Nan::New<v8::Object>();
     size_t msgIndex = 0;
     const ajn::MsgArg* arg = (*holder->message)->GetArg(msgIndex);
     while(arg != NULL){
@@ -27,17 +26,36 @@ void SignalHandlerImpl::signal_callback(uv_async_t *handle, int status) {
       arg = (*holder->message)->GetArg(msgIndex);
     }
 
-    v8::Local<v8::Object> sender = v8::Object::New();
-    sender->Set(NanNew<v8::String>("sender"), NanNew<v8::String>((*holder->message)->GetSender()));
-    sender->Set(NanNew<v8::String>("session_id"), NanNew<v8::Integer>((*holder->message)->GetSessionId()));
-    sender->Set(NanNew<v8::String>("timestamp"), NanNew<v8::Integer>((*holder->message)->GetTimeStamp()));
-    sender->Set(NanNew<v8::String>("member_name"), NanNew<v8::String>((*holder->message)->GetMemberName()));
-    sender->Set(NanNew<v8::String>("object_path"), NanNew<v8::String>((*holder->message)->GetObjectPath()));
-    sender->Set(NanNew<v8::String>("signature"), NanNew<v8::String>((*holder->message)->GetSignature()));
+    v8::Local<v8::Object> sender = Nan::New<v8::Object>();
 
-    v8::Handle<v8::Value> argv[] = {
-      msg,
-      sender
+    Nan::Set(sender, 
+      Nan::New<v8::String>("sender").ToLocalChecked(), 
+      Nan::New<v8::String>((*holder->message)->GetSender()).ToLocalChecked()
+    );
+    Nan::Set(sender, 
+      Nan::New<v8::String>("session_id").ToLocalChecked(), 
+      Nan::New<v8::Integer>((*holder->message)->GetSessionId())
+    );
+    Nan::Set(sender, 
+      Nan::New<v8::String>("timestamp").ToLocalChecked(), 
+      Nan::New<v8::Integer>((*holder->message)->GetTimeStamp())
+    );
+    Nan::Set(sender, 
+      Nan::New<v8::String>("member_name").ToLocalChecked(), 
+      Nan::New<v8::String>((*holder->message)->GetMemberName()).ToLocalChecked()
+    );
+    Nan::Set(sender, 
+      Nan::New<v8::String>("object_path").ToLocalChecked(), 
+      Nan::New<v8::String>((*holder->message)->GetObjectPath()).ToLocalChecked()
+    );
+    Nan::Set(sender, 
+      Nan::New<v8::String>("signature").ToLocalChecked(), 
+      Nan::New<v8::String>((*holder->message)->GetSignature()).ToLocalChecked()
+    );    
+
+    v8::Local<v8::Value> argv[] = {
+      sender,
+      msg
     };
     holder->callback->Call(2, argv);
 

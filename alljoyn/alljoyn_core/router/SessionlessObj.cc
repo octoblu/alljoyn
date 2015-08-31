@@ -4,7 +4,7 @@
  */
 
 /******************************************************************************
- * Copyright (c) 2012,2014-2015 AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2012,2014 AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -133,7 +133,7 @@ SessionlessObj::SessionlessObj(Bus& bus, BusController* busController) :
             ConfigDB::GetConfigDB()->GetLimit("sls_backoff_exponential", 32),
             ConfigDB::GetConfigDB()->GetLimit("sls_backoff_max", 15 * 60))
 {
-    sessionOpts.transports = ConfigDB::GetConfigDB()->GetLimit("sls_preferred_transports", TRANSPORT_ANY);
+    sessionOpts.transports = ConfigDB::GetConfigDB()->GetLimit("sls_preferred_transports", TRANSPORT_ANY & ~TRANSPORT_UDP);
 }
 
 SessionlessObj::~SessionlessObj()
@@ -908,9 +908,7 @@ void SessionlessObj::AlarmTriggered(const Alarm& alarm, QStatus reason)
         lock.Lock();
         Timespec now;
         GetTimeNow(&now);
-        RemoteCaches::iterator cit = remoteCaches.begin();
-        while (cit != remoteCaches.end()) {
-            String guid = cit->first;
+        for (RemoteCaches::iterator cit = remoteCaches.begin(); cit != remoteCaches.end(); ++cit) {
             RemoteCache& cache = cit->second;
             WorkType pendingWork = PendingWork(cache);
             if ((cache.nextJoinTime <= now) && (cache.state == RemoteCache::IDLE) && pendingWork) {
@@ -927,42 +925,23 @@ void SessionlessObj::AlarmTriggered(const Alarm& alarm, QStatus reason)
                     cache.fromRulesId = cache.appliedRulesId - (numeric_limits<uint32_t>::max() >> 1);
                     cache.toRulesId = nextRulesId;
                 }
-                String name = cache.name;
                 SessionOpts opts = sessionOpts;
                 opts.transports = cache.transport;
-                uint32_t retries = cache.retries;
-
-                /* Need to release locks around JoinSessionAsync to avoid deadlock, see ASACORE-1402 */
-                lock.Unlock();
-                router.UnlockNameTable();
-                status = bus.JoinSessionAsync(name.c_str(), sessionPort, NULL, opts, this, reinterpret_cast<void*>(ctx));
-                router.LockNameTable();
-                lock.Lock();
-
-                cit = remoteCaches.find(guid);
-                if (cit != remoteCaches.end()) {
-                    cache = cit->second;
-                    if (status == ER_OK) {
-                        QCC_DbgPrintf(("JoinSessionAsync(name=%s,...) pending", cache.name.c_str()));
-                        /* retries could be reset while unlocked, only increment if that hasn't happened */
-                        if (cache.retries == retries) {
-                            ++cache.retries;
-                        }
-                    } else {
-                        QCC_LogError(status, ("JoinSessionAsync to %s failed", cache.name.c_str()));
-                        cache.state = RemoteCache::IDLE;
-                        /* Retry with a random backoff */
-                        ScheduleWork(cache, false);
-                        if ((tilExpire == Timespec::Zero) || (cache.nextJoinTime < tilExpire)) {
-                            tilExpire = cache.nextJoinTime;
-                        }
+                status = bus.JoinSessionAsync(cache.name.c_str(), sessionPort, NULL, opts, this, reinterpret_cast<void*>(ctx));
+                if (status == ER_OK) {
+                    QCC_DbgPrintf(("JoinSessionAsync(name=%s,...) pending", cache.name.c_str()));
+                    ++cache.retries;
+                } else {
+                    QCC_LogError(status, ("JoinSessionAsync to %s failed", cache.name.c_str()));
+                    cache.state = RemoteCache::IDLE;
+                    delete ctx;
+                    /* Retry with a random backoff */
+                    ScheduleWork(cache, false);
+                    if ((tilExpire == Timespec::Zero) || (cache.nextJoinTime < tilExpire)) {
+                        tilExpire = cache.nextJoinTime;
                     }
                 }
-                if (status != ER_OK) {
-                    delete ctx;
-                }
             }
-            cit = remoteCaches.upper_bound(guid);
         }
 
         lock.Unlock();
@@ -1047,25 +1026,16 @@ void SessionlessObj::JoinSessionCB(QStatus status, SessionId sid, const SessionO
              * Send the request signal if join was successful.  Prefer
              * RequestRange since it may be possible to receive duplicates when
              * RequestSignals is used together with RequestRange.
-             *
-             * The request signal is sent to the owner of the cache's advertised
-             * name, not the advertised name.  The owner of the cache's name is
-             * the remote routing node, and will always be :GUID.1.  The reason
-             * to send to the owner and not the advertised name is that the
-             * advertised name can be cancelled/released after joining the
-             * session but before the request signal is sent if the remote
-             * router advertises a new change ID in that interval.
              */
-            String name = ":" + ctx->guid + ".1";
             if (matchCapable) {
-                status = RequestRangeMatch(name.c_str(), sid, fromId, toId, matchRules);
+                status = RequestRangeMatch(ctx->name.c_str(), sid, fromId, toId, matchRules);
             } else if (rangeCapable) {
-                status = RequestRange(name.c_str(), sid, fromId, toId);
+                status = RequestRange(ctx->name.c_str(), sid, fromId, toId);
             } else {
-                status = RequestSignals(name.c_str(), sid, fromId);
+                status = RequestSignals(ctx->name.c_str(), sid, fromId);
             }
             if (status != ER_OK) {
-                QCC_LogError(status, ("Failed to send Request to %s", name.c_str()));
+                QCC_LogError(status, ("Failed to send Request to %s", ctx->name.c_str()));
                 status = bus.LeaveSession(sid);
                 QCC_LogError(status, ("Failed to leave session %u", sid));
 

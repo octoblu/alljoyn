@@ -595,7 +595,7 @@ void _RemoteEndpoint::ThreadExit(Thread* thread)
 static inline bool IsControlMessage(Message& msg)
 {
     const char* sender = msg->GetSender();
-    size_t offset = ::strlen(sender);
+	size_t offset = (sender ? ::strlen(sender) : 0);
     if (offset >= 2) {
         offset -= 2;
     }

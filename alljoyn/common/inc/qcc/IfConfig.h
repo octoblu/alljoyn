@@ -32,6 +32,7 @@
 #include <qcc/String.h>
 #include <qcc/SocketTypes.h>
 
+
 namespace qcc {
 
 class IfConfigEntry {
@@ -43,6 +44,7 @@ class IfConfigEntry {
 
     static const uint32_t UP = 1;               /**< The interface is running and routes are in place. */
     static const uint32_t BROADCAST = 2;        /**< The interface has a valid broadcast address (can broadcast). */
+#undef DEBUG
     static const uint32_t DEBUG = 4;            /**< The underlying interface is in debug mode. */
     static const uint32_t LOOPBACK = 8;         /**< This is a loopback interface. */
     static const uint32_t POINTOPOINT = 16;     /**< This interface runs over a point to point link. */

@@ -6,7 +6,7 @@
  * Note: This file is generated during the make process.
  */
 /******************************************************************************
- * Copyright AllSeen Alliance. All rights reserved.
+ * Copyright (c) 2009-2015, AllSeen Alliance. All rights reserved.
  *
  *    Permission to use, copy, modify, and/or distribute this software for any
  *    purpose with or without fee is hereby granted, provided that the above
@@ -39,15 +39,6 @@
 #    define AJ_CALL __stdcall
 #  else
 #    define AJ_CALL
-#  endif
-#endif
-
-/** This @#define allows for calling convention redefinition on relevant platforms */
-#ifndef CDECL_CALL
-#  if defined(QCC_OS_GROUP_WINDOWS)
-#    define CDECL_CALL __cdecl
-#  else
-#    define CDECL_CALL
 #  endif
 #endif
 
@@ -90,7 +81,6 @@ typedef enum {
     ER_BAD_ARG_COUNT = 0x1C /**< Incorrect number of arguments given to function call */,
     ER_WARNING = 0x1D /**< Generic warning */,
     ER_EOF = 0x1E /**< End of file */,
-    ER_DEADLOCK = 0x1F /**< Operation would cause deadlock */,
     ER_COMMON_ERRORS = 0x1000 /**< Error code block for the Common subsystem. */,
     ER_STOPPING_THREAD = 0x1001 /**< Operation interrupted by ERThread stop signal. */,
     ER_ALERTED_THREAD = 0x1002 /**< Operation interrupted by ERThread alert signal. */,
