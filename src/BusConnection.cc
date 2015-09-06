@@ -97,7 +97,11 @@ NAN_METHOD(BusConnection::Join) {
 NAN_METHOD(BusConnection::Connect) {
   NanScope();
   BusConnection* connection = node::ObjectWrap::Unwrap<BusConnection>(args.This());
-  QStatus status = connection->bus->Connect();
+  if (args.Length() != 0 && !args[0]->IsString())
+    return NanThrowError("connect must be called with a string connectSpec");
+
+  QStatus status = args.Length() == 0 ? connection->bus->Connect()
+    : connection->bus->Connect(*NanUtf8String(args[0]));
   NanReturnValue(NanNew<v8::Integer>(static_cast<int>(status)));
 }
 
