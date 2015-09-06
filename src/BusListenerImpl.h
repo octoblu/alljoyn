@@ -16,7 +16,7 @@ class BusListenerImpl : public ajn::BusListener {
     uv_async_t found_async, lost_async, name_change_async;
 
     struct CallbackHolder{
-      NanCallback* callback;
+      Nan::Callback* callback;
       std::queue<std::string> dataqueue;
       uv_mutex_t datalock;
 
@@ -28,10 +28,11 @@ class BusListenerImpl : public ajn::BusListener {
       }
     } foundName, lostName, nameChanged;
 
-    static void callback(uv_async_t *handle, int status);
+    template<typename... Args>
+      static void callback(uv_async_t *handle, Args... );
 
   public:
-    BusListenerImpl(NanCallback* foundName, NanCallback* lostName, NanCallback* nameChanged);
+    BusListenerImpl(Nan::Callback* foundName, Nan::Callback* lostName, Nan::Callback* nameChanged);
 
     virtual void FoundAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix);
     virtual void LostAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix);

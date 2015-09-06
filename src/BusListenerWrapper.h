@@ -11,15 +11,15 @@
 
 NAN_METHOD(BusListenerConstructor);
 
-class BusListenerWrapper : public node::ObjectWrap {
+class BusListenerWrapper : public Nan::ObjectWrap {
   private:
 
     static NAN_METHOD(New);
   public:
-  	BusListenerWrapper(NanCallback* foundName, NanCallback* lostName, NanCallback* nameChanged);
-  	~BusListenerWrapper();
+    BusListenerWrapper(Nan::Callback* foundName, Nan::Callback* lostName, Nan::Callback* nameChanged);
+    ~BusListenerWrapper();
+
     static void Init ();
-    static v8::Handle<v8::Value> NewInstance();
 
     BusListenerImpl *listener;
 };

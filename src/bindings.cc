@@ -18,18 +18,12 @@ void init(Handle<Object> target) {
   SessionPortListenerWrapper::Init();
   NotificationWrapper::Init();
 
-  Local<Function> busWrap = FunctionTemplate::New(BusAttachmentWrapper)->GetFunction();
-  target->Set(NanNew<String>("BusAttachment"), busWrap);
-  Local<Function> interfaceWrap = FunctionTemplate::New(InterfaceDescriptionWrapper)->GetFunction();
-  target->Set(NanNew<String>("InterfaceDescription"), interfaceWrap);
-  Local<Function> listenerConstructor = FunctionTemplate::New(BusListenerConstructor)->GetFunction();
-  target->Set(NanNew<String>("BusListener"), listenerConstructor);
-  Local<Function> objectConstructor = FunctionTemplate::New(BusObjectConstructor)->GetFunction();
-  target->Set(NanNew<String>("BusObject"), objectConstructor);
-  Local<Function> sessionPortListenerConstructor = FunctionTemplate::New(SessionPortListenerConstructor)->GetFunction();
-  target->Set(NanNew<String>("SessionPortListener"), sessionPortListenerConstructor);
-  Local<Function> notificationConstructor = FunctionTemplate::New(NotificationConstructor)->GetFunction();
-  target->Set(NanNew<String>("NotificationService"), notificationConstructor);
+  Nan::SetMethod(target, "BusAttachment", BusAttachmentWrapper);
+  Nan::SetMethod(target, "InterfaceDescription", InterfaceDescriptionWrapper);
+  Nan::SetMethod(target, "BusListener", BusListenerConstructor);
+  Nan::SetMethod(target, "BusObject", BusObjectConstructor);
+  Nan::SetMethod(target, "SessionPortListener", SessionPortListenerConstructor);
+  Nan::SetMethod(target, "NotificationService", NotificationConstructor);
 }
 
 NODE_MODULE(node_alljoyn, init)

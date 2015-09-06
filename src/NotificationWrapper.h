@@ -26,14 +26,14 @@ class NotificationBusListener : public ajn::BusListener, public ajn::SessionPort
     ajn::SessionPort sessionPort;
 };
 
-class NotificationWrapper : public node::ObjectWrap {
+class NotificationWrapper : public Nan::ObjectWrap {
   private:
 
     static NAN_METHOD(New);
     static NAN_METHOD(Notify);
     static NAN_METHOD(DeleteLastMsg);
   public:
-  	NotificationWrapper(const char* appName, ajn::BusAttachment* bus, int port);
+    NotificationWrapper(const char* appName, ajn::BusAttachment* bus, int port);
     static void Init ();
     ajn::services::AboutPropertyStoreImpl* propertyStore;
     ajn::services::AboutServiceApi* aboutService;

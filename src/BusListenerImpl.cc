@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-BusListenerImpl::BusListenerImpl(NanCallback* foundNameCallback, NanCallback* lostNameCallback, NanCallback* nameChangedCallback){
+BusListenerImpl::BusListenerImpl(Nan::Callback* foundNameCallback, Nan::Callback* lostNameCallback, Nan::Callback* nameChangedCallback){
   loop = uv_default_loop();
   foundName.callback = foundNameCallback;
   lostName.callback = lostNameCallback;
@@ -16,8 +16,11 @@ BusListenerImpl::BusListenerImpl(NanCallback* foundNameCallback, NanCallback* lo
   uv_async_init(loop, &name_change_async, callback);
 }
 
-void BusListenerImpl::callback(uv_async_t *handle, int status) {
+template<typename... Args>
+void BusListenerImpl::callback(uv_async_t *handle, Args...) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
+
+    Nan::HandleScope scope;
 
     std::queue<std::string> dataqueue;
     uv_mutex_lock(&holder->datalock);
@@ -25,8 +28,8 @@ void BusListenerImpl::callback(uv_async_t *handle, int status) {
     uv_mutex_unlock(&holder->datalock);
 
     while (!dataqueue.empty()) {
-      v8::Handle<v8::Value> argv[] = {
-        NanNew<v8::String>(std::move(dataqueue.front()))
+      v8::Local<v8::Value> argv[] = {
+        Nan::New<v8::String>(std::move(dataqueue.front())).ToLocalChecked()
       };
       holder->callback->Call(1, argv);
       dataqueue.pop();

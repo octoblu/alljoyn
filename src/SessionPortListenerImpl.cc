@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-SessionPortListenerImpl::SessionPortListenerImpl(NanCallback* accept, NanCallback* joined){
+SessionPortListenerImpl::SessionPortListenerImpl(Nan::Callback* accept, Nan::Callback* joined){
   loop = uv_default_loop();
   acceptCallback.callback = accept;
   joinedCallback.callback = joined;
@@ -14,23 +14,29 @@ SessionPortListenerImpl::SessionPortListenerImpl(NanCallback* accept, NanCallbac
   uv_async_init(loop, &joined_async, joined_callback);
 }
 
-void SessionPortListenerImpl::accept_callback(uv_async_t *handle, int status) {
+template<typename... Args>
+void SessionPortListenerImpl::accept_callback(uv_async_t *handle, Args... ) {
   AcceptCallbackHolder* holder = (AcceptCallbackHolder*) handle->data;
 
+  Nan::HandleScope scope;
+
   uv_mutex_lock(&holder->datalock);
-  v8::Handle<v8::Value> argv[] = {
-    NanNew<v8::Integer>(holder->port),
-    NanNew<v8::String>(std::move(holder->data))
+  v8::Local<v8::Value> argv[] = {
+    Nan::New<v8::Integer>(holder->port),
+    Nan::New<v8::String>(std::move(holder->data)).ToLocalChecked()
   };
-  v8::Handle<v8::Value> accept = holder->callback->Call(2, argv);
+  v8::Local<v8::Value> accept = holder->callback->Call(2, argv);
   holder->rval = accept->BooleanValue();
   holder->complete = true;
   uv_cond_signal(&holder->datacond);
   uv_mutex_unlock(&holder->datalock);
 }
 
-void SessionPortListenerImpl::joined_callback(uv_async_t *handle, int status) {
+template<typename... Args>
+void SessionPortListenerImpl::joined_callback(uv_async_t *handle, Args... ) {
   JoinedCallbackHolder* holder = (JoinedCallbackHolder*) handle->data;
+
+  Nan::HandleScope scope;
 
   std::queue<JoinedCallbackData> dataqueue;
   uv_mutex_lock(&holder->datalock);
@@ -39,10 +45,10 @@ void SessionPortListenerImpl::joined_callback(uv_async_t *handle, int status) {
 
   while (!dataqueue.empty()) {
     const JoinedCallbackData& data = dataqueue.front();
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::Integer>(data.port),
-      NanNew<v8::Integer>(data.id),
-      NanNew<v8::String>(std::move(data.data))
+    v8::Local<v8::Value> argv[] = {
+      Nan::New<v8::Integer>(data.port),
+      Nan::New<v8::Integer>(data.id),
+      Nan::New<v8::String>(std::move(data.data)).ToLocalChecked()
     };
     holder->callback->Call(3, argv);
     dataqueue.pop();

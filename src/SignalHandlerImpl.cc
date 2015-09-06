@@ -6,7 +6,9 @@
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-SignalHandlerImpl::SignalHandlerImpl(NanCallback* sig){
+#include <algorithm>
+
+SignalHandlerImpl::SignalHandlerImpl(Nan::Callback* sig){
   loop = uv_default_loop();
   signalCallback.callback = sig;
   uv_async_init(loop, &signal_async, signal_callback);
@@ -15,40 +17,59 @@ SignalHandlerImpl::SignalHandlerImpl(NanCallback* sig){
 SignalHandlerImpl::~SignalHandlerImpl(){
 }
 
-void SignalHandlerImpl::signal_callback(uv_async_t *handle, int status) {
+template<typename... Args>
+void SignalHandlerImpl::signal_callback(uv_async_t *handle, Args... ) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
-    v8::Local<v8::Object> msg = v8::Object::New();
-    size_t msgIndex = 0;
-    const ajn::MsgArg* arg = (*holder->message)->GetArg(msgIndex);
-    while(arg != NULL){
-      msgArgToObject(arg, msgIndex, msg);
-      msgIndex++;
-      arg = (*holder->message)->GetArg(msgIndex);
-    }
+    Nan::HandleScope scope;
 
-    v8::Local<v8::Object> sender = v8::Object::New();
-    sender->Set(NanNew<v8::String>("sender"), NanNew<v8::String>((*holder->message)->GetSender()));
-    sender->Set(NanNew<v8::String>("session_id"), NanNew<v8::Integer>((*holder->message)->GetSessionId()));
-    sender->Set(NanNew<v8::String>("timestamp"), NanNew<v8::Integer>((*holder->message)->GetTimeStamp()));
-    sender->Set(NanNew<v8::String>("member_name"), NanNew<v8::String>((*holder->message)->GetMemberName()));
-    sender->Set(NanNew<v8::String>("object_path"), NanNew<v8::String>((*holder->message)->GetObjectPath()));
-    sender->Set(NanNew<v8::String>("signature"), NanNew<v8::String>((*holder->message)->GetSignature()));
+    std::queue<std::unique_ptr<ajn::Message>> messages;
+    uv_mutex_lock(&holder->lock);
+    messages = std::move(holder->messages);
+    uv_mutex_unlock(&holder->lock);
 
-    v8::Handle<v8::Value> argv[] = {
-      msg,
-      sender
-    };
-    holder->callback->Call(2, argv);
+    while(!messages.empty()) {
+      std::unique_ptr<ajn::Message> message = std::move(messages.front());
 
-    if(holder->message){
-      delete holder->message;
-      holder->message = NULL;
+      v8::Local<v8::Object> msg = Nan::New<v8::Object>();
+      size_t msgIndex = 0;
+      const ajn::MsgArg* arg = (*message)->GetArg(msgIndex);
+      while(arg != NULL){
+        msgArgToObject(arg, msgIndex, msg);
+        msgIndex++;
+        arg = (*message)->GetArg(msgIndex);
+      }
+
+      v8::Local<v8::Object> sender = Nan::New<v8::Object>();
+      Nan::Set(sender, Nan::New<v8::String>("sender").ToLocalChecked(),
+               Nan::New<v8::String>((*message)->GetSender()).ToLocalChecked());
+      Nan::Set(sender, Nan::New<v8::String>("session_id").ToLocalChecked(),
+               Nan::New<v8::Integer>((*message)->GetSessionId()));
+      Nan::Set(sender, Nan::New<v8::String>("timestamp").ToLocalChecked(),
+               Nan::New<v8::Integer>((*message)->GetTimeStamp()));
+      Nan::Set(sender, Nan::New<v8::String>("member_name").ToLocalChecked(),
+               Nan::New<v8::String>((*message)->GetMemberName()).ToLocalChecked());
+      Nan::Set(sender, Nan::New<v8::String>("object_path").ToLocalChecked(),
+               Nan::New<v8::String>((*message)->GetObjectPath()).ToLocalChecked());
+      Nan::Set(sender, Nan::New<v8::String>("signature").ToLocalChecked(),
+               Nan::New<v8::String>((*message)->GetSignature()).ToLocalChecked());
+
+      v8::Local<v8::Value> argv[] = {
+        msg,
+        sender
+      };
+      holder->callback->Call(2, argv);
+
+      messages.pop();
     }
 }
 
 void SignalHandlerImpl::Signal(const ajn::InterfaceDescription::Member *member, const char *srcPath, ajn::Message &message){
     signal_async.data = (void*) &signalCallback;
-    signalCallback.message = new ajn::Message(message);
+
+    uv_mutex_lock(&signalCallback.lock);
+    signalCallback.messages.emplace(new ajn::Message(message));
+    uv_mutex_unlock(&signalCallback.lock);
+
     uv_async_send(&signal_async);
 }
