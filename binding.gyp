@@ -25,6 +25,7 @@
       "<!(node -e \"require('nan')\")"
     ],
     'cflags':[
+      '-std=c++11',
       '-Wno-deprecated',
       '-Wno-ignored-qualifiers'
     ],
