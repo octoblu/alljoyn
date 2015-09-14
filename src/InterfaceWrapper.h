@@ -8,17 +8,17 @@
 
 NAN_METHOD(InterfaceDescriptionWrapper);
 
-class InterfaceWrapper : public node::ObjectWrap {
+class InterfaceWrapper : public Nan::ObjectWrap {
   private:
 
     static NAN_METHOD(New);
     static NAN_METHOD(AddSignal);
     static NAN_METHOD(Activate);
   public:
-  	InterfaceWrapper();
+    InterfaceWrapper();
     ajn::InterfaceDescription* interface;
     static void Init ();
-    static v8::Handle<v8::Value> NewInstance();
+    static v8::Local<v8::Value> NewInstance();
 };
 
 #endif

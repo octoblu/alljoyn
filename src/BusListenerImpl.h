@@ -7,24 +7,32 @@
 #include <BusListener.h>
 #include <TransportMask.h>
 #include <alljoyn/AllJoynStd.h>
+#include <queue>
+#include <string>
 
 class BusListenerImpl : public ajn::BusListener {
   private:
-  	uv_loop_t *loop;
-  	uv_async_t found_async, lost_async, name_change_async;
+    uv_loop_t *loop;
+    uv_async_t found_async, lost_async, name_change_async;
 
     struct CallbackHolder{
-      NanCallback* callback;
-      char* data;
-      uv_rwlock_t datalock;
+      Nan::Callback* callback;
+      std::queue<std::string> dataqueue;
+      uv_mutex_t datalock;
+
+      CallbackHolder() {
+        uv_mutex_init(&datalock);
+      }
+      ~CallbackHolder() {
+        uv_mutex_destroy(&datalock);
+      }
     } foundName, lostName, nameChanged;
 
+    template<typename... Args>
+      static void callback(uv_async_t *handle, Args... );
+
   public:
-  	BusListenerImpl(NanCallback* foundName, NanCallback* lostName, NanCallback* nameChanged);
-  	~BusListenerImpl();
-  	static void found_callback(uv_async_t *handle, int status);
-  	static void lost_callback(uv_async_t *handle, int status);
-  	static void name_change_callback(uv_async_t *handle, int status);
+    BusListenerImpl(Nan::Callback* foundName, Nan::Callback* lostName, Nan::Callback* nameChanged);
 
     virtual void FoundAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix);
     virtual void LostAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix);

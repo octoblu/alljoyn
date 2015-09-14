@@ -4,83 +4,54 @@
 #include <alljoyn/InterfaceDescription.h>
 #include <alljoyn/AllJoynStd.h>
 
-BusListenerImpl::BusListenerImpl(NanCallback* foundNameCallback, NanCallback* lostNameCallback, NanCallback* nameChangedCallback){
+#include <algorithm>
+
+BusListenerImpl::BusListenerImpl(Nan::Callback* foundNameCallback, Nan::Callback* lostNameCallback, Nan::Callback* nameChangedCallback){
   loop = uv_default_loop();
   foundName.callback = foundNameCallback;
   lostName.callback = lostNameCallback;
   nameChanged.callback = nameChangedCallback;
-  uv_async_init(loop, &found_async, found_callback);
-  uv_async_init(loop, &lost_async, lost_callback);
-  uv_async_init(loop, &name_change_async, name_change_callback);
-  
-  foundName.data = 0;
-  lostName.data = 0;
-  nameChanged.data = 0;
-  uv_rwlock_init(&foundName.datalock);
-  uv_rwlock_init(&lostName.datalock);
-  uv_rwlock_init(&nameChanged.datalock);
+  uv_async_init(loop, &found_async, callback);
+  uv_async_init(loop, &lost_async, callback);
+  uv_async_init(loop, &name_change_async, callback);
 }
 
-BusListenerImpl::~BusListenerImpl(){
-  uv_rwlock_destroy(&foundName.datalock);
-  uv_rwlock_destroy(&lostName.datalock);
-  uv_rwlock_destroy(&nameChanged.datalock);
-  free(foundName.data);
-  free(lostName.data);
-  free(nameChanged.data);
-}
-
-void BusListenerImpl::found_callback(uv_async_t *handle, int status) {
+template<typename... Args>
+void BusListenerImpl::callback(uv_async_t *handle, Args...) {
     CallbackHolder* holder = (CallbackHolder*) handle->data;
 
-    uv_rwlock_rdlock(&holder->datalock);
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::String>(holder->data)
-    };
-    uv_rwlock_rdunlock(&holder->datalock);
-    holder->callback->Call(1, argv);
-}
+    Nan::HandleScope scope;
 
-void BusListenerImpl::lost_callback(uv_async_t *handle, int status) {
-    CallbackHolder* holder = (CallbackHolder*) handle->data;
+    std::queue<std::string> dataqueue;
+    uv_mutex_lock(&holder->datalock);
+    dataqueue = std::move(holder->dataqueue);
+    uv_mutex_unlock(&holder->datalock);
 
-    uv_rwlock_rdlock(&holder->datalock);
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::String>(holder->data)
-    };
-    uv_rwlock_rdunlock(&holder->datalock);
-    holder->callback->Call(1, argv);
-}
-
-void BusListenerImpl::name_change_callback(uv_async_t *handle, int status) {
-    CallbackHolder* holder = (CallbackHolder*) handle->data;
-
-    uv_rwlock_rdlock(&holder->datalock);
-    v8::Handle<v8::Value> argv[] = {
-      NanNew<v8::String>(holder->data)
-    };
-    uv_rwlock_rdunlock(&holder->datalock);
-    holder->callback->Call(1, argv);
+    while (!dataqueue.empty()) {
+      v8::Local<v8::Value> argv[] = {
+        Nan::New<v8::String>(std::move(dataqueue.front())).ToLocalChecked()
+      };
+      holder->callback->Call(1, argv);
+      dataqueue.pop();
+    }
 }
 
 void BusListenerImpl::FoundAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix){
     found_async.data = (void*) &foundName;
 
-    uv_rwlock_wrlock(&foundName.datalock);
-    free(foundName.data);
-    foundName.data = strdup(name);
-    uv_rwlock_wrunlock(&foundName.datalock);
+    uv_mutex_lock(&foundName.datalock);
+    foundName.dataqueue.emplace(name);
+    uv_mutex_unlock(&foundName.datalock);
 
     uv_async_send(&found_async);
 }
 
 void BusListenerImpl::LostAdvertisedName(const char* name, ajn::TransportMask transport, const char* namePrefix){
     lost_async.data = (void*) &lostName;
-    
-    uv_rwlock_wrlock(&lostName.datalock);
-    free(lostName.data);
-    lostName.data = strdup(name);
-    uv_rwlock_wrunlock(&lostName.datalock);
+
+    uv_mutex_lock(&lostName.datalock);
+    lostName.dataqueue.emplace(name);
+    uv_mutex_unlock(&lostName.datalock);
 
     uv_async_send(&lost_async);
 }
@@ -88,10 +59,9 @@ void BusListenerImpl::LostAdvertisedName(const char* name, ajn::TransportMask tr
 void BusListenerImpl::NameOwnerChanged(const char* busName, const char* previousOwner, const char* newOwner){
     name_change_async.data = (void*) &nameChanged;
 
-    uv_rwlock_wrlock(&nameChanged.datalock);
-    free(nameChanged.data);
-    nameChanged.data = strdup(busName);
-    uv_rwlock_wrunlock(&nameChanged.datalock);
+    uv_mutex_lock(&nameChanged.datalock);
+    nameChanged.dataqueue.emplace(busName);
+    uv_mutex_unlock(&nameChanged.datalock);
 
     uv_async_send(&name_change_async);
 }

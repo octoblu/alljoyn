@@ -9,7 +9,7 @@
 
 NAN_METHOD(BusAttachmentWrapper);
 
-class BusConnection : public node::ObjectWrap {
+class BusConnection : public Nan::ObjectWrap {
   private:
 
     static NAN_METHOD(New);
@@ -34,7 +34,7 @@ class BusConnection : public node::ObjectWrap {
   	BusConnection(const char* shortName, bool allowRemoteMessages, int maxConcurrent);
     ~BusConnection();
     static void Init ();
-    static v8::Handle<v8::Value> NewInstance(v8::Local<v8::String> &appName);
+    static v8::Local<v8::Value> NewInstance(v8::Local<v8::String> &appName);
 };
 
 #endif
