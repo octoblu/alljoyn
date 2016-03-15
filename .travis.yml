@@ -6,6 +6,7 @@ cache:
     - node_modules
 node_js:
 - '0.10'
+- '5'
 deploy:
   provider: npm
   skip_cleanup: true

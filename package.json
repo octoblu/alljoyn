@@ -1,6 +1,6 @@
 {
   "name": "alljoyn",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Alljoyn NodeJS Integration",
   "main": "index.js",
   "scripts": {
